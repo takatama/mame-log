@@ -1,12 +1,23 @@
 import { Hono } from 'hono'
-import { renderer } from './renderer'
 
 const app = new Hono()
 
-app.use(renderer)
-
 app.get('/', (c) => {
-  return c.render(<h1>Hello!</h1>)
+  return c.html(
+    <html>
+      <head>
+        <link href="/static/style.css" rel="stylesheet" />
+      </head>
+      <body>
+        <div id="root"></div>
+        {import.meta.env.PROD ? (
+          <script type="module" src="/static/client.js" />
+        ) : (
+          <script type="module" src="/src/client.tsx" />
+        )}
+      </body>
+    </html>
+  )
 })
 
 export default app
