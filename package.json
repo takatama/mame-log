@@ -8,12 +8,19 @@
     "deploy": "npm run build && wrangler pages deploy"
   },
   "dependencies": {
-    "hono": "^4.6.15"
+    "hono": "^4.6.15",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241218.0",
     "@hono/vite-build": "^1.2.0",
     "@hono/vite-dev-server": "^0.17.0",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
     "vite": "^5.2.12",
     "wrangler": "^3.96.0"
   }

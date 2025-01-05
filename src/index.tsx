@@ -1,22 +1,38 @@
 import { Hono } from 'hono'
+import { renderToString } from 'react-dom/server'
 
 const app = new Hono()
 
-app.get('/', (c) => {
+app.get('/api/clock', (c) => {
+  return c.json({
+    time: new Date().toLocaleTimeString()
+  })
+})
+
+app.get('*', (c) => {
   return c.html(
-    <html>
-      <head>
-        <link href="/static/style.css" rel="stylesheet" />
-      </head>
-      <body>
-        <div id="root"></div>
-        {import.meta.env.PROD ? (
-          <script type="module" src="/static/client.js" />
-        ) : (
-          <script type="module" src="/src/client.tsx" />
-        )}
-      </body>
-    </html>
+    renderToString(
+      <html>
+        <head>
+          <meta charSet="utf-8" />
+          <meta content="width=device-width, initial-scale=1" name="viewport" />
+          {import.meta.env.PROD ? (
+            <>
+              <link rel="stylesheet" href="/static/assets/style.css" />
+              <script type="module" src="/static/client.js"></script>
+            </>
+          ) : (
+            <>
+              <link rel="stylesheet" href="/src/style.css" />
+              <script type="module" src="/src/client.tsx"></script>
+            </>
+          )}
+        </head>
+        <body>
+          <div id="root"></div>
+        </body>
+      </html>
+    )
   )
 })
 
