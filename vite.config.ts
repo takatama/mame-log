@@ -6,9 +6,6 @@ import { defineConfig } from 'vite'
 export default defineConfig(({ mode }) => {
   if (mode === "client")
     return {
-      esbuild: {
-        jsxImportSource: "hono/jsx/dom", // Optimized for hono/jsx/dom
-      },
       build: {
         rollupOptions: {
           input: "./src/client.tsx",
@@ -19,6 +16,9 @@ export default defineConfig(({ mode }) => {
       },
     };
   return {
+    ssr: {
+      external: ['react', 'react-dom']
+    },
     plugins: [
       build(),
       devServer({
