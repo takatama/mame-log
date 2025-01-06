@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Bean, Beans } from '../types/Bean';
+import StarRating from '../components/StarRating';
 
 const BrewForm: React.FC<Beans> = ({ beans }) => {
   const location = useLocation();
@@ -202,39 +203,19 @@ const BrewForm: React.FC<Beans> = ({ beans }) => {
         {/* 評価 */}
         <div>
           <label className="block text-sm font-medium">総合評価</label>
-          <input
-            type="number"
-            value={overallScore}
-            onChange={(e) => setOverallScore(Number(e.target.value))}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
+          <StarRating rating={overallScore} onRatingChange={setOverallScore} />
         </div>
         <div>
           <label className="block text-sm font-medium">苦味</label>
-          <input
-            type="number"
-            value={bitterness}
-            onChange={(e) => setBitterness(Number(e.target.value))}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
+          <StarRating rating={bitterness} onRatingChange={setBitterness} />
         </div>
         <div>
           <label className="block text-sm font-medium">酸味</label>
-          <input
-            type="number"
-            value={acidity}
-            onChange={(e) => setAcidity(Number(e.target.value))}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
+          <StarRating rating={acidity} onRatingChange={setAcidity} />
         </div>
         <div>
           <label className="block text-sm font-medium">甘味</label>
-          <input
-            type="number"
-            value={sweetness}
-            onChange={(e) => setSweetness(Number(e.target.value))}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
+          <StarRating rating={sweetness} onRatingChange={setSweetness} />
         </div>
         <div>
           <label className="block text-sm font-medium">メモ</label>
