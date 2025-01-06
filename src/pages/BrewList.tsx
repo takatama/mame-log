@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Brews } from '../types/Brew';
 
-const Brews: React.FC<Brews> = ({ brews }) => {
+const BrewList: React.FC<Brews> = ({ brews }) => {
 
   return (
     <div className="container mx-auto p-4">
@@ -23,7 +23,7 @@ const Brews: React.FC<Brews> = ({ brews }) => {
             <Link to={`/brews/${brew.id}`} className="text-blue-500 hover:underline">
               <h2 className="font-bold">{brew.brewDate}</h2>
               <p>豆: {brew.bean.name}</p>
-              <p>評価: {'★'.repeat(brew.rating)}</p>
+              <p>評価: {'★'.repeat(brew.overallScore)}</p>
             </Link>
           </li>
         ))}
@@ -32,4 +32,4 @@ const Brews: React.FC<Brews> = ({ brews }) => {
   );
 };
 
-export default Brews;
+export default BrewList;

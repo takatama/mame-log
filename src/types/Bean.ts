@@ -3,22 +3,18 @@ export interface Bean {
   name: string;
   country: string;
   area: string;
-  roastLevel: string;
   dryingMethod: string;
   processingMethod: string;
+  roastLevel: string;
+  roastDate: string;
+  purchaseDate: string;
+  purchaseAmount: number; // g
+  price: number; // JPY
   seller: string;
   sellerUrl: string;
-  purchaseDate: string;
-  purchaseAmount: {
-    value: number;
-    unit: string;
-  };
-  price: {
-    value: number;
-    currency: string;
-  };
-  roastDate: string;
   photoUrl: string;
+  notes?: string;
+  isActive: boolean;
 }
 
 export interface Beans {

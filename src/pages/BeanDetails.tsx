@@ -10,7 +10,10 @@ const BeanDetail: React.FC<{ bean: Bean }> = ({ bean }) => (
       className="mb-4 w-32 h-32 object-cover"
     />
     <p>
-      <strong>原産地:</strong> {bean.country} ({bean.area})
+      <strong>国:</strong> {bean.country} ({bean.area})
+    </p>
+    <p>
+      <strong>地域:</strong> {bean.country} ({bean.area})
     </p>
     <p>
       <strong>乾燥方法:</strong> {bean.dryingMethod}
@@ -22,24 +25,25 @@ const BeanDetail: React.FC<{ bean: Bean }> = ({ bean }) => (
       <strong>焙煎度:</strong> {bean.roastLevel}
     </p>
     <p>
-      <strong>購入量:</strong> {bean.purchaseAmount.value}
-      {bean.purchaseAmount.unit}
+      <strong>焙煎日:</strong> {bean.roastDate}
     </p>
     <p>
-      <strong>価格:</strong> {bean.price.value}
-      {bean.price.currency}
-    </p>
-    <p>
-      <strong>販売者:</strong> {bean.seller}
-    </p>
-    <p>
-      <strong>販売者のURL:</strong> {bean.sellerUrl}
+      <strong>購入量:</strong> {bean.purchaseAmount} g
     </p>
     <p>
       <strong>購入日:</strong> {bean.purchaseDate}
     </p>
     <p>
-      <strong>焙煎日:</strong> {bean.roastDate}
+      <strong>価格:</strong> {bean.price} 円
+    </p>
+    <p>
+      <strong>販売者:</strong> <a href={bean.sellerUrl}>{bean.seller}</a>
+    </p>
+    <p>
+      <strong>メモ:</strong> {bean.notes}
+    </p>
+    <p>
+      <strong>有効:</strong> {bean.isActive ? 'はい' : 'いいえ'}
     </p>
   </div>
 );
