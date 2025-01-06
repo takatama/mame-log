@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Brew } from '../types/Brew';
+import StarRating from '../components/StarRating';
 
 const BrewDetails: React.FC<{ brew: Brew }> = ({ brew }) => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const BrewDetails: React.FC<{ brew: Brew }> = ({ brew }) => {
       <div className="space-y-4">
         <p><strong>日付:</strong> {brew.brewDate}</p>
         <p><strong>豆:</strong> {brew.bean.name}</p>
-        <p><strong>豆の量:</strong> {brew.bean.name}</p>
+        <p><strong>豆の量:</strong> {brew.beanAmount}g</p>
         <p><strong>カップ数:</strong> {brew.cups}</p>
         <p><strong>挽き具合:</strong> {brew.grindSize}</p>
         <p><strong>湯温:</strong> {brew.waterTemp}℃</p>
@@ -34,10 +35,22 @@ const BrewDetails: React.FC<{ brew: Brew }> = ({ brew }) => {
           </ul>
         </div>
 
-        <p><strong>総合評価:</strong> {brew.overallScore}</p>
-        <p><strong>苦味:</strong> {brew.bitterness}</p>
-        <p><strong>酸味:</strong> {brew.acidity}</p>
-        <p><strong>甘味:</strong> {brew.sweetness}</p>
+        <div>
+          <strong>総合評価:</strong>
+          <StarRating rating={brew.overallScore ?? 0} onRatingChange={() => {}} />
+        </div>
+        <div>
+          <strong>苦味:</strong>
+          <StarRating rating={brew.bitterness ?? 0} onRatingChange={() => {}} />
+        </div>
+        <div>
+          <strong>酸味:</strong>
+          <StarRating rating={brew.acidity ?? 0} onRatingChange={() => {}} />
+        </div>
+        <div>
+          <strong>甘味:</strong>
+          <StarRating rating={brew.sweetness ?? 0} onRatingChange={() => {}} />
+        </div>
       </div>
       <div className="mt-4">
         <button
