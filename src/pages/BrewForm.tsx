@@ -176,6 +176,18 @@ const BrewForm: React.FC<Beans> = ({ beans }) => {
                   className="mt-1 block w-full border rounded-md p-2"
                 />
               </div>
+                {index === pours.length - 1 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                  const updatedPours = pours.filter((_, i) => i !== index);
+                  setPours(updatedPours);
+                  }}
+                  className="mt-2 bg-red-500 text-white p-2 rounded-md"
+                >
+                  削除
+                </button>
+                )}
             </div>
           ))}
           <button
