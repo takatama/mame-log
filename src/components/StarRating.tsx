@@ -7,13 +7,13 @@ interface StarRatingProps {
 
 const StarRating: React.FC<StarRatingProps> = ({ rating, onRatingChange }) => {
   return (
-    <div className="flex space-x-1">
+    <div className="flex justify-between w-full">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
           type="button"
           onClick={() => onRatingChange(star)}
-          className={`p-1 ${rating >= star ? 'text-yellow-500' : 'text-gray-400'}`}
+          className={`text-2xl ${rating >= star ? 'text-yellow-500' : 'text-gray-400'}`}
         >
           ★
         </button>
