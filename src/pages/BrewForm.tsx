@@ -5,22 +5,35 @@ import { Bean, Beans } from '../types/Bean';
 const BrewForm: React.FC<Beans> = ({ beans }) => {
   const location = useLocation();
   const [brew, setBrew] = useState<any>(null);
-  const [bean, setBean] = useState<any>(brew?.bean || null);
+  const [bean, setBean] = useState<any>(null);
   const [beanAmount, setBeanAmount] = useState(0);
   const [cups, setCups] = useState(0);
-  const [grindSize, setGrindSize] = useState(brew?.grindSize || '');
-  const [waterTemp, setWaterTemp] = useState(brew?.waterTemp || '');
-  const [pours, setPours] = useState(brew?.pours || [{ index: 0, amount: 0, flowRate: '', time: 0 }]);
+  const [grindSize, setGrindSize] = useState('');
+  const [waterTemp, setWaterTemp] = useState('');
+  const [pours, setPours] = useState([{ index: 0, amount: 0, flowRate: '', time: 0 }]);
   const [brewDate, setBrewDate] = useState(new Date().toISOString().slice(0, 16)); // 現在の日時を初期値に設定
   const [overallScore, setOverallScore] = useState(0);
   const [bitterness, setBitterness] = useState(0);
   const [acidity, setAcidity] = useState(0);
   const [sweetness, setSweetness] = useState(0);
-  const [notes, setNotes] = useState(brew?.notes || '');
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     if (location.state?.brew) {
-      setBrew(location.state.brew);
+      const brew = location.state.brew;
+      setBrew(brew);
+      setBean(brew.bean);
+      setBeanAmount(brew.beanAmount);
+      setCups(brew.cups);
+      setGrindSize(brew.grindSize);
+      setWaterTemp(brew.waterTemp);
+      setPours(brew.pours);
+      setBrewDate(new Date(brew.brewDate).toISOString().slice(0, 16));
+      setOverallScore(brew.overallScore);
+      setBitterness(brew.bitterness);
+      setAcidity(brew.acidity);
+      setSweetness(brew.sweetness);
+      setNotes(brew.notes);
     }
   }, [location.state]);
 
@@ -38,7 +51,7 @@ const BrewForm: React.FC<Beans> = ({ beans }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newBrew = {
-      beanId : bean.id,
+      beanId: bean.id,
       beanAmount,
       cups,
       grindSize,
