@@ -26,11 +26,13 @@ const App: React.FC = () => {
               <Route path="/beans" element={<BeanList />} />
               <Route path="/beans/new" element={<BeanForm />} />
               <Route path="/beans/:beanId" element={<BeanDetails />} />
+              <Route path="/beans/:beanId/edit" element={<BeanForm />} />
               {/* <Route path="/beans/:beanId/brews" element={<BrewList />} /> */}
               <Route path="/beans/:beanId/brews/new" element={<BrewForm />} />
               <Route path="/brews" element={<BrewList />} />
               <Route path="/brews/new" element={<BrewForm />} />
               <Route path="/brews/:brewId" element={<BrewDetails />} />
+              <Route path="/brews/:brewId/edit" element={<BrewForm />} />
               {/* <Route path="/brews/:brewId/brews" element={<BrewList />} /> */}
               <Route path="/brews/:brewId/brews/new" element={<BrewForm />} />
               <Route path="/settings" element={<Settings />} />

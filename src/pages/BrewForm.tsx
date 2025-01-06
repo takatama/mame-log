@@ -194,7 +194,7 @@ const BrewForm: React.FC = () => {
                   }}
                   className="mt-2 bg-red-500 text-white p-2 rounded-md"
                 >
-                  削除
+                  削除する
                 </button>
                 )}
             </div>
@@ -204,7 +204,7 @@ const BrewForm: React.FC = () => {
             onClick={handleAddPour}
             className="mt-2 bg-green-500 text-white p-2 rounded-md"
           >
-            注湯を追加
+            注湯を追加する
           </button>
         </div>
 
@@ -233,9 +233,8 @@ const BrewForm: React.FC = () => {
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
-        {/* 保存ボタン */}
         <button type="submit" className="bg-blue-500 text-white p-2 rounded-md">
-          保存
+          保存する
         </button>
       </form>
     </div>

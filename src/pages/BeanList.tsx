@@ -7,14 +7,6 @@ const BeanList: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">コーヒー豆一覧</h1>
-      <div className="mb-4">
-        <Link
-          to="/beans/new"
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          豆を追加する
-        </Link>
-        </div>
       <ul className="space-y-4">
         {beans.map((bean) => (
           <li key={bean.id} className="p-4 border rounded-md flex items-center">
@@ -38,6 +30,14 @@ const BeanList: React.FC = () => {
           </li>
         ))}
       </ul>
+      <div className="mt-4 py-4">
+        <Link
+          to="/beans/new"
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          豆を追加する
+        </Link>
+      </div>
     </div>
   );
 };

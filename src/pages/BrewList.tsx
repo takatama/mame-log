@@ -8,18 +8,8 @@ const BrewList: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">抽出ログ一覧</h1>
-        {/* 新しく淹れるボタン */}
-        <Link
-          to="/brews/new"
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-        >
-          新しく淹れる
-        </Link>
-      </div>
-
-      <ul className="space-y-4">
+      <h1 className="text-2xl font-bold">抽出ログ一覧</h1>
+      <ul className="space-y-4 mt-4">
         {brews.map((brew) => (
           <li key={brew.id} className="p-4 border rounded-md">
             <Link to={`/brews/${brew.id}`} className="text-blue-500 hover:underline">
@@ -30,6 +20,15 @@ const BrewList: React.FC = () => {
           </li>
         ))}
       </ul>
+      {/* 新しく淹れるボタン */}
+      <div className="mt-4 py-4">
+        <Link
+          to="/brews/new"
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+        >
+          新しく淹れる
+        </Link>
+      </div>
     </div>
   );
 };
