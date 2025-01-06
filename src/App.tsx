@@ -20,29 +20,29 @@ const App: React.FC = () => {
       dryingMethod: 'ペタテドライ',
       processingMethod: 'ハニー',
       roastLevel: '中煎り',
-      purchaseAmount: { value: 200, unit: 'g' },
-      price: { value: 1500, currency: 'JPY' },
-      purchaseDate: '2024-12-01',
       roastDate: '2024-11-30',
-      photoUrl: 'https://via.placeholder.com/150',
+      purchaseAmount: 200,
+      purchaseDate: '2024-12-01',
+      price: 1500,
       seller: 'コーヒー豆専門店A',
       sellerUrl: 'https://example.com',
+      photoUrl: 'https://via.placeholder.com/150',
     },
     {
       id: 2,
       name: 'オリエンテナチュラル',
       country: 'グアテマラ',
       area: 'オリエンテ',
-      roastLevel: '浅煎り',
-      purchaseAmount: { value: 250, unit: 'g' },
-      price: { value: 1800, currency: 'JPY' },
-      photoUrl: 'https://via.placeholder.com/150',
-      purchaseDate: '2024-01-01',
-      roastDate: '2024-01-03',
       dryingMethod: 'ナチュラル',
       processingMethod: 'ナチュラル',
+      roastLevel: '浅煎り',
+      roastDate: '2024-01-03',
+      purchaseAmount: 250,
+      purchaseDate: '2024-01-01',
+      price: 1800,
       seller: 'コーヒー豆太郎',
       sellerUrl: 'https://example.com',
+      photoUrl: 'https://via.placeholder.com/150',
     },
   ];
 
@@ -56,7 +56,8 @@ const App: React.FC = () => {
   const brews = [
     {
       id: 1,
-      bean: {
+      brewDate: '2024-12-30T08:00:00',
+      bean:     {
         id: 1,
         name: 'メキシコ オアハカ ハニー',
         country: 'メキシコ',
@@ -64,25 +65,28 @@ const App: React.FC = () => {
         dryingMethod: 'ペタテドライ',
         processingMethod: 'ハニー',
         roastLevel: '中煎り',
-        purchaseAmount: { value: 200, unit: 'g' },
-        price: { value: 1500, currency: 'JPY' },
-        purchaseDate: '2024-12-01',
         roastDate: '2024-11-30',
-        photoUrl: 'https://via.placeholder.com/150',
+        purchaseAmount: 200,
+        purchaseDate: '2024-12-01',
+        price: 1500,
         seller: 'コーヒー豆専門店A',
-        sellerUrl: 'https://example.com',  
+        sellerUrl: 'https://example.com',
+        photoUrl: 'https://via.placeholder.com/150',
       },
       beanAmount: 20,
       grindSize: '中挽き',
+      cups: 2,
       waterTemp: 85,
-      bloomTime: 30,
-      bloomWater: 50,
-      brewDate: '2024-12-30T08:00:00',
       pours: [
-        { pourNumber: 1, amount: 100, flowRate: '2.0' },
-        { pourNumber: 2, amount: 150, flowRate: '1.5' },
+        { index: 0, amount: 60, flowRate: 'ゆっくり', time: 30 },
+        { index: 1, amount: 170, flowRate: '普通' },
+        { index: 2, amount: 170, flowRate: '普通' },
       ],
-      rating: 4,
+      overallScore: 4,
+      bitterness: 3,
+      acidity: 2,
+      sweetness: 4,
+      notes: 'フルーティーでおいしい',
     }
   ];
 
@@ -106,7 +110,7 @@ const App: React.FC = () => {
             <Route path="/beans/new" element={<BeanForm />} />
             <Route path="/beans/:id" element={<BeanDetailWrapper />} />
             <Route path="/brews" element={<BrewList brews={brews} />} />
-            <Route path="/brews/new" element={<BrewForm />} />
+            <Route path="/brews/new" element={<BrewForm beans={beans}/>} />
             <Route path="/brews/:id" element={<BrewDetailWrapper />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>

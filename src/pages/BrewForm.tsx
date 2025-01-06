@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Bean, Beans } from '../types/Bean';
 
-const NewBrew: React.FC = () => {
+const BrewForm: React.FC<Beans> = ({ beans }) => {
   const location = useLocation();
   const [brew, setBrew] = useState<any>(null);
-
-  const [beanId, setBeanId] = useState(brew?.beanId || '');
+  const [bean, setBean] = useState<any>(brew?.bean || null);
+  const [beanAmount, setBeanAmount] = useState(0);
+  const [cups, setCups] = useState(0);
   const [grindSize, setGrindSize] = useState(brew?.grindSize || '');
   const [waterTemp, setWaterTemp] = useState(brew?.waterTemp || '');
-  const [bloomTime, setBloomTime] = useState(brew?.bloomTime || '');
-  const [bloomWater, setBloomWater] = useState(brew?.bloomWater || '');
-  const [pours, setPours] = useState(brew?.pours || [{ pourNumber: 1, amount: '', flowRate: '' }]);
+  const [pours, setPours] = useState(brew?.pours || [{ index: 0, amount: 0, flowRate: '', time: 0 }]);
   const [brewDate, setBrewDate] = useState(new Date().toISOString().slice(0, 16)); // 現在の日時を初期値に設定
+  const [overallScore, setOverallScore] = useState(0);
+  const [bitterness, setBitterness] = useState(0);
+  const [acidity, setAcidity] = useState(0);
+  const [sweetness, setSweetness] = useState(0);
+  const [notes, setNotes] = useState(brew?.notes || '');
 
   useEffect(() => {
     if (location.state?.brew) {
@@ -20,7 +25,7 @@ const NewBrew: React.FC = () => {
   }, [location.state]);
 
   const handleAddPour = () => {
-    setPours([...pours, { pourNumber: pours.length + 1, amount: '', flowRate: '' }]);
+    setPours([...pours, { index: pours.length, amount: 0, flowRate: '', time: 0 }]);
   };
 
   const handlePourChange = (index: number, field: string, value: string) => {
@@ -33,13 +38,18 @@ const NewBrew: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newBrew = {
-      beanId,
+      beanId : bean.id,
+      beanAmount,
+      cups,
       grindSize,
       waterTemp,
-      bloomTime,
-      bloomWater,
-      brewDate,
       pours,
+      brewDate,
+      overallScore,
+      bitterness,
+      acidity,
+      sweetness,
+      notes
     };
     console.log(newBrew);
     // APIリクエストでデータを保存する処理をここに追加
@@ -47,61 +57,8 @@ const NewBrew: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">新しい抽出ログを作成</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">新しい抽出ログを作成</h1> */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* コーヒー豆の選択 */}
-        <div>
-          <label className="block text-sm font-medium">コーヒー豆のID</label>
-          <input
-            type="text"
-            value={beanId}
-            onChange={(e) => setBeanId(e.target.value)}
-            className="mt-1 block w-full border rounded-md p-2"
-            required
-          />
-        </div>
-
-        {/* 抽出設定 */}
-        <div>
-          <label className="block text-sm font-medium">挽き具合</label>
-          <input
-            type="text"
-            value={grindSize}
-            onChange={(e) => setGrindSize(e.target.value)}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">湯温 (℃)</label>
-          <input
-            type="number"
-            value={waterTemp}
-            onChange={(e) => setWaterTemp(e.target.value)}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">蒸らし時間 (秒)</label>
-          <input
-            type="number"
-            value={bloomTime}
-            onChange={(e) => setBloomTime(e.target.value)}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">蒸らし湯量 (ml)</label>
-          <input
-            type="number"
-            value={bloomWater}
-            onChange={(e) => setBloomWater(e.target.value)}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-
         <div>
           <label className="block text-sm font-medium">抽出日時</label>
           <input
@@ -112,6 +69,66 @@ const NewBrew: React.FC = () => {
             required
           />
         </div>
+        {/* コーヒー豆の選択 */}
+        <div>
+          <label className="block text-sm font-medium">コーヒー豆</label>
+          <select
+            value={bean?.id || ''}
+            onChange={(e) => {
+              const selectedBean = beans.find((b: Bean) => b.id === Number(e.target.value));
+              setBean(selectedBean);
+            }}
+            className="mt-1 block w-full border rounded-md p-2"
+            required
+          >
+            <option value="" disabled>コーヒー豆を選択してください</option>
+            {beans.map((bean: Bean) => (
+              <option key={bean.id} value={bean.id}>
+                {bean.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* 抽出設定 */}
+        <div>
+          <label className="block text-sm font-medium">豆の量 (g)</label>
+          <input
+            type="number"
+            value={beanAmount}
+            onChange={(e) => setBeanAmount(Number(e.target.value))}
+            className="mt-1 block w-full border rounded-md p-2"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">カップ数</label>
+          <input
+            type="number"
+            value={cups}
+            onChange={(e) => setCups(Number(e.target.value))}
+            className="mt-1 block w-full border rounded-md p-2"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">挽き具合</label>
+          <input
+            type="text"
+            value={grindSize}
+            onChange={(e) => setGrindSize(e.target.value)}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">湯温 (℃)</label>
+          <input
+            type="number"
+            value={waterTemp}
+            onChange={(e) => setWaterTemp(e.target.value)}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
 
         {/* 注湯詳細 */}
         <div>
@@ -119,7 +136,7 @@ const NewBrew: React.FC = () => {
           {pours.map((pour: any, index: number) => (
             <div key={index} className="space-y-2 mb-4 border p-4 rounded-md">
               <div>
-                <label className="block text-sm font-medium">注湯 {pour.pourNumber} - 湯量 (ml)</label>
+                <label className="block text-sm font-medium">注湯 {pour.index + 1} - 湯量 (ml)</label>
                 <input
                   type="number"
                   value={pour.amount}
@@ -129,11 +146,20 @@ const NewBrew: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">流速 (ml/s)</label>
+                <label className="block text-sm font-medium">流速</label>
                 <input
                   type="text"
                   value={pour.flowRate}
                   onChange={(e) => handlePourChange(index, 'flowRate', e.target.value)}
+                  className="mt-1 block w-full border rounded-md p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">時間 (秒)</label>
+                <input
+                  type="text"
+                  value={pour.time}
+                  onChange={(e) => handlePourChange(index, 'time', e.target.value)}
                   className="mt-1 block w-full border rounded-md p-2"
                 />
               </div>
@@ -148,6 +174,51 @@ const NewBrew: React.FC = () => {
           </button>
         </div>
 
+        {/* 評価 */}
+        <div>
+          <label className="block text-sm font-medium">総合評価</label>
+          <input
+            type="number"
+            value={overallScore}
+            onChange={(e) => setOverallScore(Number(e.target.value))}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">苦味</label>
+          <input
+            type="number"
+            value={bitterness}
+            onChange={(e) => setBitterness(Number(e.target.value))}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">酸味</label>
+          <input
+            type="number"
+            value={acidity}
+            onChange={(e) => setAcidity(Number(e.target.value))}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">甘味</label>
+          <input
+            type="number"
+            value={sweetness}
+            onChange={(e) => setSweetness(Number(e.target.value))}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">メモ</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
         {/* 保存ボタン */}
         <button type="submit" className="bg-blue-500 text-white p-2 rounded-md">
           保存
@@ -157,4 +228,4 @@ const NewBrew: React.FC = () => {
   );
 };
 
-export default NewBrew;
+export default BrewForm;

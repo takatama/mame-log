@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Beans } from '../types/Bean';
 
-const Beans: React.FC<Beans> = ({ beans }) => {
+const BeanList: React.FC<Beans> = ({ beans }) => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">コーヒー豆一覧</h1>
@@ -31,9 +31,7 @@ const Beans: React.FC<Beans> = ({ beans }) => {
               </p>
               <p>{bean.roastLevel}</p>
               <p>
-                {bean.purchaseAmount.value}
-                {bean.purchaseAmount.unit} - {bean.price.value}
-                {bean.price.currency}
+                {bean.purchaseAmount} g | {bean.price} 円
               </p>
             </div>
           </li>
@@ -43,4 +41,4 @@ const Beans: React.FC<Beans> = ({ beans }) => {
   );
 };
 
-export default Beans;
+export default BeanList;
