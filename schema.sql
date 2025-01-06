@@ -64,5 +64,5 @@ CREATE TABLE IF NOT EXISTS pours (
 INSERT INTO pours (id, brew_id, idx, amount, flow_rate, time)
 VALUES
 (1, 1, 0, 60, 'ゆっくり', 30),
-(2, 1, 1, 170, '普通', 0),
-(3, 1, 2, 170, '普通', 0);
+(2, 1, 1, 170, '普通', 60),
+(3, 1, 2, 170, '普通', 60);

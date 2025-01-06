@@ -8,15 +8,14 @@ import StarRating from '../components/StarRating';
 const BrewForm: React.FC = () => {
   const { beans, brews } = useBrewContext();
   const { brewId, beanId } = useParams<{ brewId?: string; beanId?: string }>();
-  const [brew, setBrew] = useState<any>(null);
   const [bean, setBean] = useState<any>(null);
-  const [beanAmount, setBeanAmount] = useState(0);
+  const [bean_amount, setBeanAmount] = useState(0);
   const [cups, setCups] = useState(0);
-  const [grindSize, setGrindSize] = useState('');
-  const [waterTemp, setWaterTemp] = useState(0);
+  const [grind_size, setGrindSize] = useState('');
+  const [water_temp, setWaterTemp] = useState(0);
   const [pours, setPours] = useState<Pour[]>([{ idx: 0, amount: 0, flow_rate: '', time: 0 }]);
-  const [brewDate, setBrewDate] = useState(new Date().toISOString().slice(0, 16)); // 現在の日時を初期値に設定
-  const [overallScore, setOverallScore] = useState(0);
+  const [brew_date, setBrewDate] = useState(new Date().toISOString().slice(0, 16)); // 現在の日時を初期値に設定
+  const [overall_score, setOverallScore] = useState(0);
   const [bitterness, setBitterness] = useState(0);
   const [acidity, setAcidity] = useState(0);
   const [sweetness, setSweetness] = useState(0);
@@ -26,7 +25,6 @@ const BrewForm: React.FC = () => {
     if (brewId) {
       const selectedBrew = brews.find((b: Brew) => b.id === Number(brewId))
       if (selectedBrew) {
-        setBrew(selectedBrew);
         setBean(selectedBrew.bean);
         setBeanAmount(selectedBrew.bean_amount);
         setCups(selectedBrew.cups);
@@ -50,7 +48,7 @@ const BrewForm: React.FC = () => {
     setPours([...pours, { idx: pours.length, amount: 0, flow_rate: '', time: 0 }]);
   };
 
-  const handlePourChange = (index: number, field: string, value: string) => {
+  const handlePourChange = (index: number, field: string, value: string | number) => {
     const updatedPours = pours.map((pour: any, i: number) =>
       i === index ? { ...pour, [field]: value } : pour
     );
@@ -60,14 +58,14 @@ const BrewForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newBrew = {
-      beanId: bean.id,
-      beanAmount,
+      bean_id: bean.id,
+      bean_amount,
       cups,
-      grindSize,
-      waterTemp,
+      grind_size,
+      water_temp,
       pours,
-      brewDate,
-      overallScore,
+      brew_date,
+      overall_score,
       bitterness,
       acidity,
       sweetness,
@@ -98,7 +96,7 @@ const BrewForm: React.FC = () => {
           <label className="block text-sm font-medium">抽出日時</label>
           <input
             type="datetime-local"
-            value={brewDate}
+            value={brew_date}
             onChange={(e) => setBrewDate(e.target.value)}
             className="mt-1 block w-full border rounded-md p-2"
             required
@@ -130,7 +128,7 @@ const BrewForm: React.FC = () => {
           <label className="block text-sm font-medium">豆の量 (g)</label>
           <input
             type="number"
-            value={beanAmount}
+            value={bean_amount}
             onChange={(e) => setBeanAmount(Number(e.target.value))}
             className="mt-1 block w-full border rounded-md p-2"
             required
@@ -150,7 +148,7 @@ const BrewForm: React.FC = () => {
           <label className="block text-sm font-medium">挽き具合</label>
           <input
             type="text"
-            value={grindSize}
+            value={grind_size}
             onChange={(e) => setGrindSize(e.target.value)}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -159,7 +157,7 @@ const BrewForm: React.FC = () => {
           <label className="block text-sm font-medium">湯温 (℃)</label>
           <input
             type="number"
-            value={waterTemp}
+            value={water_temp}
             onChange={(e) => setWaterTemp(Number(e.target.value))}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -175,7 +173,7 @@ const BrewForm: React.FC = () => {
                 <input
                   type="number"
                   value={pour.amount}
-                  onChange={(e) => handlePourChange(index, 'amount', e.target.value)}
+                  onChange={(e) => handlePourChange(index, 'amount', Number(e.target.value))}
                   className="mt-1 block w-full border rounded-md p-2"
                   required
                 />
@@ -184,8 +182,8 @@ const BrewForm: React.FC = () => {
                 <label className="block text-sm font-medium">流速</label>
                 <input
                   type="text"
-                  value={pour.flowRate}
-                  onChange={(e) => handlePourChange(index, 'flowRate', e.target.value)}
+                  value={pour.flow_rate}
+                  onChange={(e) => handlePourChange(index, 'flow_rate', e.target.value)}
                   className="mt-1 block w-full border rounded-md p-2"
                 />
               </div>
@@ -194,7 +192,7 @@ const BrewForm: React.FC = () => {
                 <input
                   type="text"
                   value={pour.time}
-                  onChange={(e) => handlePourChange(index, 'time', e.target.value)}
+                  onChange={(e) => handlePourChange(index, 'time', Number(e.target.value))}
                   className="mt-1 block w-full border rounded-md p-2"
                 />
               </div>
@@ -224,7 +222,7 @@ const BrewForm: React.FC = () => {
         {/* 評価 */}
         <div>
           <label className="block text-sm font-medium">総合評価</label>
-          <StarRating rating={overallScore} onRatingChange={setOverallScore} />
+          <StarRating rating={overall_score} onRatingChange={setOverallScore} />
         </div>
         <div>
           <label className="block text-sm font-medium">苦味</label>

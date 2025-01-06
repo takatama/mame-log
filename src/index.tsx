@@ -29,10 +29,10 @@ const beanSchema = z.object({
 
 const pourSchema = z.object({
   brew_id: z.number().int().positive(),
-  idx: z.number().int().positive(),
-  amount: z.number().positive(),
-  flow_rate: z.number().positive().optional(),
-  time: z.number().positive().optional(),
+  idx: z.number().nonnegative(),
+  amount: z.number().positive().optional(),
+  flow_rate: z.string().optional(),
+  time: z.number().nonnegative().optional(),
 });
 
 const brewSchema = z.object({
@@ -126,7 +126,7 @@ app.post('/api/brews', async (c) => {
     const { brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes, pours } = parsedBrewLog;
 
     const insertResult = await c.env.DB.prepare(
-      `INSERT INTO brew_logs (brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes)
+      `INSERT INTO brews (brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes)
@@ -172,7 +172,7 @@ app.put('/api/brews/:id', async (c) => {
     const { brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes, pours } = parsedBrewLog;
 
     const updateResult = await c.env.DB.prepare(
-      `UPDATE brew_logs
+      `UPDATE brews
        SET brew_date = ?, bean_id = ?, bean_amount = ?, cups = ?, grind_size = ?, water_temp = ?, overall_score = ?, bitterness = ?, acidity = ?, sweetness = ?, notes = ?
        WHERE id = ?`
     )
