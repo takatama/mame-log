@@ -43,7 +43,6 @@ const Settings: React.FC = () => {
           </label>
         </div>
 
-        {/* 保存ボタン */}
         <button className="bg-blue-500 text-white p-2 rounded-md">設定を保存</button>
       </div>
     </div>

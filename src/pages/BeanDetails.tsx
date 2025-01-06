@@ -55,13 +55,20 @@ const BeanDetail: React.FC = () => {
       <p>
         <strong>有効:</strong> {bean.isActive ? 'はい' : 'いいえ'}
       </p>
-        <div className="mt-4">
-          <Link
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-            to={`/beans/${beanId}/brews/new`}>
-            この豆で淹れる
-          </Link>
-        </div>
+      <div className="mt-4 py-2">
+        <Link
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+          to={`/beans/${beanId}/brews/new`}>
+          この豆で淹れる
+        </Link>
+      </div>
+      <div className="mt-4 py-2">
+        <Link
+          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700"
+          to={`/beans/${beanId}/edit`}>
+          編集する
+        </Link>
+      </div>
     </div>
   )
 };

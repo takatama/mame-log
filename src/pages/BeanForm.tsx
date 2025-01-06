@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useBrewContext } from '../context/BrewContext';
 
 const BeanForm: React.FC = () => {
+  const { beans } = useBrewContext();
+  const { beanId } = useParams();
   const [name, setName] = useState('');
   const [country, setCountry] = useState('');
   const [area, setArea] = useState('');
@@ -15,6 +19,28 @@ const BeanForm: React.FC = () => {
   const [price, setPrice] = useState(0);
   const [photoUrl, setPhotoUrl] = useState('');
   const [isActive, setIsActive] = useState(true);
+
+  useEffect(() => {
+    if (beanId) {
+      const bean = beans.find((bean) => bean.id === beanId);
+      if (bean) {
+        setName(bean.name);
+        setCountry(bean.country);
+        setArea(bean.area);
+        setDryingMethod(bean.dryingMethod);
+        setProcessingMethod(bean.processingMethod);
+        setRoastLevel(bean.roastLevel);
+        setRoastDate(bean.roastDate);
+        setSeller(bean.seller);
+        setSellerUrl(bean.sellerUrl);
+        setPurchaseDate(bean.purchaseDate);
+        setPurchaseAmount(bean.purchaseAmount);
+        setPrice(bean.price);
+        setPhotoUrl(bean.photoUrl);
+        setIsActive(bean.isActive);
+      }
+    }
+  }, [beanId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +57,25 @@ const BeanForm: React.FC = () => {
       purchaseDate,
       purchaseAmount,
       price,
-      photoUrl
+      photoUrl,
+      isActive
     };
     console.log(newBean);
     // APIリクエストでデータを保存
+    // Example:
+    // if (beanId) {
+    //   fetch(`/api/beans/${beanId}`, {
+    //     method: 'PUT',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(newBean)
+    //   });
+    // } else {
+    //   fetch('/api/beans', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(newBean)
+    //   });
+    // }
   };
 
   return (
@@ -124,7 +165,7 @@ const BeanForm: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium">購入量</label>
+          <label className="block text-sm font-medium">購入量（g）</label>
           <input
             type="number"
             value={purchaseAmount}
@@ -133,7 +174,7 @@ const BeanForm: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium">価格</label>
+          <label className="block text-sm font-medium">価格（円）</label>
           <input
             type="number"
             value={price}
@@ -168,7 +209,7 @@ const BeanForm: React.FC = () => {
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
-        <button className="bg-blue-500 text-white p-2 rounded-md">保存</button>
+        <button className="bg-blue-500 text-white p-2 rounded-md">保存する</button>
       </form>
     </div>
   );
