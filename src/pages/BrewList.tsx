@@ -13,9 +13,9 @@ const BrewList: React.FC = () => {
         {brews.map((brew) => (
           <li key={brew.id} className="p-4 border rounded-md">
             <Link to={`/brews/${brew.id}`} className="text-blue-500 hover:underline">
-              <h2 className="font-bold">{brew.brewDate}</h2>
+              <h2 className="font-bold">{brew.brew_date}</h2>
               <p>豆: {brew.bean.name}</p>
-              <p>評価: {'★'.repeat(brew.overallScore)}</p>
+              <p>評価: {'★'.repeat(brew.overall_score)}</p>
             </Link>
           </li>
         ))}

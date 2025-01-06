@@ -5,7 +5,7 @@ import { Link, useParams } from 'react-router-dom';
 const BeanDetail: React.FC = () => {
   const { beans } = useBrewContext()
   const { beanId } = useParams<{ beanId?: string }>()
-  const bean = beans.find(bean => bean.id === beanId)
+  const bean = beans.find(bean => bean.id === Number(beanId))
 
   if (!bean) {
     return <div>豆が見つかりません。</div>
@@ -15,7 +15,7 @@ const BeanDetail: React.FC = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{bean.name}</h1>
       <img
-        src={bean.photoUrl}
+        src={bean.photo_url}
         alt={bean.name}
         className="mb-4 w-32 h-32 object-cover"
       />
@@ -26,34 +26,34 @@ const BeanDetail: React.FC = () => {
         <strong>地域:</strong> {bean.area}
       </p>
       <p>
-        <strong>乾燥方法:</strong> {bean.dryingMethod}
+        <strong>乾燥方法:</strong> {bean.drying_method}
       </p>
       <p>
-        <strong>精製方法:</strong> {bean.processingMethod}
+        <strong>精製方法:</strong> {bean.processing_method}
       </p>
       <p>
-        <strong>焙煎度:</strong> {bean.roastLevel}
+        <strong>焙煎度:</strong> {bean.roast_level}
       </p>
       <p>
-        <strong>焙煎日:</strong> {bean.roastDate}
+        <strong>焙煎日:</strong> {bean.roast_date}
       </p>
       <p>
-        <strong>購入量:</strong> {bean.purchaseAmount} g
+        <strong>購入量:</strong> {bean.purchase_amount} g
       </p>
       <p>
-        <strong>購入日:</strong> {bean.purchaseDate}
+        <strong>購入日:</strong> {bean.purchase_date}
       </p>
       <p>
         <strong>価格:</strong> {bean.price} 円
       </p>
       <p>
-        <strong>販売者:</strong> <a href={bean.sellerUrl} target='_blank'>{bean.seller}</a>
+        <strong>販売者:</strong> <a href={bean.seller_url} target='_blank'>{bean.seller}</a>
       </p>
       <p>
         <strong>メモ:</strong> {bean.notes}
       </p>
       <p>
-        <strong>有効:</strong> {bean.isActive ? 'はい' : 'いいえ'}
+        <strong>有効:</strong> {bean.is_active ? 'はい' : 'いいえ'}
       </p>
       <div className="mt-4 py-2">
         <Link

@@ -14,7 +14,7 @@ const BrewForm: React.FC = () => {
   const [cups, setCups] = useState(0);
   const [grindSize, setGrindSize] = useState('');
   const [waterTemp, setWaterTemp] = useState(0);
-  const [pours, setPours] = useState<Pour[]>([{ index: 0, amount: 0, flowRate: '', time: 0 }]);
+  const [pours, setPours] = useState<Pour[]>([{ idx: 0, amount: 0, flow_rate: '', time: 0 }]);
   const [brewDate, setBrewDate] = useState(new Date().toISOString().slice(0, 16)); // 現在の日時を初期値に設定
   const [overallScore, setOverallScore] = useState(0);
   const [bitterness, setBitterness] = useState(0);
@@ -24,30 +24,30 @@ const BrewForm: React.FC = () => {
 
   useEffect(() => {
     if (brewId) {
-      const selectedBrew = brews.find((b: Brew) => b.id === brewId)
+      const selectedBrew = brews.find((b: Brew) => b.id === Number(brewId))
       if (selectedBrew) {
         setBrew(selectedBrew);
         setBean(selectedBrew.bean);
-        setBeanAmount(selectedBrew.beanAmount);
+        setBeanAmount(selectedBrew.bean_amount);
         setCups(selectedBrew.cups);
-        setGrindSize(selectedBrew.grindSize);
-        setWaterTemp(selectedBrew.waterTemp);
+        setGrindSize(selectedBrew.grind_size);
+        setWaterTemp(selectedBrew.water_temp);
         setPours(selectedBrew.pours);
-        setBrewDate(new Date(selectedBrew.brewDate).toISOString().slice(0, 16));
-        setOverallScore(selectedBrew.overallScore);
+        setBrewDate(new Date(selectedBrew.brew_date).toISOString().slice(0, 16));
+        setOverallScore(selectedBrew.overall_score);
         setBitterness(selectedBrew.bitterness ?? 0);
         setAcidity(selectedBrew.acidity ?? 0);
         setSweetness(selectedBrew.sweetness ?? 0);
         setNotes(selectedBrew.notes ?? '');
       }
     } else if (beanId) {
-      const selectedBean = beans.find((b: Bean) => b.id === beanId);
+      const selectedBean = beans.find((b: Bean) => b.id === Number(beanId));
       setBean(selectedBean);
     }
   }, [brewId, beanId, beans, brews]);
 
   const handleAddPour = () => {
-    setPours([...pours, { index: pours.length, amount: 0, flowRate: '', time: 0 }]);
+    setPours([...pours, { idx: pours.length, amount: 0, flow_rate: '', time: 0 }]);
   };
 
   const handlePourChange = (index: number, field: string, value: string) => {
@@ -97,7 +97,7 @@ const BrewForm: React.FC = () => {
           <select
             value={bean?.id || ''}
             onChange={(e) => {
-              const selectedBean = beans.find((b: Bean) => b.id === e.target.value);
+              const selectedBean = beans.find((b: Bean) => b.id === Number(e.target.value));
               setBean(selectedBean);
             }}
             className="mt-1 block w-full border rounded-md p-2"
@@ -158,7 +158,7 @@ const BrewForm: React.FC = () => {
           {pours.map((pour: any, index: number) => (
             <div key={index} className="space-y-2 mb-4 border p-4 rounded-md">
               <div>
-                <label className="block text-sm font-medium">注湯 {pour.index + 1} - 湯量 (ml)</label>
+                <label className="block text-sm font-medium">注湯 {pour.idx + 1} - 湯量 (ml)</label>
                 <input
                   type="number"
                   value={pour.amount}

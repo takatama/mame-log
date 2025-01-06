@@ -22,22 +22,22 @@ const BeanForm: React.FC = () => {
 
   useEffect(() => {
     if (beanId) {
-      const bean = beans.find((bean) => bean.id === beanId);
+      const bean = beans.find((bean) => bean.id === Number(beanId));
       if (bean) {
         setName(bean.name);
         setCountry(bean.country);
         setArea(bean.area);
-        setDryingMethod(bean.dryingMethod);
-        setProcessingMethod(bean.processingMethod);
-        setRoastLevel(bean.roastLevel);
-        setRoastDate(bean.roastDate);
+        setDryingMethod(bean.drying_method);
+        setProcessingMethod(bean.processing_method);
+        setRoastLevel(bean.roast_level);
+        setRoastDate(bean.roast_date);
         setSeller(bean.seller);
-        setSellerUrl(bean.sellerUrl);
-        setPurchaseDate(bean.purchaseDate);
-        setPurchaseAmount(bean.purchaseAmount);
+        setSellerUrl(bean.seller_url);
+        setPurchaseDate(bean.purchase_date);
+        setPurchaseAmount(bean.purchase_amount);
         setPrice(bean.price);
-        setPhotoUrl(bean.photoUrl);
-        setIsActive(bean.isActive);
+        setPhotoUrl(bean.photo_url);
+        setIsActive(bean.is_active);
       }
     }
   }, [beanId]);
