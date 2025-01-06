@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Brews } from '../types/Brew';
+import { useBrewContext } from '../context/BrewContext';
 
-const BrewList: React.FC<Brews> = ({ brews }) => {
+const BrewList: React.FC = () => {
+  const { brews, beans } = useBrewContext()
 
   return (
     <div className="container mx-auto p-4">

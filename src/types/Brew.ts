@@ -8,7 +8,7 @@ export interface Pour {
 }
 
 export interface Brew {
-  id: number;
+  id: string;
   brewDate: string;
   bean: Bean;
   beanAmount: number; // g
