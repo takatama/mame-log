@@ -4,7 +4,7 @@ import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 
 const BrewDetails: React.FC = () => {
-  const { brews, beans } = useBrewContext()
+  const { brews } = useBrewContext()
   const { brewId } = useParams<{ brewId?: string }>()
   const brew = brews.find(brew => brew.id === brewId)
   if (!brew) {
@@ -51,8 +51,9 @@ const BrewDetails: React.FC = () => {
           <strong>甘味:</strong>
           <StarRating rating={brew.sweetness ?? 0} onRatingChange={() => {}} />
         </div>
+        <p><strong>メモ:</strong> {brew.notes ?? ''}</p>
       </div>
-      <div className="mt-4 py-4">
+      <div className="mt-4 py-2">
         <Link
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
           to={`/brews/${brewId}/brews/new`}
@@ -60,7 +61,7 @@ const BrewDetails: React.FC = () => {
           これをベースに淹れる
         </Link>
       </div>
-      <div className="mt-4 py-4">
+      <div className="mt-4 py-2">
         <Link
           className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700"
           to={`/brews/${brewId}/edit`}
