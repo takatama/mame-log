@@ -8,17 +8,18 @@ const BeanForm: React.FC = () => {
   const [name, setName] = useState('');
   const [country, setCountry] = useState('');
   const [area, setArea] = useState('');
-  const [dryingMethod, setDryingMethod] = useState('');
-  const [processingMethod, setProcessingMethod] = useState('');
-  const [roastLevel, setRoastLevel] = useState('');
-  const [roastDate, setRoastDate] = useState('');
+  const [drying_method, setDryingMethod] = useState('');
+  const [processing_method, setProcessingMethod] = useState('');
+  const [roast_level, setRoastLevel] = useState('');
+  const [roast_date, setRoastDate] = useState('');
   const [seller, setSeller] = useState('');
-  const [sellerUrl, setSellerUrl] = useState('');
-  const [purchaseDate, setPurchaseDate] = useState('');
-  const [purchaseAmount, setPurchaseAmount] = useState(0);
+  const [seller_url, setSellerUrl] = useState('');
+  const [purchase_date, setPurchaseDate] = useState('');
+  const [purchase_amount, setPurchaseAmount] = useState(0);
   const [price, setPrice] = useState(0);
-  const [photoUrl, setPhotoUrl] = useState('');
-  const [isActive, setIsActive] = useState(true);
+  const [photo_url, setPhotoUrl] = useState('');
+  const [notes, setNotes] = useState('');
+  const [is_active, setIsActive] = useState(true);
 
   useEffect(() => {
     if (beanId) {
@@ -37,6 +38,7 @@ const BeanForm: React.FC = () => {
         setPurchaseAmount(bean.purchase_amount);
         setPrice(bean.price);
         setPhotoUrl(bean.photo_url);
+        setNotes(bean.notes ?? '');
         setIsActive(bean.is_active);
       }
     }
@@ -48,34 +50,35 @@ const BeanForm: React.FC = () => {
       name,
       country,
       area,
-      dryingMethod,
-      processingMethod,
-      roastLevel,
-      roastDate,
+      drying_method,
+      processing_method,
+      roast_level,
+      roast_date,
       seller,
-      sellerUrl,
-      purchaseDate,
-      purchaseAmount,
+      seller_url,
+      purchase_date,
+      purchase_amount,
       price,
-      photoUrl,
-      isActive
+      photo_url,
+      notes,
+      is_active
     };
+
     console.log(newBean);
-    // APIリクエストでデータを保存
-    // Example:
-    // if (beanId) {
-    //   fetch(`/api/beans/${beanId}`, {
-    //     method: 'PUT',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(newBean)
-    //   });
-    // } else {
-    //   fetch('/api/beans', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(newBean)
-    //   });
-    // }
+
+    if (beanId) {
+      fetch(`/api/beans/${beanId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBean)
+      });
+    } else {
+      fetch('/api/beans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBean)
+      });
+    }
   };
 
   return (
@@ -86,7 +89,7 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">有効</label>
           <input
             type="checkbox"
-            checked={isActive}
+            checked={is_active}
             onChange={(e) => setIsActive(e.target.checked)}
             className="mt-1"
           />
@@ -123,7 +126,7 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">乾燥方法</label>
           <input
             type="text"
-            value={dryingMethod}
+            value={drying_method}
             onChange={(e) => setDryingMethod(e.target.value)}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -132,7 +135,7 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">処理方法</label>
           <input
             type="text"
-            value={processingMethod}
+            value={processing_method}
             onChange={(e) => setProcessingMethod(e.target.value)}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -141,7 +144,7 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">焙煎度</label>
           <input
             type="text"
-            value={roastLevel}
+            value={roast_level}
             onChange={(e) => setRoastLevel(e.target.value)}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -150,7 +153,7 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">焙煎日</label>
           <input
             type="date"
-            value={roastDate}
+            value={roast_date}
             onChange={(e) => setRoastDate(e.target.value)}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -159,7 +162,7 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">購入日</label>
           <input
             type="date"
-            value={purchaseDate}
+            value={purchase_date}
             onChange={(e) => setPurchaseDate(e.target.value)}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -168,7 +171,7 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">購入量（g）</label>
           <input
             type="number"
-            value={purchaseAmount}
+            value={purchase_amount}
             onChange={(e) => setPurchaseAmount(Number(e.target.value))}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -195,7 +198,7 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">販売者URL</label>
           <input
             type="url"
-            value={sellerUrl}
+            value={seller_url}
             onChange={(e) => setSellerUrl(e.target.value)}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -204,8 +207,16 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">写真URL</label>
           <input
             type="url"
-            value={photoUrl}
+            value={photo_url}
             onChange={(e) => setPhotoUrl(e.target.value)}
+            className="mt-1 block w-full border rounded-md p-2"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">メモ</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>

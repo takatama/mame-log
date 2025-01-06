@@ -24,7 +24,7 @@ const beanSchema = z.object({
   seller_url: z.string().url().optional(),
   photo_url: z.string().url().optional(),
   notes: z.string().optional(),
-  is_active: z.boolean().optional(),
+  is_active: z.number().optional(),
 });
 
 const pourSchema = z.object({
@@ -50,8 +50,6 @@ const brewSchema = z.object({
   pours: z.array(pourSchema),
 });
 
-
-
 app.post('/api/beans', async (c: Context<{ Bindings: Env }>) => {
   try {
     const bean = await c.req.json();
@@ -68,6 +66,7 @@ app.post('/api/beans', async (c: Context<{ Bindings: Env }>) => {
 
     return c.json({ message: 'Bean added successfully' }, 201);
   } catch (error) {
+    console.error(error);
     if (error instanceof Error) {
       return c.json({ error: error.message }, 400);
     } else {
@@ -81,10 +80,40 @@ app.get('/api/beans', async (c: Context<{ Bindings: Env }>) => {
     const { results } = await c.env.DB.prepare('SELECT * FROM beans').all();
     return c.json(results);
   } catch (error) {
+    console.error(error);
     if (error instanceof Error) {
       return c.json({ error: error.message }, 500);
     } else {
       return c.json({ error: 'An unexpected error occurred' }, 500);
+    }
+  }
+});
+
+app.put('/api/beans/:id', async (c: Context<{ Bindings: Env }>) => {
+  try {
+    const bean = await c.req.json();
+    const parsedBean = beanSchema.parse(bean);
+    const { name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active } = parsedBean;
+
+    const updateResult = await c.env.DB.prepare(
+      `UPDATE beans
+       SET name = ?, country = ?, area = ?, drying_method = ?, processing_method = ?, roast_level = ?, roast_date = ?, purchase_date = ?, purchase_amount = ?, price = ?, seller = ?, seller_url = ?, photo_url = ?, notes = ?, is_active = ?
+       WHERE id = ?`
+    )
+      .bind(name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active, c.req.param('id'))
+      .run();
+
+    if (!updateResult.success) {
+      throw new Error('Failed to update bean');
+    }
+
+    return c.json({ message: 'Bean updated successfully' });
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      return c.json({ error: error.message }, 400);
+    } else {
+      return c.json({ error: 'An unexpected error occurred' }, 400);
     }
   }
 });
@@ -97,10 +126,10 @@ app.post('/api/brews', async (c) => {
     const { brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes, pours } = parsedBrewLog;
 
     const insertResult = await c.env.DB.prepare(
-      `INSERT INTO brew_logs (brew_date, bean_id, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO brew_logs (brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-      .bind(brew_date, bean_id, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes)
+      .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes)
       .run();
 
     if (!insertResult.success) {
@@ -125,6 +154,56 @@ app.post('/api/brews', async (c) => {
 
     return c.json({ message: 'Brew log and pours added successfully' }, 201);
   } catch (error) {
+    console.error(error);
+    return c.json(
+      {
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      },
+      400
+    );
+  }
+});
+
+app.put('/api/brews/:id', async (c) => {
+  try {
+    const brewLog = await c.req.json();
+    const parsedBrewLog = brewSchema.parse(brewLog);
+
+    const { brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes, pours } = parsedBrewLog;
+
+    const updateResult = await c.env.DB.prepare(
+      `UPDATE brew_logs
+       SET brew_date = ?, bean_id = ?, bean_amount = ?, cups = ?, grind_size = ?, water_temp = ?, overall_score = ?, bitterness = ?, acidity = ?, sweetness = ?, notes = ?
+       WHERE id = ?`
+    )
+      .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes, c.req.param('id'))
+      .run();
+
+    if (!updateResult.success) {
+      throw new Error('Failed to update brew log');
+    }
+
+    const brew_id = c.req.param('id');
+
+    await c.env.DB.prepare('DELETE FROM pours WHERE brew_id = ?').bind(brew_id).run();
+
+    for (const pour of pours) {
+      const { idx, amount, flow_rate, time } = pour;
+      const insertPour = await c.env.DB.prepare(
+        `INSERT INTO pours (brew_id, idx, amount, flow_rate, time)
+         VALUES (?, ?, ?, ?, ?)`
+      )
+        .bind(brew_id, idx, amount, flow_rate, time)
+        .run();
+
+      if (!insertPour.success) {
+        throw new Error(`Failed to insert pour ${idx} for brew ${brew_id}`);
+      }
+    }
+
+    return c.json({ message: 'Brew log and pours updated successfully' });
+  } catch (error) {
+    console.error(error);
     return c.json(
       {
         error: error instanceof Error ? error.message : 'An unexpected error occurred',
@@ -148,6 +227,7 @@ app.get('/api/brews', async (c: Context<{ Bindings: Env }>) => {
 
     return c.json(results);
   } catch (error) {
+    console.error(error);
     if (error instanceof Error) {
       return c.json({ error: error.message }, 500);
     } else {

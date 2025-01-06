@@ -74,7 +74,20 @@ const BrewForm: React.FC = () => {
       notes
     };
     console.log(newBrew);
-    // APIリクエストでデータを保存する処理をここに追加
+
+    if (brewId) {
+      fetch(`/api/brews/${brewId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBrew)
+      });
+    } else {
+      fetch('/api/brews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBrew)
+      });
+    }
   };
 
   return (
