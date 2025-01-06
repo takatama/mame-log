@@ -39,6 +39,12 @@ const BeanDetail: React.FC<{ bean: Bean }> = ({ bean }) => (
     <p>
       <strong>販売者:</strong> <a href={bean.sellerUrl}>{bean.seller}</a>
     </p>
+    <p>
+      <strong>メモ:</strong> {bean.notes}
+    </p>
+    <p>
+      <strong>有効:</strong> {bean.isActive ? 'はい' : 'いいえ'}
+    </p>
   </div>
 );
 

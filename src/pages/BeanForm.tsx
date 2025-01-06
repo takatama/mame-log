@@ -14,6 +14,7 @@ const BeanForm: React.FC = () => {
   const [purchaseAmount, setPurchaseAmount] = useState(0);
   const [price, setPrice] = useState(0);
   const [photoUrl, setPhotoUrl] = useState('');
+  const [isActive, setIsActive] = useState(true);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +41,15 @@ const BeanForm: React.FC = () => {
     <div className="container mx-auto p-4">
       {/* <h1 className="text-2xl font-bold mb-4">新しいコーヒー豆を追加</h1> */}
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium">有効</label>
+          <input
+            type="checkbox"
+            checked={isActive}
+            onChange={(e) => setIsActive(e.target.checked)}
+            className="mt-1"
+          />
+        </div>
         <div>
           <label className="block text-sm font-medium">豆の名前</label>
           <input

@@ -27,6 +27,7 @@ const App: React.FC = () => {
       seller: 'コーヒー豆専門店A',
       sellerUrl: 'https://example.com',
       photoUrl: 'https://via.placeholder.com/150',
+      isActive: true,
     },
     {
       id: 2,
@@ -43,6 +44,7 @@ const App: React.FC = () => {
       seller: 'コーヒー豆太郎',
       sellerUrl: 'https://example.com',
       photoUrl: 'https://via.placeholder.com/150',
+      isActive: true,
     },
   ];
 
@@ -72,6 +74,7 @@ const App: React.FC = () => {
         seller: 'コーヒー豆専門店A',
         sellerUrl: 'https://example.com',
         photoUrl: 'https://via.placeholder.com/150',
+        isActive: true,
       },
       beanAmount: 20,
       grindSize: '中挽き',

@@ -13,6 +13,8 @@ export interface Bean {
   seller: string;
   sellerUrl: string;
   photoUrl: string;
+  notes?: string;
+  isActive: boolean;
 }
 
 export interface Beans {
