@@ -1,15 +1,15 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Brew } from '../types/Brew';
+import { useParams, Link } from 'react-router-dom';
+import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 
-const BrewDetails: React.FC<{ brew: Brew }> = ({ brew }) => {
-  const navigate = useNavigate();
-  const handleCopyBrew = () => {
-    // データを引き継いでNewBrewに遷移
-    navigate('/brews/new', { state: { brew } });
-  };
-
+const BrewDetails: React.FC = () => {
+  const { brews, beans } = useBrewContext()
+  const { brewId } = useParams<{ brewId?: string }>()
+  const brew = brews.find(brew => brew.id === brewId)
+  if (!brew) {
+    return <div>抽出ログが見つかりません。</div>
+  }
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
@@ -53,12 +53,12 @@ const BrewDetails: React.FC<{ brew: Brew }> = ({ brew }) => {
         </div>
       </div>
       <div className="mt-4">
-        <button
+        <Link
           className="px-4 py-2 bg-blue-500 text-white rounded"
-          onClick={handleCopyBrew}
+          to={`/brews/${brewId}/brews/new`}
         >
           これをベースに淹れる
-        </button>
+        </Link>
       </div>
     </div>
   );

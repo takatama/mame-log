@@ -1,5 +1,5 @@
 export interface Bean {
-  id: number;
+  id: string;
   name: string;
   country: string;
   area: string;

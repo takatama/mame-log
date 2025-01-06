@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Bean, Beans } from '../types/Bean';
+import { useParams } from 'react-router-dom';
+import { Bean } from '../types/Bean';
+import { Brew, Pour } from '../types/Brew';
+import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 
-const BrewForm: React.FC<Beans> = ({ beans }) => {
-  const location = useLocation();
+const BrewForm: React.FC = () => {
+  const { beans, brews } = useBrewContext();
+  const { brewId, beanId } = useParams<{ brewId?: string; beanId?: string }>();
   const [brew, setBrew] = useState<any>(null);
   const [bean, setBean] = useState<any>(null);
   const [beanAmount, setBeanAmount] = useState(0);
   const [cups, setCups] = useState(0);
   const [grindSize, setGrindSize] = useState('');
-  const [waterTemp, setWaterTemp] = useState('');
-  const [pours, setPours] = useState([{ index: 0, amount: 0, flowRate: '', time: 0 }]);
+  const [waterTemp, setWaterTemp] = useState(0);
+  const [pours, setPours] = useState<Pour[]>([{ index: 0, amount: 0, flowRate: '', time: 0 }]);
   const [brewDate, setBrewDate] = useState(new Date().toISOString().slice(0, 16)); // 現在の日時を初期値に設定
   const [overallScore, setOverallScore] = useState(0);
   const [bitterness, setBitterness] = useState(0);
@@ -20,23 +23,28 @@ const BrewForm: React.FC<Beans> = ({ beans }) => {
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
-    if (location.state?.brew) {
-      const brew = location.state.brew;
-      setBrew(brew);
-      setBean(brew.bean);
-      setBeanAmount(brew.beanAmount);
-      setCups(brew.cups);
-      setGrindSize(brew.grindSize);
-      setWaterTemp(brew.waterTemp);
-      setPours(brew.pours);
-      setBrewDate(new Date(brew.brewDate).toISOString().slice(0, 16));
-      setOverallScore(brew.overallScore);
-      setBitterness(brew.bitterness);
-      setAcidity(brew.acidity);
-      setSweetness(brew.sweetness);
-      setNotes(brew.notes);
+    if (brewId) {
+      const selectedBrew = brews.find((b: Brew) => b.id === brewId)
+      if (selectedBrew) {
+        setBrew(selectedBrew);
+        setBean(selectedBrew.bean);
+        setBeanAmount(selectedBrew.beanAmount);
+        setCups(selectedBrew.cups);
+        setGrindSize(selectedBrew.grindSize);
+        setWaterTemp(selectedBrew.waterTemp);
+        setPours(selectedBrew.pours);
+        setBrewDate(new Date(selectedBrew.brewDate).toISOString().slice(0, 16));
+        setOverallScore(selectedBrew.overallScore);
+        setBitterness(selectedBrew.bitterness ?? 0);
+        setAcidity(selectedBrew.acidity ?? 0);
+        setSweetness(selectedBrew.sweetness ?? 0);
+        setNotes(selectedBrew.notes ?? '');
+      }
+    } else if (beanId) {
+      const selectedBean = beans.find((b: Bean) => b.id === beanId);
+      setBean(selectedBean);
     }
-  }, [location.state]);
+  }, [brewId, beanId, beans, brews]);
 
   const handleAddPour = () => {
     setPours([...pours, { index: pours.length, amount: 0, flowRate: '', time: 0 }]);
@@ -89,7 +97,7 @@ const BrewForm: React.FC<Beans> = ({ beans }) => {
           <select
             value={bean?.id || ''}
             onChange={(e) => {
-              const selectedBean = beans.find((b: Bean) => b.id === Number(e.target.value));
+              const selectedBean = beans.find((b: Bean) => b.id === e.target.value);
               setBean(selectedBean);
             }}
             className="mt-1 block w-full border rounded-md p-2"
@@ -139,7 +147,7 @@ const BrewForm: React.FC<Beans> = ({ beans }) => {
           <input
             type="number"
             value={waterTemp}
-            onChange={(e) => setWaterTemp(e.target.value)}
+            onChange={(e) => setWaterTemp(Number(e.target.value))}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
