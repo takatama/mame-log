@@ -52,7 +52,7 @@ const brewSchema = z.object({
 
 
 
-app.post('/beans', async (c: Context<{ Bindings: Env }>) => {
+app.post('/api/beans', async (c: Context<{ Bindings: Env }>) => {
   try {
     const bean = await c.req.json();
     const parsedBean = beanSchema.parse(bean);
@@ -76,7 +76,7 @@ app.post('/beans', async (c: Context<{ Bindings: Env }>) => {
   }
 });
 
-app.get('/beans', async (c: Context<{ Bindings: Env }>) => {
+app.get('/api/beans', async (c: Context<{ Bindings: Env }>) => {
   try {
     const { results } = await c.env.DB.prepare('SELECT * FROM beans').all();
     return c.json(results);
@@ -89,7 +89,7 @@ app.get('/beans', async (c: Context<{ Bindings: Env }>) => {
   }
 });
 
-app.post('/brews', async (c) => {
+app.post('/api/brews', async (c) => {
   try {
     const brewLog = await c.req.json();
     const parsedBrewLog = brewSchema.parse(brewLog);
@@ -134,7 +134,7 @@ app.post('/brews', async (c) => {
   }
 });
 
-app.get('/brews', async (c: Context<{ Bindings: Env }>) => {
+app.get('/api/brews', async (c: Context<{ Bindings: Env }>) => {
   try {
     const brews = await c.env.DB.prepare('SELECT * FROM brews').all();
     const results = [];

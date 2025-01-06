@@ -15,11 +15,11 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     async function fetchBeansAndBrews() {
-      const beansResponse = await fetch('/beans');
+      const beansResponse = await fetch('/api/beans');
       const beans: Bean[] = await beansResponse.json();
       setBeans(beans);
 
-      const brewsResponse = await fetch('/brews');
+      const brewsResponse = await fetch('/api/brews');
       const brews: any = await brewsResponse.json();
       const updatedBrews: Brew[] = brews.map((brew: any) => ({
         ...brew,
