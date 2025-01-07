@@ -19,6 +19,7 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // beans または brews の再計算ロジック
   const updateBrewsWithBeans = (beans: Bean[], brews: Brew[]) => {
+    console.log(beans, brews)
     return brews
       .map((brew) => ({
         ...brew,
@@ -30,7 +31,7 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const setBeans = (newBeans: Bean[]) => {
     setBeansState(newBeans);
-    setBrewsState((currentBrews) => updateBrewsWithBeans(newBeans, currentBrews));
+    setBrewsState(updateBrewsWithBeans(newBeans, brews));
     beans.sort((a, b) => b.purchase_date.localeCompare(a.purchase_date));
   };
 
@@ -42,15 +43,13 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     async function fetchBeansAndBrews() {
       const beansResponse = await fetch('/api/beans');
       const beans: Bean[] = await beansResponse.json();
-      setBeans(beans);
 
       const brewsResponse = await fetch('/api/brews');
-      const brews: any = await brewsResponse.json();
-      const updatedBrews: Brew[] = brews.map((brew: any) => ({
-        ...brew,
-        bean: beans.find((bean) => bean.id === brew.bean_id),
-      }));
-      setBrews(updatedBrews);
+      const brews: Brew[] = await brewsResponse.json();
+
+      const updatedBrews = updateBrewsWithBeans(beans, brews);
+      setBeansState(beans);
+      setBrewsState(updatedBrews)
     }
 
     fetchBeansAndBrews();
