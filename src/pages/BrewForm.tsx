@@ -220,12 +220,7 @@ const BrewForm: React.FC = () => {
         </div>
         <div>
           <label className="block text-sm font-medium">湯温 (℃)</label>
-          <input
-            type="number"
-            value={water_temp}
-            onChange={(e) => setWaterTemp(Number(e.target.value))}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
+          {renderPresetButtons([80, 85, 90, 95], water_temp, setWaterTemp)}
         </div>
 
         {/* 注湯詳細 */}
