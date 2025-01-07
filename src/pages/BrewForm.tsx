@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Navigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
 import { Brew, Pour } from '../types/Brew';
 import { useBrewContext } from '../context/BrewContext';
@@ -59,10 +59,6 @@ const BrewForm: React.FC = () => {
     return brews.find(brew => brew.id === brewId);
   }
 
-  const removeBrewById = (brewId: number) => {
-    setBrews(brews.filter(brew => brew.id !== brewId));
-  }
-
   const navigate = useNavigate();
 
   const handlePost = async (newBrew: any) => {
@@ -78,6 +74,7 @@ const BrewForm: React.FC = () => {
       }
   
       const createdBrew: Brew = await response.json();
+      createdBrew.bean = beans.find(bean => bean.id === createdBrew.bean_id)!
       setBrews([...brews, createdBrew]);
       navigate(`/brews/${createdBrew.id}`);
     } catch (error) {
@@ -88,7 +85,7 @@ const BrewForm: React.FC = () => {
   
   const handlePut = async (brewId: number, updatedBrew: any) => {
     const previousBrew = getBrewById(brewId); // 現在の状態を取得
-    updatedBrew.bean = previousBrew?.bean;
+
     try {
       // 楽観的に状態を更新
       updateBrew(updatedBrew);
@@ -116,6 +113,7 @@ const BrewForm: React.FC = () => {
   
     const newBrew = {
       id: Number(brewId) || Date.now(), // POST時に一時IDを使用
+      bean,
       bean_id: bean.id,
       bean_amount,
       cups,

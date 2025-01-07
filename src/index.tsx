@@ -28,7 +28,7 @@ const beanSchema = z.object({
 });
 
 const pourSchema = z.object({
-  brew_id: z.number().int().positive(),
+  brew_id: z.number().int().positive().optional(),
   idx: z.number().nonnegative(),
   amount: z.number().positive().optional(),
   flow_rate: z.string().optional(),

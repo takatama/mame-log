@@ -11,6 +11,7 @@ export interface Brew {
   id: number;
   brew_date: string;
   bean: Bean;
+  bean_id: number;
   bean_amount: number; // g
   cups: number;
   grind_size: string;
