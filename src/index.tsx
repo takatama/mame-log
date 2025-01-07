@@ -124,6 +124,59 @@ app.put('/api/beans/:id', async (c: Context<{ Bindings: Env }>) => {
   }
 });
 
+app.delete('/api/beans/:beanId', async (c: Context<{ Bindings: Env }>) => {
+  try {
+    const beanId = c.req.param('beanId');
+
+    if (!beanId) {
+      return c.json({ error: 'Bean ID is required' }, 400);
+    }
+
+    // `brews` に関連する `pours` を削除
+    const deletePoursResult = await c.env.DB.prepare(
+      `DELETE FROM pours WHERE brew_id IN (SELECT id FROM brews WHERE bean_id = ?)`
+    )
+      .bind(beanId)
+      .run();
+
+    if (!deletePoursResult.success) {
+      throw new Error(`Failed to delete pours for bean ID ${beanId}`);
+    }
+
+    // `brews` を削除
+    const deleteBrewsResult = await c.env.DB.prepare(
+      `DELETE FROM brews WHERE bean_id = ?`
+    )
+      .bind(beanId)
+      .run();
+
+    if (!deleteBrewsResult.success) {
+      throw new Error(`Failed to delete brews for bean ID ${beanId}`);
+    }
+
+    // `beans` を削除
+    const deleteBeanResult = await c.env.DB.prepare(
+      `DELETE FROM beans WHERE id = ?`
+    )
+      .bind(beanId)
+      .run();
+
+    if (!deleteBeanResult.success) {
+      throw new Error(`Failed to delete bean with ID ${beanId}`);
+    }
+
+    return c.json({ message: `Bean with ID ${beanId} and its related brews and pours were deleted successfully` }, 200);
+  } catch (error) {
+    console.error(error);
+    return c.json(
+      {
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      },
+      400
+    );
+  }
+});
+
 app.post('/api/brews', async (c) => {
   try {
     const brew = await c.req.json();
