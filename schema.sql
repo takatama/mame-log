@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS pours (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     brew_id INTEGER NOT NULL,
     idx INTEGER NOT NULL,
-    amount INTEGER NOT NULL,
+    amount INTEGER,
     flow_rate TEXT,
     time INTEGER,
     FOREIGN KEY (brew_id) REFERENCES brews (id)

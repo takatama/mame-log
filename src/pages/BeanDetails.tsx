@@ -40,11 +40,13 @@ const BeanDetail: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{bean.name}</h1>
-      <img
-        src={bean.photo_url}
-        alt={bean.name}
-        className="mb-4 w-32 h-32 object-cover"
-      />
+      {bean.photo_url && (
+        <img
+          src={bean.photo_url}
+          alt={bean.name}
+          className="mb-4 w-32 h-32 object-cover"
+        />
+      )}
       <p>
         <strong>国:</strong> {bean.country}
       </p>
