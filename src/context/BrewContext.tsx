@@ -14,8 +14,29 @@ interface BrewContextProps {
 const BrewContext = createContext<BrewContextProps | undefined>(undefined);
 
 export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [beans, setBeans] = useState<Bean[]>([]);
-  const [brews, setBrews] = useState<Brew[]>([]);
+  const [beans, setBeansState] = useState<Bean[]>([]);
+  const [brews, setBrewsState] = useState<Brew[]>([]);
+
+  // beans または brews の再計算ロジック
+  const updateBrewsWithBeans = (beans: Bean[], brews: Brew[]) => {
+    return brews
+      .map((brew) => ({
+        ...brew,
+        bean: beans.find((bean) => bean.id === brew.bean_id),
+      }))
+      .filter((brew) => brew.bean !== undefined)
+      .sort((a, b) => a.brew_date.localeCompare(b.brew_date)) as Brew[];
+  };
+
+  const setBeans = (newBeans: Bean[]) => {
+    setBeansState(newBeans);
+    setBrewsState((currentBrews) => updateBrewsWithBeans(newBeans, currentBrews));
+    beans.sort((a, b) => a.purchase_date.localeCompare(b.purchase_date));
+  };
+
+  const setBrews = (newBrews: Brew[]) => {
+    setBrewsState(updateBrewsWithBeans(beans, newBrews));
+  };
 
   useEffect(() => {
     async function fetchBeansAndBrews() {
