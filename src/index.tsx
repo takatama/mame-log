@@ -57,14 +57,18 @@ app.post('/api/beans', async (c: Context<{ Bindings: Env }>) => {
 
     const { name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active } = parsedBean;
 
-    await c.env.DB.prepare(
+    const result = await c.env.DB.prepare(
       `INSERT INTO beans (name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active)
       .run();
 
-    return c.json({ message: 'Bean added successfully' }, 201);
+    const insertedBean = {
+      id: result.meta.last_row_id,
+      ...parsedBean
+    }
+    return c.json(insertedBean, 201);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {

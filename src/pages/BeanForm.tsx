@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
+import { Bean } from '../types/Bean';
 
 const BeanForm: React.FC = () => {
-  const { beans } = useBrewContext();
+  const { beans, updateBean, setBeans } = useBrewContext();
   const { beanId } = useParams();
   const [name, setName] = useState('');
   const [country, setCountry] = useState('');
@@ -20,6 +21,14 @@ const BeanForm: React.FC = () => {
   const [photo_url, setPhotoUrl] = useState('');
   const [notes, setNotes] = useState('');
   const [is_active, setIsActive] = useState(true);
+
+  const getBeanById = (beanId: number) => {
+    return beans.find(bean => bean.id === beanId);
+  }
+
+  const removeBeanById = (beanId: number) => {
+    setBeans(beans.filter(bean => bean.id !== beanId));
+  }
 
   useEffect(() => {
     if (beanId) {
@@ -44,9 +53,56 @@ const BeanForm: React.FC = () => {
     }
   }, [beanId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handlePost = async (newBean: Bean) => {
+    try {
+      updateBean(newBean); // 一時的に状態を更新
+      const response = await fetch('/api/beans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBean),
+      });
+  
+      if (!response.ok) {
+        removeBeanById(newBean.id); // エラー時に一時データを削除
+        throw new Error(`Failed to create bean: ${response.statusText}`);
+      }
+  
+      const createdBean: Bean = await response.json();
+      updateBean({ ...newBean, id: createdBean.id }); // 作成されたIDで更新
+    } catch (error) {
+      console.error(error);
+      removeBeanById(newBean.id); // エラー時に一時データを削除
+      alert('An error occurred while creating the bean. Please try again.');
+    }
+  };
+  
+  const handlePut = async (beanId: number, updatedBean: Bean) => {
+    const previousBean = getBeanById(beanId); // 現在の状態を取得
+    try {
+      updateBean(updatedBean); // 状態を一時的に更新
+      const response = await fetch(`/api/beans/${beanId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedBean),
+      });
+  
+      if (!response.ok) {
+        if (previousBean) updateBean(previousBean); // エラー時に元の状態を復元
+        throw new Error(`Failed to update bean: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error(error);
+      if (previousBean) updateBean(previousBean); // エラー時に元の状態を復元
+      alert('An error occurred while updating the bean. Please try again.');
+    }
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+  
+    const tempId = Date.now();
     const newBean = {
+      id: beanId ? Number(beanId) : tempId,
       name,
       country,
       area,
@@ -61,26 +117,18 @@ const BeanForm: React.FC = () => {
       price,
       photo_url,
       notes,
-      is_active
+      is_active,
     };
-
+  
     console.log(newBean);
-
+  
     if (beanId) {
-      fetch(`/api/beans/${beanId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBean)
-      });
+      await handlePut(Number(beanId), newBean);
     } else {
-      fetch('/api/beans', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBean)
-      });
+      await handlePost(newBean);
     }
   };
-
+  
   return (
     <div className="container mx-auto p-4">
       {/* <h1 className="text-2xl font-bold mb-4">新しいコーヒー豆を追加</h1> */}

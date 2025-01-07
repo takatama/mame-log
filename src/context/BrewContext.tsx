@@ -5,6 +5,9 @@ import { Brew } from '../types/Brew';
 interface BrewContextProps {
   beans: Bean[];
   brews: Brew[];
+  updateBean: (bean: Bean) => void;
+  updateBrew: (brew: Brew) => void;
+  setBeans: (beans: Bean[]) => void;
 }
 
 const BrewContext = createContext<BrewContextProps | undefined>(undefined);
@@ -31,8 +34,18 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     fetchBeansAndBrews();
   }, []);
 
+  const updateBean = (bean: Bean) => {
+    const updatedBeans = beans.map((b) => (b.id === bean.id ? bean : b));
+    setBeans(updatedBeans);
+  };
+
+  const updateBrew = (brew: Brew) => {
+    const updatedBrews = brews.map((b) => (b.id === brew.id ? brew : b));
+    setBrews(updatedBrews);
+  };
+
   return (
-    <BrewContext.Provider value={{ beans, brews }}>
+    <BrewContext.Provider value={{ beans, brews, updateBean, setBeans, updateBrew }}>
       {children}
     </BrewContext.Provider>
   );
