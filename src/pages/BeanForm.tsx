@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, createBrowserRouter } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
 
@@ -53,9 +53,11 @@ const BeanForm: React.FC = () => {
     }
   }, [beanId]);
 
+  const navigate = useNavigate();
+
   const handlePost = async (newBean: Bean) => {
     try {
-      updateBean(newBean); // 一時的に状態を更新
+      setBeans([...beans, newBean]); // 一時的に状態を更新
       const response = await fetch('/api/beans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,7 +70,10 @@ const BeanForm: React.FC = () => {
       }
   
       const createdBean: Bean = await response.json();
-      updateBean({ ...newBean, id: createdBean.id }); // 作成されたIDで更新
+      // 作成されたIDで更新
+      removeBeanById(newBean.id);
+      setBeans([...beans, createdBean]);
+      navigate(`/beans/${createdBean.id}`);
     } catch (error) {
       console.error(error);
       removeBeanById(newBean.id); // エラー時に一時データを削除
@@ -90,6 +95,7 @@ const BeanForm: React.FC = () => {
         if (previousBean) updateBean(previousBean); // エラー時に元の状態を復元
         throw new Error(`Failed to update bean: ${response.statusText}`);
       }
+      navigate(`/beans/${beanId}`);
     } catch (error) {
       console.error(error);
       if (previousBean) updateBean(previousBean); // エラー時に元の状態を復元

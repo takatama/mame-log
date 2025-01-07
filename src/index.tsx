@@ -53,6 +53,7 @@ const brewSchema = z.object({
 app.post('/api/beans', async (c: Context<{ Bindings: Env }>) => {
   try {
     const bean = await c.req.json();
+    bean.is_active = bean.is_active ? 1 : 0;
     const parsedBean = beanSchema.parse(bean);
 
     const { name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active } = parsedBean;
@@ -96,6 +97,7 @@ app.get('/api/beans', async (c: Context<{ Bindings: Env }>) => {
 app.put('/api/beans/:id', async (c: Context<{ Bindings: Env }>) => {
   try {
     const bean = await c.req.json();
+    bean.is_active = bean.is_active ? 1 : 0;
     const parsedBean = beanSchema.parse(bean);
     const { name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active } = parsedBean;
 
