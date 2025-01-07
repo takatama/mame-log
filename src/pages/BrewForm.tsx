@@ -145,6 +145,24 @@ const BrewForm: React.FC = () => {
     }
   };
   
+  const renderPresetButtons = <T extends string | number>(
+    options: T[],
+    selectedOption: T,
+    setOption: (option: T) => void,
+  ) => (
+    <div className="flex space-x-4 py-2">
+      {options.map((option) => (
+        <button
+          type='button'
+          key={option}
+          onClick={() => setOption(option)}
+          className={`p-2 rounded-md w-1/${options.length} ${selectedOption === option ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div className="container mx-auto p-4">
@@ -184,18 +202,7 @@ const BrewForm: React.FC = () => {
         {/* 抽出設定 */}
         <div>
           <label className="block text-sm font-medium">カップ数</label>
-          <div className="flex space-x-4 py-2">
-            {[1, 2, 3, 4].map((cup) => (
-              <button
-                type='button'
-                key={cup}
-                onClick={() => setCups(cup)}
-                className={`p-2 rounded-md ${cups === cup ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-              >
-                {cup}杯
-              </button>
-            ))}
-          </div>
+          {renderPresetButtons([1, 2, 3, 4], cups, setCups)}
         </div>
         <div>
           <label className="block text-sm font-medium">豆の量 (g)</label>
@@ -209,18 +216,7 @@ const BrewForm: React.FC = () => {
         </div>
         <div>
           <label className="block text-sm font-medium">挽き具合</label>
-          <div className="flex space-x-4 py-2">
-            {['極細', '細', '中細', '中', '粗'].map((grind) => (
-                <button
-                  type='button'
-                  key={grind}
-                  onClick={() => setGrindSize(grind)}
-                  className={`p-2 rounded-md ${grind_size === grind ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-                >
-                  {grind}
-                </button>
-            ))}
-          </div>
+          {renderPresetButtons(['極細', '細', '中細', '中', '粗'], grind_size, setGrindSize)}
         </div>
         <div>
           <label className="block text-sm font-medium">湯温 (℃)</label>
