@@ -10,11 +10,13 @@ const BeanList: React.FC = () => {
       <ul className="space-y-4">
         {beans.map((bean) => (
           <li key={bean.id} className="p-4 border rounded-md flex items-center">
+            {bean.photo_url && (
             <img
               src={bean.photo_url}
               alt={bean.name}
               className="w-16 h-16 object-cover rounded-full mr-4"
             />
+            )}
             <div>
               <Link to={`/beans/${bean.id}`} className="text-blue-500 hover:underline">
                 <h2 className="font-bold">{bean.name}</h2>

@@ -16,7 +16,3 @@ export interface Bean {
   notes?: string;
   is_active: boolean;
 }
-
-export interface Beans {
-  beans: Bean[];
-}

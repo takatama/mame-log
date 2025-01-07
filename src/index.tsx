@@ -18,19 +18,19 @@ const beanSchema = z.object({
   roast_level: z.string().optional(),
   roast_date: z.string().optional(),
   purchase_date: z.string().optional(),
-  purchase_amount: z.number().positive().optional(),
-  price: z.number().positive().optional(),
+  purchase_amount: z.number().nonnegative().optional(),
+  price: z.number().nonnegative().optional(),
   seller: z.string().optional(),
-  seller_url: z.string().url().optional(),
-  photo_url: z.string().url().optional(),
+  seller_url: z.string().optional(), // string().url() にすると空の場合にエラーになる
+  photo_url: z.string().optional(),
   notes: z.string().optional(),
-  is_active: z.number().optional(),
+  is_active: z.number().nonnegative().optional(),
 });
 
 const pourSchema = z.object({
-  brew_id: z.number().int().positive().optional(),
+  brew_id: z.number().int().positive().optional(), // 登録するときには不定
   idx: z.number().nonnegative(),
-  amount: z.number().positive().optional(),
+  amount: z.number().nonnegative().optional(),
   flow_rate: z.string().optional(),
   time: z.number().nonnegative().optional(),
 });
@@ -38,14 +38,14 @@ const pourSchema = z.object({
 const brewSchema = z.object({
   brew_date: z.string(),
   bean_id: z.number().int().positive(),
-  bean_amount: z.number().positive(),
-  cups: z.number().int().positive(),
+  bean_amount: z.number().nonnegative(),
+  cups: z.number().int().nonnegative(),
   grind_size: z.string(),
-  water_temp: z.number().positive(),
-  overall_score: z.number().positive(),
-  bitterness: z.number().positive().optional(),
-  acidity: z.number().positive().optional(),
-  sweetness: z.number().positive().optional(),
+  water_temp: z.number().nonnegative(),
+  overall_score: z.number().nonnegative(),
+  bitterness: z.number().nonnegative().optional(),
+  acidity: z.number().nonnegative().optional(),
+  sweetness: z.number().nonnegative().optional(),
   notes: z.string().optional(),
   pours: z.array(pourSchema),
 });

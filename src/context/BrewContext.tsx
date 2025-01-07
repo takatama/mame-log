@@ -14,22 +14,41 @@ interface BrewContextProps {
 const BrewContext = createContext<BrewContextProps | undefined>(undefined);
 
 export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [beans, setBeans] = useState<Bean[]>([]);
-  const [brews, setBrews] = useState<Brew[]>([]);
+  const [beans, setBeansState] = useState<Bean[]>([]);
+  const [brews, setBrewsState] = useState<Brew[]>([]);
+
+  // beans または brews の再計算ロジック
+  const updateBrewsWithBeans = (beans: Bean[], brews: Brew[]) => {
+    return brews
+      .map((brew) => ({
+        ...brew,
+        bean: beans.find((bean) => bean.id === brew.bean_id),
+      }))
+      .filter((brew) => brew.bean !== undefined)
+      .sort((a, b) => b.brew_date.localeCompare(a.brew_date)) as Brew[];
+  };
+
+  const setBeans = (newBeans: Bean[]) => {
+    setBeansState(newBeans);
+    setBrewsState(updateBrewsWithBeans(newBeans, brews));
+    beans.sort((a, b) => b.purchase_date.localeCompare(a.purchase_date));
+  };
+
+  const setBrews = (newBrews: Brew[]) => {
+    setBrewsState(updateBrewsWithBeans(beans, newBrews));
+  };
 
   useEffect(() => {
     async function fetchBeansAndBrews() {
       const beansResponse = await fetch('/api/beans');
       const beans: Bean[] = await beansResponse.json();
-      setBeans(beans);
 
       const brewsResponse = await fetch('/api/brews');
-      const brews: any = await brewsResponse.json();
-      const updatedBrews: Brew[] = brews.map((brew: any) => ({
-        ...brew,
-        bean: beans.find((bean) => bean.id === brew.bean_id),
-      }));
-      setBrews(updatedBrews);
+      const brews: Brew[] = await brewsResponse.json();
+
+      const updatedBrews = updateBrewsWithBeans(beans, brews);
+      setBeansState(beans);
+      setBrewsState(updatedBrews)
     }
 
     fetchBeansAndBrews();

@@ -7,7 +7,7 @@ import StarRating from '../components/StarRating';
 
 const BrewForm: React.FC = () => {
   const { beans, brews, updateBrew, setBrews } = useBrewContext();
-  const { brewId, beanId } = useParams<{ brewId?: string; beanId?: string }>();
+  const { brewId, beanId, baseBrewId } = useParams<{ brewId?: string; beanId?: string; baseBrewId?: string }>();
   const [bean, setBean] = useState<any>(null);
   const [bean_amount, setBeanAmount] = useState(0);
   const [cups, setCups] = useState(0);
@@ -21,35 +21,46 @@ const BrewForm: React.FC = () => {
   const [sweetness, setSweetness] = useState(0);
   const [notes, setNotes] = useState('');
 
+  const setBrewParams = (brew: Brew) => {
+    setBean(brew.bean);
+    setBeanAmount(brew.bean_amount);
+    setCups(brew.cups);
+    setGrindSize(brew.grind_size);
+    setWaterTemp(brew.water_temp);
+    setPours(brew.pours);
+    setBrewDate(brew.brew_date);
+    setOverallScore(brew.overall_score);
+    setBitterness(brew.bitterness ?? 0);
+    setAcidity(brew.acidity ?? 0);
+    setSweetness(brew.sweetness ?? 0);
+    setNotes(brew.notes ?? '');
+  }
+
   useEffect(() => {
     if (brewId) {
       const selectedBrew = brews.find((b: Brew) => b.id === Number(brewId))
       if (selectedBrew) {
-        setBean(selectedBrew.bean);
-        setBeanAmount(selectedBrew.bean_amount);
-        setCups(selectedBrew.cups);
-        setGrindSize(selectedBrew.grind_size);
-        setWaterTemp(selectedBrew.water_temp);
-        setPours(selectedBrew.pours);
-        setBrewDate(new Date(selectedBrew.brew_date).toISOString().slice(0, 16));
-        setOverallScore(selectedBrew.overall_score);
-        setBitterness(selectedBrew.bitterness ?? 0);
-        setAcidity(selectedBrew.acidity ?? 0);
-        setSweetness(selectedBrew.sweetness ?? 0);
-        setNotes(selectedBrew.notes ?? '');
+        setBrewParams(selectedBrew);
       }
     } else if (beanId) {
       const selectedBean = beans.find((b: Bean) => b.id === Number(beanId));
       setBean(selectedBean);
+      setBrewDate(new Date().toISOString().slice(0, 16));
+    } else if (baseBrewId) {
+      const baseBrew = brews.find((b: Brew) => b.id === Number(baseBrewId));
+      if (baseBrew) {
+        setBrewParams(baseBrew);
+        setBrewDate(new Date().toISOString().slice(0, 16));
+      }
     }
-  }, [brewId, beanId, beans, brews]);
+  }, [brewId, beanId, baseBrewId, beans, brews]);
 
   const handleAddPour = () => {
     setPours([...pours, { idx: pours.length, amount: 0, flow_rate: '', time: 0 }]);
   };
 
   const handlePourChange = (index: number, field: string, value: string | number) => {
-    const updatedPours = pours.map((pour: any, i: number) =>
+    const updatedPours = pours.map((pour: Pour, i: number) =>
       i === index ? { ...pour, [field]: value } : pour
     );
     setPours(updatedPours);
@@ -61,7 +72,7 @@ const BrewForm: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const handlePost = async (newBrew: any) => {
+  const handlePost = async (newBrew: Brew) => {
     try {  
       const response = await fetch('/api/brews', {
         method: 'POST',
@@ -74,7 +85,6 @@ const BrewForm: React.FC = () => {
       }
   
       const createdBrew: Brew = await response.json();
-      createdBrew.bean = beans.find(bean => bean.id === createdBrew.bean_id)!
       setBrews([...brews, createdBrew]);
       navigate(`/brews/${createdBrew.id}`);
     } catch (error) {
@@ -83,7 +93,7 @@ const BrewForm: React.FC = () => {
     }
   };
   
-  const handlePut = async (brewId: number, updatedBrew: any) => {
+  const handlePut = async (brewId: number, updatedBrew: Brew) => {
     const previousBrew = getBrewById(brewId); // 現在の状態を取得
 
     try {
@@ -214,7 +224,7 @@ const BrewForm: React.FC = () => {
         {/* 注湯詳細 */}
         <div>
           <label className="block text-sm font-medium mb-2">注湯詳細</label>
-          {pours.map((pour: any, index: number) => (
+          {pours.map((pour: Pour, index: number) => (
             <div key={index} className="space-y-2 mb-4 border p-4 rounded-md">
               <div>
                 <label className="block text-sm font-medium">注湯 {pour.idx + 1} - 湯量 (ml)</label>

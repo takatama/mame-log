@@ -23,7 +23,3 @@ export interface Brew {
   sweetness?: number;
   notes?: string;
 }
-
-export interface Brews {
-  brews: Brew[];
-}
