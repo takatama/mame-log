@@ -6,7 +6,7 @@ import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 
 const BrewForm: React.FC = () => {
-  const { beans, brews } = useBrewContext();
+  const { beans, brews, updateBrew, setBrews } = useBrewContext();
   const { brewId, beanId } = useParams<{ brewId?: string; beanId?: string }>();
   const [bean, setBean] = useState<any>(null);
   const [bean_amount, setBeanAmount] = useState(0);
@@ -55,9 +55,68 @@ const BrewForm: React.FC = () => {
     setPours(updatedPours);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const getBrewById = (brewId: number) => {
+    return brews.find(brew => brew.id === brewId);
+  }
+
+  const removeBrewById = (brewId: number) => {
+    setBrews(brews.filter(brew => brew.id !== brewId));
+  }
+
+  const handlePost = async (newBrew: any) => {
+    try {
+      // 楽観的に状態を更新
+      updateBrew(newBrew);
+  
+      const response = await fetch('/api/brews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBrew),
+      });
+  
+      if (!response.ok) {
+        removeBrewById(newBrew.id); // エラー時に一時的なデータを削除
+        throw new Error(`Failed to create brew: ${response.statusText}`);
+      }
+  
+      const createdBrew: Brew = await response.json();
+      updateBrew({ ...newBrew, id: createdBrew.id }); // サーバーから返却されたIDを更新
+    } catch (error) {
+      console.error(error);
+      removeBrewById(newBrew.id); // エラー時に一時的なデータを削除
+      alert('An error occurred while creating the brew. Please try again.');
+    }
+  };
+  
+  const handlePut = async (brewId: number, updatedBrew: any) => {
+    const previousBrew = getBrewById(brewId); // 現在の状態を取得
+  
+    try {
+      // 楽観的に状態を更新
+      updateBrew(updatedBrew);
+  
+      const response = await fetch(`/api/brews/${brewId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedBrew),
+      });
+  
+      if (!response.ok) {
+        if (previousBrew) updateBrew(previousBrew); // エラー時に元の状態を復元
+        throw new Error(`Failed to update brew: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error(error);
+      if (previousBrew) updateBrew(previousBrew); // エラー時に元の状態を復元
+      alert('An error occurred while updating the brew. Please try again.');
+    }
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+  
     const newBrew = {
+      id: Number(brewId) || Date.now(), // POST時に一時IDを使用
       bean_id: bean.id,
       bean_amount,
       cups,
@@ -69,24 +128,16 @@ const BrewForm: React.FC = () => {
       bitterness,
       acidity,
       sweetness,
-      notes
+      notes,
     };
-    console.log(newBrew);
-
+    
     if (brewId) {
-      fetch(`/api/brews/${brewId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBrew)
-      });
+      await handlePut(Number(brewId), newBrew);
     } else {
-      fetch('/api/brews', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBrew)
-      });
+      await handlePost(newBrew);
     }
   };
+  
 
   return (
     <div className="container mx-auto p-4">

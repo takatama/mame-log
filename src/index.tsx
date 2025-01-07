@@ -66,7 +66,7 @@ app.post('/api/beans', async (c: Context<{ Bindings: Env }>) => {
 
     const insertedBean = {
       id: result.meta.last_row_id,
-      ...parsedBean
+      name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active
     }
     return c.json(insertedBean, 201);
   } catch (error) {
@@ -124,16 +124,41 @@ app.put('/api/beans/:id', async (c: Context<{ Bindings: Env }>) => {
 
 app.post('/api/brews', async (c) => {
   try {
-    const brewLog = await c.req.json();
-    const parsedBrewLog = brewSchema.parse(brewLog);
+    const brew = await c.req.json();
+    const parsedBrew = brewSchema.parse(brew);
 
-    const { brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes, pours } = parsedBrewLog;
+    const {
+      brew_date,
+      bean_id,
+      bean_amount,
+      cups,
+      grind_size,
+      water_temp,
+      overall_score,
+      bitterness,
+      acidity,
+      sweetness,
+      notes,
+      pours
+    } = parsedBrew;
 
     const insertResult = await c.env.DB.prepare(
       `INSERT INTO brews (brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-      .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes)
+      .bind(
+        brew_date,
+        bean_id,
+        bean_amount,
+        cups,
+        grind_size,
+        water_temp,
+        overall_score,
+        bitterness,
+        acidity,
+        sweetness,
+        notes
+      )
       .run();
 
     if (!insertResult.success) {
@@ -142,6 +167,7 @@ app.post('/api/brews', async (c) => {
 
     const brew_id = insertResult.meta.last_row_id;
 
+    const insertedPours = [];
     for (const pour of pours) {
       const { idx, amount, flow_rate, time } = pour;
       const insertPour = await c.env.DB.prepare(
@@ -154,9 +180,27 @@ app.post('/api/brews', async (c) => {
       if (!insertPour.success) {
         throw new Error(`Failed to insert pour ${idx} for brew ${brew_id}`);
       }
+
+      insertedPours.push({ idx, amount, flow_rate, time });
     }
 
-    return c.json({ message: 'Brew log and pours added successfully' }, 201);
+    const insertedBrew = {
+      id: brew_id,
+      brew_date,
+      bean_id,
+      bean_amount,
+      cups,
+      grind_size,
+      water_temp,
+      overall_score,
+      bitterness,
+      acidity,
+      sweetness,
+      notes,
+      pours: insertedPours
+    };
+
+    return c.json(insertedBrew, 201);
   } catch (error) {
     console.error(error);
     return c.json(
@@ -170,10 +214,10 @@ app.post('/api/brews', async (c) => {
 
 app.put('/api/brews/:id', async (c) => {
   try {
-    const brewLog = await c.req.json();
-    const parsedBrewLog = brewSchema.parse(brewLog);
+    const brew = await c.req.json();
+    const parsedBrew = brewSchema.parse(brew);
 
-    const { brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes, pours } = parsedBrewLog;
+    const { brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes, pours } = parsedBrew;
 
     const updateResult = await c.env.DB.prepare(
       `UPDATE brews

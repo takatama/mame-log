@@ -120,8 +120,6 @@ const BeanForm: React.FC = () => {
       is_active,
     };
   
-    console.log(newBean);
-  
     if (beanId) {
       await handlePut(Number(beanId), newBean);
     } else {

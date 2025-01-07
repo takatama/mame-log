@@ -6,8 +6,9 @@ interface BrewContextProps {
   beans: Bean[];
   brews: Brew[];
   updateBean: (bean: Bean) => void;
-  updateBrew: (brew: Brew) => void;
   setBeans: (beans: Bean[]) => void;
+  updateBrew: (brew: Brew) => void;
+  setBrews: (brews: Brew[]) => void;
 }
 
 const BrewContext = createContext<BrewContextProps | undefined>(undefined);
@@ -45,7 +46,7 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <BrewContext.Provider value={{ beans, brews, updateBean, setBeans, updateBrew }}>
+    <BrewContext.Provider value={{ beans, brews, updateBean, setBeans, updateBrew, setBrews }}>
       {children}
     </BrewContext.Provider>
   );
