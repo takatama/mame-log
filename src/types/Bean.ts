@@ -1,20 +1,20 @@
 export interface Bean {
-  id: string;
+  id: number;
   name: string;
   country: string;
   area: string;
-  dryingMethod: string;
-  processingMethod: string;
-  roastLevel: string;
-  roastDate: string;
-  purchaseDate: string;
-  purchaseAmount: number; // g
+  drying_method: string;
+  processing_method: string;
+  roast_level: string;
+  roast_date: string;
+  purchase_date: string;
+  purchase_amount: number; // g
   price: number; // JPY
   seller: string;
-  sellerUrl: string;
-  photoUrl: string;
+  seller_url: string;
+  photo_url: string;
   notes?: string;
-  isActive: boolean;
+  is_active: boolean;
 }
 
 export interface Beans {

@@ -11,7 +11,7 @@ const BeanList: React.FC = () => {
         {beans.map((bean) => (
           <li key={bean.id} className="p-4 border rounded-md flex items-center">
             <img
-              src={bean.photoUrl}
+              src={bean.photo_url}
               alt={bean.name}
               className="w-16 h-16 object-cover rounded-full mr-4"
             />
@@ -22,9 +22,9 @@ const BeanList: React.FC = () => {
               <p>
                 {bean.country} ({bean.area})
               </p>
-              <p>{bean.roastLevel}</p>
+              <p>{bean.roast_level}</p>
               <p>
-                {bean.purchaseAmount} g | {bean.price} 円
+                {bean.purchase_amount} g | {bean.price} 円
               </p>
             </div>
           </li>

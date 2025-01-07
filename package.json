@@ -5,7 +5,8 @@
     "dev": "vite",
     "build": "vite build --mode client && vite build",
     "preview": "wrangler pages dev",
-    "deploy": "npm run build && wrangler pages deploy"
+    "deploy": "npm run build && wrangler pages deploy",
+    "reset-db": "npx wrangler d1 execute mame-log --local --file=./schema.sql"
   },
   "dependencies": {
     "hono": "^4.6.15",

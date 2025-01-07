@@ -14,10 +14,10 @@ compatibility_flags = [ "nodejs_compat" ]
 # binding = "MY_BUCKET"
 # bucket_name = "my-bucket"
 
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "my-database"
-# database_id = ""
+[[d1_databases]]
+binding = "DB"
+database_name = "mame-log"
+database_id = "e53e7a23-7c7f-4a89-8cd4-cc417b3fa792"
 
 # [ai]
 # binding = "AI"
