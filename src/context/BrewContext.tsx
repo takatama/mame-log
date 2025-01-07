@@ -25,13 +25,13 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         bean: beans.find((bean) => bean.id === brew.bean_id),
       }))
       .filter((brew) => brew.bean !== undefined)
-      .sort((a, b) => a.brew_date.localeCompare(b.brew_date)) as Brew[];
+      .sort((a, b) => b.brew_date.localeCompare(a.brew_date)) as Brew[];
   };
 
   const setBeans = (newBeans: Bean[]) => {
     setBeansState(newBeans);
     setBrewsState((currentBrews) => updateBrewsWithBeans(newBeans, currentBrews));
-    beans.sort((a, b) => a.purchase_date.localeCompare(b.purchase_date));
+    beans.sort((a, b) => b.purchase_date.localeCompare(a.purchase_date));
   };
 
   const setBrews = (newBrews: Brew[]) => {
