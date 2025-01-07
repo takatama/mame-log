@@ -74,7 +74,6 @@ const BrewForm: React.FC = () => {
       }
   
       const createdBrew: Brew = await response.json();
-      createdBrew.bean = beans.find(bean => bean.id === createdBrew.bean_id)!
       setBrews([...brews, createdBrew]);
       navigate(`/brews/${createdBrew.id}`);
     } catch (error) {
