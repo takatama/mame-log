@@ -34,7 +34,7 @@ const App: React.FC = () => {
               <Route path="/brews/:brewId" element={<BrewDetails />} />
               <Route path="/brews/:brewId/edit" element={<BrewForm />} />
               {/* <Route path="/brews/:brewId/brews" element={<BrewList />} /> */}
-              <Route path="/brews/:brewId/brews/new" element={<BrewForm />} />
+              <Route path="/brews/:baseBrewId/brews/new" element={<BrewForm />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </main>

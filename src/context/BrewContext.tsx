@@ -19,7 +19,6 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // beans または brews の再計算ロジック
   const updateBrewsWithBeans = (beans: Bean[], brews: Brew[]) => {
-    console.log(beans, brews)
     return brews
       .map((brew) => ({
         ...brew,
