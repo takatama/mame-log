@@ -23,8 +23,8 @@ const BrewForm: React.FC = () => {
 
   const setBrewParams = (brew: Brew) => {
     setBean(brew.bean);
-    setBeanAmount(brew.bean_amount);
     setCups(brew.cups);
+    setBeanAmount(brew.bean_amount);
     setGrindSize(brew.grind_size);
     setWaterTemp(brew.water_temp);
     setPours(brew.pours);
@@ -125,8 +125,8 @@ const BrewForm: React.FC = () => {
       id: Number(brewId) || Date.now(), // POST時に一時IDを使用
       bean,
       bean_id: bean.id,
-      bean_amount,
       cups,
+      bean_amount,
       grind_size,
       water_temp,
       pours,
@@ -183,21 +183,26 @@ const BrewForm: React.FC = () => {
 
         {/* 抽出設定 */}
         <div>
+          <div className="flex space-x-4">
+            <label className="block text-sm font-medium">カップ数</label>
+            {[1, 2, 3, 4].map((cup) => (
+              <button
+                type='button'
+                key={cup}
+                onClick={() => setCups(cup)}
+                className={`p-2 rounded-md ${cups === cup ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+              >
+                {cup}杯
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
           <label className="block text-sm font-medium">豆の量 (g)</label>
           <input
             type="number"
             value={bean_amount}
             onChange={(e) => setBeanAmount(Number(e.target.value))}
-            className="mt-1 block w-full border rounded-md p-2"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">カップ数</label>
-          <input
-            type="number"
-            value={cups}
-            onChange={(e) => setCups(Number(e.target.value))}
             className="mt-1 block w-full border rounded-md p-2"
             required
           />

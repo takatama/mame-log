@@ -12,8 +12,8 @@ export interface Brew {
   brew_date: string;
   bean: Bean;
   bean_id: number;
-  bean_amount: number; // g
   cups: number;
+  bean_amount: number; // g
   grind_size: string;
   water_temp: number; // ℃
   pours: Pour[];
