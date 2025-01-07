@@ -28,7 +28,7 @@ const BrewForm: React.FC = () => {
     setGrindSize(brew.grind_size);
     setWaterTemp(brew.water_temp);
     setPours(brew.pours);
-    setBrewDate(new Date(brew.brew_date).toISOString().slice(0, 16));
+    setBrewDate(brew.brew_date);
     setOverallScore(brew.overall_score);
     setBitterness(brew.bitterness ?? 0);
     setAcidity(brew.acidity ?? 0);
