@@ -183,8 +183,8 @@ const BrewForm: React.FC = () => {
 
         {/* 抽出設定 */}
         <div>
-          <div className="flex space-x-4">
-            <label className="block text-sm font-medium">カップ数</label>
+          <label className="block text-sm font-medium">カップ数</label>
+          <div className="flex space-x-4 py-2">
             {[1, 2, 3, 4].map((cup) => (
               <button
                 type='button'
@@ -209,12 +209,18 @@ const BrewForm: React.FC = () => {
         </div>
         <div>
           <label className="block text-sm font-medium">挽き具合</label>
-          <input
-            type="text"
-            value={grind_size}
-            onChange={(e) => setGrindSize(e.target.value)}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
+          <div className="flex space-x-4 py-2">
+            {['極細', '細', '中細', '中', '粗'].map((grind) => (
+                <button
+                  type='button'
+                  key={grind}
+                  onClick={() => setGrindSize(grind)}
+                  className={`p-2 rounded-md ${grind_size === grind ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                >
+                  {grind}
+                </button>
+            ))}
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium">湯温 (℃)</label>
