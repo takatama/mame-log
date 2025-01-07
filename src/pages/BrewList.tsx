@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Brews } from '../types/Brew';
 import { useBrewContext } from '../context/BrewContext';
 
 const BrewList: React.FC = () => {
