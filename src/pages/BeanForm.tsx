@@ -57,7 +57,6 @@ const BeanForm: React.FC = () => {
 
   const handlePost = async (newBean: Bean) => {
     try {
-      setBeans([...beans, newBean]); // 一時的に状態を更新
       const response = await fetch('/api/beans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -65,13 +64,11 @@ const BeanForm: React.FC = () => {
       });
   
       if (!response.ok) {
-        removeBeanById(newBean.id); // エラー時に一時データを削除
         throw new Error(`Failed to create bean: ${response.statusText}`);
       }
   
       const createdBean: Bean = await response.json();
       // 作成されたIDで更新
-      removeBeanById(newBean.id);
       setBeans([...beans, createdBean]);
       navigate(`/beans/${createdBean.id}`);
     } catch (error) {
@@ -85,6 +82,7 @@ const BeanForm: React.FC = () => {
     const previousBean = getBeanById(beanId); // 現在の状態を取得
     try {
       updateBean(updatedBean); // 状態を一時的に更新
+      navigate(`/beans/${beanId}`);
       const response = await fetch(`/api/beans/${beanId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -95,7 +93,6 @@ const BeanForm: React.FC = () => {
         if (previousBean) updateBean(previousBean); // エラー時に元の状態を復元
         throw new Error(`Failed to update bean: ${response.statusText}`);
       }
-      navigate(`/beans/${beanId}`);
     } catch (error) {
       console.error(error);
       if (previousBean) updateBean(previousBean); // エラー時に元の状態を復元

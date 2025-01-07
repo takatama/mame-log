@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
 import { Brew, Pour } from '../types/Brew';
 import { useBrewContext } from '../context/BrewContext';
@@ -63,11 +63,10 @@ const BrewForm: React.FC = () => {
     setBrews(brews.filter(brew => brew.id !== brewId));
   }
 
+  const navigate = useNavigate();
+
   const handlePost = async (newBrew: any) => {
-    try {
-      // 楽観的に状態を更新
-      updateBrew(newBrew);
-  
+    try {  
       const response = await fetch('/api/brews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -75,26 +74,26 @@ const BrewForm: React.FC = () => {
       });
   
       if (!response.ok) {
-        removeBrewById(newBrew.id); // エラー時に一時的なデータを削除
         throw new Error(`Failed to create brew: ${response.statusText}`);
       }
   
       const createdBrew: Brew = await response.json();
-      updateBrew({ ...newBrew, id: createdBrew.id }); // サーバーから返却されたIDを更新
+      setBrews([...brews, createdBrew]);
+      navigate(`/brews/${createdBrew.id}`);
     } catch (error) {
       console.error(error);
-      removeBrewById(newBrew.id); // エラー時に一時的なデータを削除
       alert('An error occurred while creating the brew. Please try again.');
     }
   };
   
   const handlePut = async (brewId: number, updatedBrew: any) => {
     const previousBrew = getBrewById(brewId); // 現在の状態を取得
-  
+    updatedBrew.bean = previousBrew?.bean;
     try {
       // 楽観的に状態を更新
       updateBrew(updatedBrew);
-  
+      navigate(`/brews/${brewId}`);
+
       const response = await fetch(`/api/brews/${brewId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
