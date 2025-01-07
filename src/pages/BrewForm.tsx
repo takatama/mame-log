@@ -60,7 +60,7 @@ const BrewForm: React.FC = () => {
   };
 
   const handlePourChange = (index: number, field: string, value: string | number) => {
-    const updatedPours = pours.map((pour: any, i: number) =>
+    const updatedPours = pours.map((pour: Pour, i: number) =>
       i === index ? { ...pour, [field]: value } : pour
     );
     setPours(updatedPours);
@@ -72,7 +72,7 @@ const BrewForm: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const handlePost = async (newBrew: any) => {
+  const handlePost = async (newBrew: Brew) => {
     try {  
       const response = await fetch('/api/brews', {
         method: 'POST',
@@ -93,7 +93,7 @@ const BrewForm: React.FC = () => {
     }
   };
   
-  const handlePut = async (brewId: number, updatedBrew: any) => {
+  const handlePut = async (brewId: number, updatedBrew: Brew) => {
     const previousBrew = getBrewById(brewId); // 現在の状態を取得
 
     try {
@@ -224,7 +224,7 @@ const BrewForm: React.FC = () => {
         {/* 注湯詳細 */}
         <div>
           <label className="block text-sm font-medium mb-2">注湯詳細</label>
-          {pours.map((pour: any, index: number) => (
+          {pours.map((pour: Pour, index: number) => (
             <div key={index} className="space-y-2 mb-4 border p-4 rounded-md">
               <div>
                 <label className="block text-sm font-medium">注湯 {pour.idx + 1} - 湯量 (ml)</label>
