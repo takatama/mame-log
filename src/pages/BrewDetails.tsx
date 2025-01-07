@@ -1,15 +1,41 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 
 const BrewDetails: React.FC = () => {
-  const { brews } = useBrewContext()
+  const { brews, setBrews } = useBrewContext()
   const { brewId } = useParams<{ brewId?: string }>()
   const brew = brews.find(brew => brew.id === Number(brewId))
   if (!brew) {
     return <div>抽出ログが見つかりません。</div>
   }
+
+  const navigate = useNavigate();
+  const handleDelete = async () => {
+    if (!brewId) return;
+
+    const confirmed = window.confirm('本当に削除しますか？');
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/brews/${brewId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete brew: ${response.statusText}`);
+      }
+
+      // 成功時に状態を更新し、リストページにリダイレクト
+      setBrews(brews.filter((brew) => brew.id !== Number(brewId)));
+      navigate('/brews');
+    } catch (error) {
+      console.error(error);
+      alert('削除に失敗しました。再試行してください。');
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
@@ -69,7 +95,17 @@ const BrewDetails: React.FC = () => {
           編集する
         </Link>
       </div>
-    </div>
+      {brewId && (
+        <div className="mt-4 py-2">
+          <button
+            onClick={handleDelete}
+            className="bg-red-500 text-white p-2 rounded-md hover:bg-red-700"
+          >
+            削除する
+          </button>
+        </div>
+      )}
+      </div>
   );
 };
 

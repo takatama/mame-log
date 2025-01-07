@@ -286,6 +286,48 @@ app.get('/api/brews', async (c: Context<{ Bindings: Env }>) => {
   }
 });
 
+app.delete('/api/brews/:brewId', async (c) => {
+  try {
+    const brewId = c.req.param('brewId');
+
+    if (!brewId) {
+      return c.json({ error: 'Brew ID is required' }, 400);
+    }
+
+    // 削除対象の pours データを削除
+    const deletePoursResult = await c.env.DB.prepare(
+      `DELETE FROM pours WHERE brew_id = ?`
+    )
+      .bind(brewId)
+      .run();
+
+    if (!deletePoursResult.success) {
+      throw new Error(`Failed to delete pours for brew ID ${brewId}`);
+    }
+
+    // `brews` テーブルのデータを削除
+    const deleteBrewResult = await c.env.DB.prepare(
+      `DELETE FROM brews WHERE id = ?`
+    )
+      .bind(brewId)
+      .run();
+
+    if (!deleteBrewResult.success) {
+      throw new Error(`Failed to delete brew with ID ${brewId}`);
+    }
+
+    return c.json({ message: `Brew with ID ${brewId} and its pours were deleted successfully` }, 200);
+  } catch (error) {
+    console.error(error);
+    return c.json(
+      {
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      },
+      400
+    );
+  }
+});
+
 app.get('*', (c) => {
   return c.html(
     renderToString(
