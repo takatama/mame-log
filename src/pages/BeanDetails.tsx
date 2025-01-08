@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useBrewContext } from '../context/BrewContext';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
+import { formatLocalDate } from '../utils/date';
 
 const BeanDetail: React.FC = () => {
   const { beans, setBeans } = useBrewContext()
@@ -42,16 +43,6 @@ const BeanDetail: React.FC = () => {
   if (!bean) {
     return <div>豆が見つかりません。</div>
   }
-
-  const formatLocalDate = (isoDate: string | undefined) => {
-    if (!isoDate) return '';
-    const date = new Date(isoDate);
-    return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-  };
 
   return (
     <div className="container mx-auto p-4">
