@@ -77,7 +77,7 @@ const BrewForm: React.FC = () => {
   const navigate = useNavigate();
 
   const handlePost = async (newBrew: Brew) => {
-    try {  
+    try {
       const response = await fetch('/api/brews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,7 +88,7 @@ const BrewForm: React.FC = () => {
         throw new Error(`Failed to create brew: ${response.statusText}`);
       }
   
-      const createdBrew: Brew = await response.json();
+      const createdBrew: any = await response.json();
       setBrews([...brews, createdBrew]);
       navigate(`/brews/${createdBrew.id}`);
     } catch (error) {
@@ -104,7 +104,6 @@ const BrewForm: React.FC = () => {
       // 楽観的に状態を更新
       updateBrew(updatedBrew);
       navigate(`/brews/${brewId}`);
-
       const response = await fetch(`/api/brews/${brewId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -162,7 +161,7 @@ const BrewForm: React.FC = () => {
           type='button'
           key={option}
           onClick={() => setOption(option)}
-          className={`p-2 rounded-md w-1/${options.length} ${selectedOption === option ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          className={`p-2 rounded-md flex-1 w-1/${options.length} ${selectedOption === option ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
           {option}
         </button>
@@ -249,7 +248,7 @@ const BrewForm: React.FC = () => {
           {pours.map((pour: number, index: number) => (
             <div key={index} className="space-y-2 mb-4 border p-4 rounded-md">
               <div>
-                <label className="block text-sm font-medium">注湯 {index + 1} - 湯量 (ml)</label>
+                <label className="block text-sm font-medium">{index + 1}湯目 (ml)</label>
                 <input
                   type="number"
                   value={pour}

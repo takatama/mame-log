@@ -16,7 +16,7 @@ const BeanDetail: React.FC = () => {
   const handleDelete = async () => {
     if (!beanId) return;
 
-    const confirmed = window.confirm('本当に削除しますか？（関連する抽出ログもすべて削除します）');
+    const confirmed = window.confirm('本当に削除しますか？ (関連する抽出ログもすべて削除します)');
     if (!confirmed) return;
 
     try {

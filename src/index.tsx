@@ -30,10 +30,10 @@ const beanSchema = z.object({
 const brewSchema = z.object({
   brew_date: z.string(),
   bean_id: z.number().int().positive(),
-  bean_amount: z.number().nonnegative(),
-  cups: z.number().int().nonnegative(),
-  grind_size: z.string(),
-  water_temp: z.number().nonnegative(),
+  bean_amount: z.number().nonnegative().optional(),
+  cups: z.number().int().nonnegative().optional(),
+  grind_size: z.string().optional(),
+  water_temp: z.number().nonnegative().optional(),
   bloom_water_amount: z.number().nonnegative().optional(),
   bloom_time: z.number().nonnegative().optional(),
   pours: z.array(z.number().nonnegative()).optional(),
@@ -195,7 +195,7 @@ app.post('/api/brews', async (c) => {
         water_temp,
         bloom_water_amount,
         bloom_time,
-        pours,
+        JSON.stringify(pours),
         overall_score,
         bitterness,
         acidity,
@@ -210,11 +210,7 @@ app.post('/api/brews', async (c) => {
 
     const brew_id = insertResult.meta.last_row_id;
 
-    const insertedBrew = {
-      id: brew_id,
-      ...parsedBrew,
-    };
-
+    const insertedBrew = { id: brew_id, ...parsedBrew };
     return c.json(insertedBrew, 201);
   } catch (error) {
     console.error(error);
@@ -239,7 +235,7 @@ app.put('/api/brews/:id', async (c) => {
        SET brew_date = ?, bean_id = ?, bean_amount = ?, cups = ?, grind_size = ?, water_temp = ?, bloom_water_amount = ?, bloom_time = ?, pours = ?, overall_score = ?, bitterness = ?, acidity = ?, sweetness = ?, notes = ?
        WHERE id = ?`
     )
-      .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, c.req.param('id'))
+      .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, JSON.stringify(pours), overall_score, bitterness, acidity, sweetness, notes, c.req.param('id'))
       .run();
 
     if (!updateResult.success) {
