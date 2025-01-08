@@ -6,7 +6,23 @@ import { Bean } from '../types/Bean';
 const BeanForm: React.FC = () => {
   const { beans, updateBean, setBeans } = useBrewContext();
   const { beanId } = useParams();
-  const [bean, setBean] = useState<Bean>({is_active: true});
+  const [bean, setBean] = useState<Bean>({
+    is_active: true,
+    name: '',
+    country: '',
+    area: '',
+    drying_method: '',
+    processing_method: '',
+    roast_level: '',
+    roast_date: '',
+    purchase_date: '',
+    purchase_amount: 0,
+    price: 0,
+    seller: '',
+    seller_url: '',
+    photo_url: '',
+    notes: '',
+  });
   const navigate = useNavigate();
 
   const getBeanById = (beanId: number) => {
