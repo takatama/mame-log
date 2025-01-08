@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
+import { Brew } from '../types/Brew';
 
 const BrewDetails: React.FC = () => {
-  const { brews, setBrews } = useBrewContext()
   const { brewId } = useParams<{ brewId?: string }>()
-  const brew = brews.find(brew => brew.id === Number(brewId))
-  if (!brew) {
-    return <div>抽出ログが見つかりません。</div>
-  }
-
   const navigate = useNavigate();
+  const { brews, setBrews } = useBrewContext()
+  const [brew, setBrew] = React.useState<Brew | undefined>(undefined)
+
+  useEffect(() => {
+    if (!brewId) return;
+      const foundBrew = brews.find(brew => brew.id === Number(brewId))
+      setBrew(foundBrew);
+  } , [brewId, brews]);
+
   const handleDelete = async () => {
     if (!brewId) return;
 
@@ -36,6 +40,10 @@ const BrewDetails: React.FC = () => {
     }
   };
 
+  if (!brew) {
+    return <div>抽出ログが見つかりません。</div>
+  }
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
@@ -44,7 +52,7 @@ const BrewDetails: React.FC = () => {
 
       <div className="space-y-4">
         <p><strong>日付:</strong> {brew.brew_date}</p>
-        <p><strong>豆:</strong> {brew.bean.name}</p>
+        <p><strong>豆:</strong> {brew.bean?.name}</p>
         <p><strong>豆の量:</strong> {brew.bean_amount}g</p>
         <p><strong>カップ数:</strong> {brew.cups}</p>
         <p><strong>挽き具合:</strong> {brew.grind_size}</p>
@@ -55,7 +63,7 @@ const BrewDetails: React.FC = () => {
         <div>
           <strong>注湯:</strong>
           <ul className="list-disc pl-5">
-            {brew.pours.map((pourAmount, index) => (
+            {brew.pours?.map((pourAmount, index) => (
               <li key={index}>
                 {index + 1}湯目: {pourAmount}ml
               </li>

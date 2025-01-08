@@ -1,56 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, createBrowserRouter } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
 
 const BeanForm: React.FC = () => {
   const { beans, updateBean, setBeans } = useBrewContext();
   const { beanId } = useParams();
-  const [name, setName] = useState('');
-  const [country, setCountry] = useState('');
-  const [area, setArea] = useState('');
-  const [drying_method, setDryingMethod] = useState('');
-  const [processing_method, setProcessingMethod] = useState('');
-  const [roast_level, setRoastLevel] = useState('');
-  const [roast_date, setRoastDate] = useState('');
-  const [seller, setSeller] = useState('');
-  const [seller_url, setSellerUrl] = useState('');
-  const [purchase_date, setPurchaseDate] = useState('');
-  const [purchase_amount, setPurchaseAmount] = useState(0);
-  const [price, setPrice] = useState(0);
-  const [photo_url, setPhotoUrl] = useState('');
-  const [notes, setNotes] = useState('');
-  const [is_active, setIsActive] = useState(true);
+  const [bean, setBean] = useState<Bean>({is_active: true});
 
   const getBeanById = (beanId: number) => {
     return beans.find(bean => bean.id === beanId);
   }
 
-  const removeBeanById = (beanId: number) => {
-    setBeans(beans.filter(bean => bean.id !== beanId));
-  }
-
   useEffect(() => {
-    if (beanId) {
-      const bean = beans.find((bean) => bean.id === Number(beanId));
-      if (bean) {
-        setName(bean.name);
-        setCountry(bean.country);
-        setArea(bean.area);
-        setDryingMethod(bean.drying_method);
-        setProcessingMethod(bean.processing_method);
-        setRoastLevel(bean.roast_level);
-        setRoastDate(bean.roast_date);
-        setSeller(bean.seller);
-        setSellerUrl(bean.seller_url);
-        setPurchaseDate(bean.purchase_date);
-        setPurchaseAmount(bean.purchase_amount);
-        setPrice(bean.price);
-        setPhotoUrl(bean.photo_url);
-        setNotes(bean.notes ?? '');
-        setIsActive(bean.is_active);
-      }
-    }
+    if (!beanId) return;
+    const bean = getBeanById(Number(beanId));
+    if (!bean) return;
+    setBean(bean);
   }, [beanId]);
 
   const navigate = useNavigate();
@@ -73,7 +39,6 @@ const BeanForm: React.FC = () => {
       navigate(`/beans/${createdBean.id}`);
     } catch (error) {
       console.error(error);
-      removeBeanById(newBean.id); // エラー時に一時データを削除
       alert('An error occurred while creating the bean. Please try again.');
     }
   };
@@ -105,22 +70,8 @@ const BeanForm: React.FC = () => {
   
     const tempId = Date.now();
     const newBean = {
+      ...bean,
       id: beanId ? Number(beanId) : tempId,
-      name,
-      country,
-      area,
-      drying_method,
-      processing_method,
-      roast_level,
-      roast_date,
-      seller,
-      seller_url,
-      purchase_date,
-      purchase_amount,
-      price,
-      photo_url,
-      notes,
-      is_active,
     };
   
     if (beanId) {
@@ -129,6 +80,10 @@ const BeanForm: React.FC = () => {
       await handlePost(newBean);
     }
   };
+
+  if (!bean) {
+    return <div>豆が見つかりません。</div>
+  }
   
   return (
     <div className="container mx-auto p-4">
@@ -138,8 +93,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">有効</label>
           <input
             type="checkbox"
-            checked={is_active}
-            onChange={(e) => setIsActive(e.target.checked)}
+            checked={bean.is_active}
+            onChange={(e) => setBean({ ...bean, is_active: e.target.checked })}
             className="mt-1"
           />
         </div>
@@ -147,8 +102,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">豆の名前</label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={bean.name}
+            onChange={(e) => setBean({ ...bean, name: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
             required
           />
@@ -157,8 +112,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">国</label>
           <input
             type="text"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
+            value={bean.country}
+            onChange={(e) => setBean({ ...bean, country: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -166,8 +121,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">地域</label>
           <input
             type="text"
-            value={area}
-            onChange={(e) => setArea(e.target.value)}
+            value={bean.area}
+            onChange={(e) => setBean({ ...bean, area: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -175,8 +130,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">乾燥方法</label>
           <input
             type="text"
-            value={drying_method}
-            onChange={(e) => setDryingMethod(e.target.value)}
+            value={bean.drying_method}
+            onChange={(e) => setBean({ ...bean, drying_method: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -184,8 +139,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">処理方法</label>
           <input
             type="text"
-            value={processing_method}
-            onChange={(e) => setProcessingMethod(e.target.value)}
+            value={bean.processing_method}
+            onChange={(e) => setBean({ ...bean, processing_method: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -193,8 +148,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">焙煎度</label>
           <input
             type="text"
-            value={roast_level}
-            onChange={(e) => setRoastLevel(e.target.value)}
+            value={bean.roast_level}
+            onChange={(e) => setBean({ ...bean, roast_level: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -202,8 +157,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">焙煎日</label>
           <input
             type="date"
-            value={roast_date}
-            onChange={(e) => setRoastDate(e.target.value)}
+            value={bean.roast_date}
+            onChange={(e) => setBean({ ...bean, roast_date: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -211,8 +166,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">購入日</label>
           <input
             type="date"
-            value={purchase_date}
-            onChange={(e) => setPurchaseDate(e.target.value)}
+            value={bean.purchase_date}
+            onChange={(e) => setBean({ ...bean, purchase_date: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -220,8 +175,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">購入量 (g)</label>
           <input
             type="number"
-            value={purchase_amount}
-            onChange={(e) => setPurchaseAmount(Number(e.target.value))}
+            value={bean.purchase_amount}
+            onChange={(e) => setBean({ ...bean, purchase_amount: Number(e.target.value) })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -229,8 +184,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">価格 (円)</label>
           <input
             type="number"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
+            value={bean.price}
+            onChange={(e) => setBean({ ...bean, price: Number(e.target.value) })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -238,8 +193,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">販売者</label>
           <input
             type="text"
-            value={seller}
-            onChange={(e) => setSeller(e.target.value)}
+            value={bean.seller}
+            onChange={(e) => setBean({ ...bean, seller: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -247,8 +202,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">販売者URL</label>
           <input
             type="url"
-            value={seller_url}
-            onChange={(e) => setSellerUrl(e.target.value)}
+            value={bean.seller_url}
+            onChange={(e) => setBean({ ...bean, seller_url: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -256,16 +211,16 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">写真URL</label>
           <input
             type="url"
-            value={photo_url}
-            onChange={(e) => setPhotoUrl(e.target.value)}
+            value={bean.photo_url}
+            onChange={(e) => setBean({ ...bean, photo_url: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
         <div>
           <label className="block text-sm font-medium">メモ</label>
           <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            value={bean.notes}
+            onChange={(e) => setBean({ ...bean, notes: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>

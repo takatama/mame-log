@@ -50,7 +50,23 @@ app.post('/api/beans', async (c: Context<{ Bindings: Env }>) => {
     bean.is_active = bean.is_active ? 1 : 0;
     const parsedBean = beanSchema.parse(bean);
 
-    const { name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active } = parsedBean;
+    const {
+      name = '',
+      country = '',
+      area = '',
+      drying_method = '',
+      processing_method = '',
+      roast_level = '',
+      roast_date = '',
+      purchase_date = '',
+      purchase_amount = '',
+      price = 0,
+      seller = '',
+      seller_url = '',
+      photo_url = '',
+      notes = '',
+      is_active = 0
+    } = parsedBean;
 
     const result = await c.env.DB.prepare(
       `INSERT INTO beans (name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active)
@@ -168,18 +184,18 @@ app.post('/api/brews', async (c) => {
     const {
       brew_date,
       bean_id,
-      bean_amount,
-      cups,
-      grind_size,
-      water_temp,
-      bloom_water_amount,
-      bloom_time,
-      pours,
-      overall_score,
-      bitterness,
-      acidity,
-      sweetness,
-      notes,
+      bean_amount = 0,
+      cups = 0,
+      grind_size = '',
+      water_temp = 0,
+      bloom_water_amount = 0,
+      bloom_time = 0,
+      pours = [],
+      overall_score = 0,
+      bitterness = 0,
+      acidity = 0,
+      sweetness = 0,
+      notes = '',
     } = parsedBrew;
 
     const insertResult = await c.env.DB.prepare(
