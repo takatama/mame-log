@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
+import { fromUtcToLocalDate, fromLocalToUtc } from '../utils/date';
 
 const BeanForm: React.FC = () => {
   const { beans, updateBean, setBeans } = useBrewContext();
@@ -98,22 +99,6 @@ const BeanForm: React.FC = () => {
 
   if (!bean) {
     return <div>豆が見つかりません。</div>
-  }
-
-  const fromUtcToLocalDate = (utcDateString: string | undefined) => {
-    if (!utcDateString) return '';
-    const date = new Date(utcDateString);
-    const offset = date.getTimezoneOffset();
-    const localDate = new Date(date.getTime() - offset * 60 * 1000);
-    return localDate.toISOString().slice(0, 10);
-  }
-
-  const fromLocalToUtc = (localDateString: string | undefined) => {
-    if (!localDateString) return '';
-    const localDate = new Date(localDateString);
-    const offset = localDate.getTimezoneOffset();
-    const date = new Date(localDate.getTime() + offset * 60 * 1000);
-    return date.toISOString();
   }
 
   return (
