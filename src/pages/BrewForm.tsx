@@ -249,7 +249,7 @@ const BrewForm: React.FC = () => {
           {pours.map((pour: number, index: number) => (
             <div key={index} className="space-y-2 mb-4 border p-4 rounded-md">
               <div>
-                <label className="block text-sm font-medium">注湯 {index + 1} - 湯量 (ml)</label>
+                <label className="block text-sm font-medium">{index + 1}湯目 (ml)</label>
                 <input
                   type="number"
                   value={pour}

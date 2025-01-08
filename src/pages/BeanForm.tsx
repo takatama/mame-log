@@ -217,7 +217,7 @@ const BeanForm: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium">購入量（g）</label>
+          <label className="block text-sm font-medium">購入量 (g)</label>
           <input
             type="number"
             value={purchase_amount}
@@ -226,7 +226,7 @@ const BeanForm: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium">価格（円）</label>
+          <label className="block text-sm font-medium">価格 (円)</label>
           <input
             type="number"
             value={price}
