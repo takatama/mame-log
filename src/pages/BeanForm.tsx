@@ -7,6 +7,7 @@ const BeanForm: React.FC = () => {
   const { beans, updateBean, setBeans } = useBrewContext();
   const { beanId } = useParams();
   const [bean, setBean] = useState<Bean>({is_active: true});
+  const navigate = useNavigate();
 
   const getBeanById = (beanId: number) => {
     return beans.find(bean => bean.id === beanId);
@@ -18,8 +19,6 @@ const BeanForm: React.FC = () => {
     if (!bean) return;
     setBean(bean);
   }, [beanId]);
-
-  const navigate = useNavigate();
 
   const handlePost = async (newBean: Bean) => {
     try {
@@ -84,7 +83,23 @@ const BeanForm: React.FC = () => {
   if (!bean) {
     return <div>豆が見つかりません。</div>
   }
-  
+
+  const fromUtcToLocalDate = (utcDateString: string | undefined) => {
+    if (!utcDateString) return '';
+    const date = new Date(utcDateString);
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().slice(0, 10);
+  }
+
+  const fromLocalToUtc = (localDateString: string | undefined) => {
+    if (!localDateString) return '';
+    const localDate = new Date(localDateString);
+    const offset = localDate.getTimezoneOffset();
+    const date = new Date(localDate.getTime() + offset * 60 * 1000);
+    return date.toISOString();
+  }
+
   return (
     <div className="container mx-auto p-4">
       {/* <h1 className="text-2xl font-bold mb-4">新しいコーヒー豆を追加</h1> */}
@@ -157,8 +172,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">焙煎日</label>
           <input
             type="date"
-            value={bean.roast_date}
-            onChange={(e) => setBean({ ...bean, roast_date: e.target.value })}
+            value={fromUtcToLocalDate(bean.roast_date)}
+            onChange={(e) => setBean({ ...bean, roast_date: fromLocalToUtc(e.target.value) })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
@@ -166,8 +181,8 @@ const BeanForm: React.FC = () => {
           <label className="block text-sm font-medium">購入日</label>
           <input
             type="date"
-            value={bean.purchase_date}
-            onChange={(e) => setBean({ ...bean, purchase_date: e.target.value })}
+            value={fromUtcToLocalDate(bean.purchase_date)}
+            onChange={(e) => setBean({ ...bean, purchase_date: fromLocalToUtc(e.target.value) })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
