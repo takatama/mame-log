@@ -15,16 +15,6 @@ const BeanDetail: React.FC = () => {
     setBean(bean);
   }, [beanId, beans]);
 
-  const formatLocalDate = (isoDate: string | undefined) => {
-    if (!isoDate) return '';
-    const date = new Date(isoDate);
-    return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-  };
-
   const handleDelete = async () => {
     if (!beanId) return;
 
@@ -52,6 +42,16 @@ const BeanDetail: React.FC = () => {
   if (!bean) {
     return <div>豆が見つかりません。</div>
   }
+
+  const formatLocalDate = (isoDate: string | undefined) => {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  };
 
   return (
     <div className="container mx-auto p-4">
