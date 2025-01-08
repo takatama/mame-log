@@ -77,19 +77,21 @@ const BrewForm: React.FC = () => {
   const navigate = useNavigate();
 
   const handlePost = async (newBrew: Brew) => {
+    const serializedBrew = { ...newBrew, pours: JSON.stringify(newBrew.pours) };
     try {  
       const response = await fetch('/api/brews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBrew),
+        body: JSON.stringify(serializedBrew),
       });
   
       if (!response.ok) {
         throw new Error(`Failed to create brew: ${response.statusText}`);
       }
   
-      const createdBrew: Brew = await response.json();
-      setBrews([...brews, createdBrew]);
+      const createdBrew: any = await response.json();
+      const createBrewWithPours = { ...createdBrew, pours: JSON.parse(createdBrew.pours) };
+      setBrews([...brews, createBrewWithPours]);
       navigate(`/brews/${createdBrew.id}`);
     } catch (error) {
       console.error(error);
@@ -104,11 +106,11 @@ const BrewForm: React.FC = () => {
       // 楽観的に状態を更新
       updateBrew(updatedBrew);
       navigate(`/brews/${brewId}`);
-
+      const serializedBrew = { ...updatedBrew, pours: JSON.stringify(updatedBrew.pours) };
       const response = await fetch(`/api/brews/${brewId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedBrew),
+        body: JSON.stringify(serializedBrew),
       });
   
       if (!response.ok) {
