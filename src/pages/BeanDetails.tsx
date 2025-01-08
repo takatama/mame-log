@@ -11,7 +11,6 @@ const BeanDetail: React.FC = () => {
 
   useEffect(() => {
     if (!beanId) return;
-
     const bean = beans.find((bean) => bean.id === Number(beanId));
     setBean(bean);
   }, [beanId, beans]);
@@ -44,6 +43,16 @@ const BeanDetail: React.FC = () => {
     return <div>豆が見つかりません。</div>
   }
 
+  const formatLocalDate = (isoDate: string | undefined) => {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{bean.name}</h1>
@@ -70,13 +79,13 @@ const BeanDetail: React.FC = () => {
         <strong>焙煎度:</strong> {bean.roast_level}
       </p>
       <p>
-        <strong>焙煎日:</strong> {bean.roast_date}
+        <strong>焙煎日:</strong> {formatLocalDate(bean.roast_date)}
       </p>
       <p>
         <strong>購入量:</strong> {bean.purchase_amount} g
       </p>
       <p>
-        <strong>購入日:</strong> {bean.purchase_date}
+        <strong>購入日:</strong> {formatLocalDate(bean.purchase_date)}
       </p>
       <p>
         <strong>価格:</strong> {bean.price} 円

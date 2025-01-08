@@ -44,6 +44,19 @@ const BrewDetails: React.FC = () => {
     return <div>抽出ログが見つかりません。</div>
   }
 
+  const formatLocalDateTime = (isoDate: string | undefined) => {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
@@ -51,7 +64,7 @@ const BrewDetails: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <p><strong>日付:</strong> {brew.brew_date}</p>
+        <p><strong>日付:</strong> {formatLocalDateTime(brew.brew_date)}</p>
         <p><strong>豆:</strong> {brew.bean?.name}</p>
         <p><strong>豆の量:</strong> {brew.bean_amount}g</p>
         <p><strong>カップ数:</strong> {brew.cups}</p>
