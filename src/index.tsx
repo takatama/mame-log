@@ -27,14 +27,6 @@ const beanSchema = z.object({
   is_active: z.number().nonnegative().optional(),
 });
 
-const pourSchema = z.object({
-  brew_id: z.number().int().positive().optional(), // 登録するときには不定
-  idx: z.number().nonnegative(),
-  amount: z.number().nonnegative().optional(),
-  flow_rate: z.string().optional(),
-  time: z.number().nonnegative().optional(),
-});
-
 const brewSchema = z.object({
   brew_date: z.string(),
   bean_id: z.number().int().positive(),
@@ -42,12 +34,14 @@ const brewSchema = z.object({
   cups: z.number().int().nonnegative(),
   grind_size: z.string(),
   water_temp: z.number().nonnegative(),
-  overall_score: z.number().nonnegative(),
+  bloom_water_amount: z.number().nonnegative().optional(),
+  bloom_time: z.number().nonnegative().optional(),
+  pours: z.array(z.number().nonnegative()).optional(),
+  overall_score: z.number().nonnegative().optional(),
   bitterness: z.number().nonnegative().optional(),
   acidity: z.number().nonnegative().optional(),
   sweetness: z.number().nonnegative().optional(),
   notes: z.string().optional(),
-  pours: z.array(pourSchema),
 });
 
 app.post('/api/beans', async (c: Context<{ Bindings: Env }>) => {
@@ -132,17 +126,6 @@ app.delete('/api/beans/:beanId', async (c: Context<{ Bindings: Env }>) => {
       return c.json({ error: 'Bean ID is required' }, 400);
     }
 
-    // `brews` に関連する `pours` を削除
-    const deletePoursResult = await c.env.DB.prepare(
-      `DELETE FROM pours WHERE brew_id IN (SELECT id FROM brews WHERE bean_id = ?)`
-    )
-      .bind(beanId)
-      .run();
-
-    if (!deletePoursResult.success) {
-      throw new Error(`Failed to delete pours for bean ID ${beanId}`);
-    }
-
     // `brews` を削除
     const deleteBrewsResult = await c.env.DB.prepare(
       `DELETE FROM brews WHERE bean_id = ?`
@@ -189,17 +172,19 @@ app.post('/api/brews', async (c) => {
       cups,
       grind_size,
       water_temp,
+      bloom_water_amount,
+      bloom_time,
+      pours,
       overall_score,
       bitterness,
       acidity,
       sweetness,
       notes,
-      pours
     } = parsedBrew;
 
     const insertResult = await c.env.DB.prepare(
-      `INSERT INTO brews (brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO brews (brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         brew_date,
@@ -208,6 +193,9 @@ app.post('/api/brews', async (c) => {
         cups,
         grind_size,
         water_temp,
+        bloom_water_amount,
+        bloom_time,
+        pours,
         overall_score,
         bitterness,
         acidity,
@@ -222,37 +210,9 @@ app.post('/api/brews', async (c) => {
 
     const brew_id = insertResult.meta.last_row_id;
 
-    const insertedPours = [];
-    for (const pour of pours) {
-      const { idx, amount, flow_rate, time } = pour;
-      const insertPour = await c.env.DB.prepare(
-        `INSERT INTO pours (brew_id, idx, amount, flow_rate, time)
-         VALUES (?, ?, ?, ?, ?)`
-      )
-        .bind(brew_id, idx, amount, flow_rate, time)
-        .run();
-
-      if (!insertPour.success) {
-        throw new Error(`Failed to insert pour ${idx} for brew ${brew_id}`);
-      }
-
-      insertedPours.push({ idx, amount, flow_rate, time });
-    }
-
     const insertedBrew = {
       id: brew_id,
-      brew_date,
-      bean_id,
-      bean_amount,
-      cups,
-      grind_size,
-      water_temp,
-      overall_score,
-      bitterness,
-      acidity,
-      sweetness,
-      notes,
-      pours: insertedPours
+      ...parsedBrew,
     };
 
     return c.json(insertedBrew, 201);
@@ -272,36 +232,18 @@ app.put('/api/brews/:id', async (c) => {
     const brew = await c.req.json();
     const parsedBrew = brewSchema.parse(brew);
 
-    const { brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes, pours } = parsedBrew;
+    const { brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount: bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes } = parsedBrew;
 
     const updateResult = await c.env.DB.prepare(
       `UPDATE brews
-       SET brew_date = ?, bean_id = ?, bean_amount = ?, cups = ?, grind_size = ?, water_temp = ?, overall_score = ?, bitterness = ?, acidity = ?, sweetness = ?, notes = ?
+       SET brew_date = ?, bean_id = ?, bean_amount = ?, cups = ?, grind_size = ?, water_temp = ?, bloom_water_amount = ?, bloom_time = ?, pours = ?, overall_score = ?, bitterness = ?, acidity = ?, sweetness = ?, notes = ?
        WHERE id = ?`
     )
-      .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, overall_score, bitterness, acidity, sweetness, notes, c.req.param('id'))
+      .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, c.req.param('id'))
       .run();
 
     if (!updateResult.success) {
       throw new Error('Failed to update brew log');
-    }
-
-    const brew_id = c.req.param('id');
-
-    await c.env.DB.prepare('DELETE FROM pours WHERE brew_id = ?').bind(brew_id).run();
-
-    for (const pour of pours) {
-      const { idx, amount, flow_rate, time } = pour;
-      const insertPour = await c.env.DB.prepare(
-        `INSERT INTO pours (brew_id, idx, amount, flow_rate, time)
-         VALUES (?, ?, ?, ?, ?)`
-      )
-        .bind(brew_id, idx, amount, flow_rate, time)
-        .run();
-
-      if (!insertPour.success) {
-        throw new Error(`Failed to insert pour ${idx} for brew ${brew_id}`);
-      }
     }
 
     return c.json({ message: 'Brew log and pours updated successfully' });
@@ -318,17 +260,12 @@ app.put('/api/brews/:id', async (c) => {
 
 app.get('/api/brews', async (c: Context<{ Bindings: Env }>) => {
   try {
-    const brews = await c.env.DB.prepare('SELECT * FROM brews').all();
-    const results = [];
-
-    for (const brew of brews.results) {
-      const pours = await c.env.DB.prepare('SELECT * FROM pours WHERE brew_id = ?')
-        .bind(brew.id)
-        .all();
-      results.push({ ...brew, pours: pours.results });
-    }
-
-    return c.json(results);
+    const { results } = await c.env.DB.prepare('SELECT * FROM brews').all();
+    const parsedResults = results.map((brew: any) => ({
+      ...brew,
+      pours: JSON.parse(brew.pours)
+    }));
+    return c.json(parsedResults);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -347,17 +284,6 @@ app.delete('/api/brews/:brewId', async (c) => {
       return c.json({ error: 'Brew ID is required' }, 400);
     }
 
-    // 削除対象の pours データを削除
-    const deletePoursResult = await c.env.DB.prepare(
-      `DELETE FROM pours WHERE brew_id = ?`
-    )
-      .bind(brewId)
-      .run();
-
-    if (!deletePoursResult.success) {
-      throw new Error(`Failed to delete pours for brew ID ${brewId}`);
-    }
-
     // `brews` テーブルのデータを削除
     const deleteBrewResult = await c.env.DB.prepare(
       `DELETE FROM brews WHERE id = ?`
@@ -369,7 +295,7 @@ app.delete('/api/brews/:brewId', async (c) => {
       throw new Error(`Failed to delete brew with ID ${brewId}`);
     }
 
-    return c.json({ message: `Brew with ID ${brewId} and its pours were deleted successfully` }, 200);
+    return c.json({ message: `Brew with ID ${brewId} is deleted successfully` }, 200);
   } catch (error) {
     console.error(error);
     return c.json(

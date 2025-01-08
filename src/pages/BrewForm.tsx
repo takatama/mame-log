@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
-import { Brew, Pour } from '../types/Brew';
+import { Brew } from '../types/Brew';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 
@@ -10,10 +10,12 @@ const BrewForm: React.FC = () => {
   const { brewId, beanId, baseBrewId } = useParams<{ brewId?: string; beanId?: string; baseBrewId?: string }>();
   const [bean, setBean] = useState<any>(null);
   const [bean_amount, setBeanAmount] = useState(0);
-  const [cups, setCups] = useState(0);
+  const [cups, setCups] = useState<number>(1);
   const [grind_size, setGrindSize] = useState('');
   const [water_temp, setWaterTemp] = useState(0);
-  const [pours, setPours] = useState<Pour[]>([{ idx: 0, amount: 0, flow_rate: '', time: 0 }]);
+  const [bloom_water_amount, setBloomWaterAmount] = useState(0);
+  const [bloom_time, setBloomTime] = useState(0);
+  const [pours, setPours] = useState<number[]>([]);
   const [brew_date, setBrewDate] = useState(new Date().toISOString().slice(0, 16)); // 現在の日時を初期値に設定
   const [overall_score, setOverallScore] = useState(0);
   const [bitterness, setBitterness] = useState(0);
@@ -23,10 +25,12 @@ const BrewForm: React.FC = () => {
 
   const setBrewParams = (brew: Brew) => {
     setBean(brew.bean);
-    setBeanAmount(brew.bean_amount);
     setCups(brew.cups);
+    setBeanAmount(brew.bean_amount);
     setGrindSize(brew.grind_size);
     setWaterTemp(brew.water_temp);
+    setBloomWaterAmount(brew.bloom_water_amount ?? 0);
+    setBloomTime(brew.bloom_time ?? 0);
     setPours(brew.pours);
     setBrewDate(brew.brew_date);
     setOverallScore(brew.overall_score);
@@ -56,12 +60,12 @@ const BrewForm: React.FC = () => {
   }, [brewId, beanId, baseBrewId, beans, brews]);
 
   const handleAddPour = () => {
-    setPours([...pours, { idx: pours.length, amount: 0, flow_rate: '', time: 0 }]);
+    setPours([...pours, 0])
   };
-
-  const handlePourChange = (index: number, field: string, value: string | number) => {
-    const updatedPours = pours.map((pour: Pour, i: number) =>
-      i === index ? { ...pour, [field]: value } : pour
+  
+  const handlePourChange = (index: number, value: number) => {
+    const updatedPours = pours.map((pour, i) =>
+      i === index ? value : pour
     );
     setPours(updatedPours);
   };
@@ -125,10 +129,12 @@ const BrewForm: React.FC = () => {
       id: Number(brewId) || Date.now(), // POST時に一時IDを使用
       bean,
       bean_id: bean.id,
-      bean_amount,
       cups,
+      bean_amount,
       grind_size,
       water_temp,
+      bloom_water_amount,
+      bloom_time,
       pours,
       brew_date,
       overall_score,
@@ -145,6 +151,38 @@ const BrewForm: React.FC = () => {
     }
   };
   
+  const renderPresetButtons = <T extends string | number>(
+    options: T[],
+    selectedOption: T,
+    setOption: (option: T) => void,
+  ) => (
+    <div className="flex space-x-4 py-2">
+      {options.map((option) => (
+        <button
+          type='button'
+          key={option}
+          onClick={() => setOption(option)}
+          className={`p-2 rounded-md w-1/${options.length} ${selectedOption === option ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  );
+
+  const beanAmountOptions = (): number[] => {
+    // 1 cups 10g がデフォルト
+    // 2g刻みで5段階に増減できるようにする
+    // 2 cups の場合は [16, 18, 20, 22, 24]
+    return Array.from({ length: 5 }, (_, i) => cups * 10 + (i - 2) * 2);
+  }
+
+  const bloomAmountOptions = (): number[] => {
+    // コーヒーの量の2倍がデフォルト
+    // 5ml刻みで6段階に増減できるようにする
+    // 20g の場合は [30, 35, 40, 45, 50, 55]
+    return Array.from({ length: 6 }, (_, i) => bean_amount * 2 + (i - 2) * 5);
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -183,75 +221,41 @@ const BrewForm: React.FC = () => {
 
         {/* 抽出設定 */}
         <div>
-          <label className="block text-sm font-medium">豆の量 (g)</label>
-          <input
-            type="number"
-            value={bean_amount}
-            onChange={(e) => setBeanAmount(Number(e.target.value))}
-            className="mt-1 block w-full border rounded-md p-2"
-            required
-          />
+          <label className="block text-sm font-medium">カップ数</label>
+          {renderPresetButtons([1, 2, 3, 4], cups, setCups)}
         </div>
         <div>
-          <label className="block text-sm font-medium">カップ数</label>
-          <input
-            type="number"
-            value={cups}
-            onChange={(e) => setCups(Number(e.target.value))}
-            className="mt-1 block w-full border rounded-md p-2"
-            required
-          />
+          <label className="block text-sm font-medium">豆の量 (g)</label>
+          {renderPresetButtons(beanAmountOptions(), bean_amount, setBeanAmount)}
         </div>
         <div>
           <label className="block text-sm font-medium">挽き具合</label>
-          <input
-            type="text"
-            value={grind_size}
-            onChange={(e) => setGrindSize(e.target.value)}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
+          {renderPresetButtons(['極細', '細', '中細', '中', '粗'], grind_size, setGrindSize)}
         </div>
         <div>
           <label className="block text-sm font-medium">湯温 (℃)</label>
-          <input
-            type="number"
-            value={water_temp}
-            onChange={(e) => setWaterTemp(Number(e.target.value))}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
+          {renderPresetButtons([80, 85, 90, 95], water_temp, setWaterTemp)}
         </div>
-
-        {/* 注湯詳細 */}
         <div>
-          <label className="block text-sm font-medium mb-2">注湯詳細</label>
-          {pours.map((pour: Pour, index: number) => (
+          <label className="block text-sm font-medium">蒸らし湯量 (ml)</label>
+          {renderPresetButtons(bloomAmountOptions(), bloom_water_amount, setBloomWaterAmount)}
+        </div>
+        <div>
+          <label className="block text-sm font-medium">蒸らし時間 (秒)</label>
+          {renderPresetButtons([30, 45, 60], bloom_time, setBloomTime)}
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">注湯</label>
+          {pours.map((pour: number, index: number) => (
             <div key={index} className="space-y-2 mb-4 border p-4 rounded-md">
               <div>
-                <label className="block text-sm font-medium">注湯 {pour.idx + 1} - 湯量 (ml)</label>
+                <label className="block text-sm font-medium">注湯 {index + 1} - 湯量 (ml)</label>
                 <input
                   type="number"
-                  value={pour.amount}
-                  onChange={(e) => handlePourChange(index, 'amount', Number(e.target.value))}
+                  value={pour}
+                  onChange={(e) => handlePourChange(index, Number(e.target.value))}
                   className="mt-1 block w-full border rounded-md p-2"
                   required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">流速</label>
-                <input
-                  type="text"
-                  value={pour.flow_rate}
-                  onChange={(e) => handlePourChange(index, 'flow_rate', e.target.value)}
-                  className="mt-1 block w-full border rounded-md p-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">時間 (秒)</label>
-                <input
-                  type="text"
-                  value={pour.time}
-                  onChange={(e) => handlePourChange(index, 'time', Number(e.target.value))}
-                  className="mt-1 block w-full border rounded-md p-2"
                 />
               </div>
                 {index === pours.length - 1 && (

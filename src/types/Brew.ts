@@ -1,22 +1,17 @@
 import { Bean } from "./Bean";
 
-export interface Pour {
-  idx: number;
-  amount: number; // ml
-  flow_rate?: string;
-  time?: number; // s
-}
-
 export interface Brew {
   id: number;
   brew_date: string;
   bean: Bean;
   bean_id: number;
-  bean_amount: number; // g
   cups: number;
+  bean_amount: number; // g
   grind_size: string;
   water_temp: number; // ℃
-  pours: Pour[];
+  bloom_water_amount: number; // ml
+  bloom_time: number; // s
+  pours: number[];
   overall_score: number;
   bitterness?: number;
   acidity?: number;
