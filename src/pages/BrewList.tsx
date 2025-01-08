@@ -8,10 +8,23 @@ interface BrewListItemProps {
 }
 
 const BrewListItem: React.FC<BrewListItemProps> = ({ brew }) => {
+  const formatLocalDateTime = (isoDate: string | undefined) => {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  };
+
   return (
     <li key={brew.id} className="p-4 border rounded-md">
       <Link to={`/brews/${brew.id}`} className="text-blue-500 hover:underline">
-        <h2 className="font-bold">{brew.brew_date}</h2>
+        <h2 className="font-bold">{formatLocalDateTime(brew.brew_date)}</h2>
         <p>豆: {brew.bean?.name}</p>
         <p>評価: {'★'.repeat(brew.overall_score ?? 0)}</p>
       </Link>
