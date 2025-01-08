@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS beans (
 
 INSERT INTO beans (id, name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, is_active)
 VALUES
-(1, 'メキシコ オアハカ ハニー', 'メキシコ', 'オアハカ', 'ペタテドライ', 'ハニー', '中煎り', '2024-11-30', '2024-12-01', 200, 1500, 'コーヒー豆専門店A', 'https://example.com', 'https://via.placeholder.com/150', 1),
-(2, 'オリエンテナチュラル', 'グアテマラ', 'オリエンテ', 'ナチュラル', 'ナチュラル', '浅煎り', '2024-01-03', '2024-01-01', 250, 1800, 'コーヒー豆太郎', 'https://example.com', 'https://via.placeholder.com/150', 1);
+(1, 'メキシコ オアハカ ハニー', 'メキシコ', 'オアハカ', 'ペタテドライ', 'ハニー', '中煎り', '2024-11-30T09:00:00.000Z', '2024-12-01T09:00:00.000Z', 200, 1500, 'コーヒー豆専門店A', 'https://example.com', 'https://via.placeholder.com/150', 1),
+(2, 'オリエンテナチュラル', 'グアテマラ', 'オリエンテ', 'ナチュラル', 'ナチュラル', '浅煎り', '2025-01-01T09:00:00.000Z', '2025-01-01T09:00:00.000Z', 250, 1800, 'コーヒー豆太郎', 'https://example.com', 'https://via.placeholder.com/150', 1);
 
 -- 抽出記録テーブル
 DROP TABLE IF EXISTS brews;
@@ -51,4 +51,4 @@ CREATE TABLE IF NOT EXISTS brews (
 
 INSERT INTO brews (id, brew_date, bean_id, bean_amount, grind_size, cups, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes)
 VALUES
-(1, '2024-12-30T08:00:00', 1, 20, '中細', 2, 85, 55, 45, '[140, 220, 300]', 4, 3, 2, 4, 'フルーティーでおいしい');
+(1, '2024-12-29T23:00:00.000Z', 1, 20, '中細', 2, 85, 55, 45, '[140, 220, 300]', 4, 3, 2, 4, 'フルーティーでおいしい');
