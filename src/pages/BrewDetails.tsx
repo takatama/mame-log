@@ -49,13 +49,15 @@ const BrewDetails: React.FC = () => {
         <p><strong>カップ数:</strong> {brew.cups}</p>
         <p><strong>挽き具合:</strong> {brew.grind_size}</p>
         <p><strong>湯温:</strong> {brew.water_temp}℃</p>
+        <p><strong>蒸らし湯量:</strong> {brew.bloom_water_amount}ml</p>
+        <p><strong>蒸らし時間:</strong> {brew.bloom_time}秒</p>
 
         <div>
           <strong>注湯:</strong>
           <ul className="list-disc pl-5">
-            {brew.pours.map((pour) => (
-              <li key={pour.idx}>
-                {pour.idx + 1}回目: {pour.amount}ml, 流速: {pour.flow_rate}, 時間: {pour.time}秒
+            {brew.pours.map((pourAmount, index) => (
+              <li key={index}>
+                {index + 1}湯目: {pourAmount}ml
               </li>
             ))}
           </ul>

@@ -38,6 +38,9 @@ CREATE TABLE IF NOT EXISTS brews (
     cups INTEGER,
     grind_size TEXT,
     water_temp INTEGER,
+    bloom_water_amount INTEGER,
+    bloom_time INTEGER,
+    pours JSON,
     overall_score INTEGER,
     bitterness INTEGER,
     acidity INTEGER,
@@ -46,23 +49,6 @@ CREATE TABLE IF NOT EXISTS brews (
     FOREIGN KEY (bean_id) REFERENCES beans (id)
 );
 
-INSERT INTO brews (id, brew_date, bean_id, bean_amount, grind_size, cups, water_temp, overall_score, bitterness, acidity, sweetness, notes)
+INSERT INTO brews (id, brew_date, bean_id, bean_amount, grind_size, cups, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes)
 VALUES
-(1, '2024-12-30T08:00:00', 1, 20, '中挽き', 2, 85, 4, 3, 2, 4, 'フルーティーでおいしい');
-
--- 注湯詳細テーブル
-CREATE TABLE IF NOT EXISTS pours (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    brew_id INTEGER NOT NULL,
-    idx INTEGER NOT NULL,
-    amount INTEGER,
-    flow_rate TEXT,
-    time INTEGER,
-    FOREIGN KEY (brew_id) REFERENCES brews (id)
-);
-
-INSERT INTO pours (id, brew_id, idx, amount, flow_rate, time)
-VALUES
-(1, 1, 0, 60, 'ゆっくり', 30),
-(2, 1, 1, 170, '普通', 60),
-(3, 1, 2, 170, '普通', 60);
+(1, '2024-12-30T08:00:00', 1, 20, '中細', 2, 85, 55, 45, '[140, 220, 300]', 4, 3, 2, 4, 'フルーティーでおいしい');
