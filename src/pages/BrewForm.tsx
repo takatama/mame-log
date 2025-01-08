@@ -162,7 +162,7 @@ const BrewForm: React.FC = () => {
           type='button'
           key={option}
           onClick={() => setOption(option)}
-          className={`p-2 rounded-md w-1/${options.length} ${selectedOption === option ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          className={`p-2 rounded-md flex-1 w-1/${options.length} ${selectedOption === option ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
         >
           {option}
         </button>
