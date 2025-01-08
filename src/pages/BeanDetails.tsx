@@ -1,17 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBrewContext } from '../context/BrewContext';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Bean } from '../types/Bean';
 
 const BeanDetail: React.FC = () => {
   const { beans, setBeans } = useBrewContext()
   const { beanId } = useParams<{ beanId?: string }>()
-  const bean = beans.find(bean => bean.id === Number(beanId))
-
-  if (!bean) {
-    return <div>豆が見つかりません。</div>
-  }
-
+  const [ bean, setBean ] = React.useState<Bean | undefined>(undefined)
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!beanId) return;
+
+    const bean = beans.find((bean) => bean.id === Number(beanId));
+    setBean(bean);
+  }, [beanId, beans]);
 
   const handleDelete = async () => {
     if (!beanId) return;
@@ -36,6 +39,10 @@ const BeanDetail: React.FC = () => {
       alert('削除に失敗しました。再試行してください。');
     }
   };
+
+  if (!bean) {
+    return <div>豆が見つかりません。</div>
+  }
 
   return (
     <div className="container mx-auto p-4">
