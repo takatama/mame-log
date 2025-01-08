@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 import { Brew } from '../types/Brew';
+import { formatLocalDateTime } from '../utils/date';
 
 const BrewDetails: React.FC = () => {
   const { brewId } = useParams<{ brewId?: string }>()
@@ -43,19 +44,6 @@ const BrewDetails: React.FC = () => {
   if (!brew) {
     return <div>抽出ログが見つかりません。</div>
   }
-
-  const formatLocalDateTime = (isoDate: string | undefined) => {
-    if (!isoDate) return '';
-    const date = new Date(isoDate);
-    return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-  };
 
   return (
     <div className="container mx-auto p-4">

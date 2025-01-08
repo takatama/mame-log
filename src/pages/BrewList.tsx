@@ -2,25 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Brew } from '../types/Brew';
+import { formatLocalDateTime } from '../utils/date';
 
 interface BrewListItemProps {
   brew: Brew;
 }
 
 const BrewListItem: React.FC<BrewListItemProps> = ({ brew }) => {
-  const formatLocalDateTime = (isoDate: string | undefined) => {
-    if (!isoDate) return '';
-    const date = new Date(isoDate);
-    return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-  };
-
   return (
     <li key={brew.id} className="p-4 border rounded-md">
       <Link to={`/brews/${brew.id}`} className="text-blue-500 hover:underline">
