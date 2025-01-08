@@ -10,7 +10,7 @@ const BrewForm: React.FC = () => {
   const { brewId, beanId, baseBrewId } = useParams<{ brewId?: string; beanId?: string; baseBrewId?: string }>();
   const [bean, setBean] = useState<any>(null);
   const [bean_amount, setBeanAmount] = useState(0);
-  const [cups, setCups] = useState(0);
+  const [cups, setCups] = useState<number>(1);
   const [grind_size, setGrindSize] = useState('');
   const [water_temp, setWaterTemp] = useState(0);
   const [pours, setPours] = useState<Pour[]>([{ idx: 0, amount: 0, flow_rate: '', time: 0 }]);
@@ -164,6 +164,13 @@ const BrewForm: React.FC = () => {
     </div>
   );
 
+  const beanAmountOptions = (): number[] => {
+    // 1 cups 10g がデフォルト
+    // 2g刻みで5段階に増減できるようにする
+    // 2 cups の場合は [16, 18, 20, 22, 24]
+    return Array.from({ length: 5 }, (_, i) => cups * 10 + (i - 2) * 2);
+  }
+
   return (
     <div className="container mx-auto p-4">
       {/* <h1 className="text-2xl font-bold mb-4">新しい抽出ログを作成</h1> */}
@@ -206,13 +213,7 @@ const BrewForm: React.FC = () => {
         </div>
         <div>
           <label className="block text-sm font-medium">豆の量 (g)</label>
-          <input
-            type="number"
-            value={bean_amount}
-            onChange={(e) => setBeanAmount(Number(e.target.value))}
-            className="mt-1 block w-full border rounded-md p-2"
-            required
-          />
+          {renderPresetButtons(beanAmountOptions(), bean_amount, setBeanAmount)}
         </div>
         <div>
           <label className="block text-sm font-medium">挽き具合</label>
