@@ -5,11 +5,27 @@ import { Brew } from '../types/Brew';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 
+const fromUtcToLocalDateTime = (utcDateString: string | undefined) => {
+  if (!utcDateString) return '';
+  const date = new Date(utcDateString);
+  const offset = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - offset * 60 * 1000);
+  return localDate.toISOString().slice(0, 16);
+}
+
+const fromLocalToUtc = (localDateString: string | undefined) => {
+  if (!localDateString) return '';
+  const localDate = new Date(localDateString);
+  const offset = localDate.getTimezoneOffset();
+  const date = new Date(localDate.getTime() + offset * 60 * 1000);
+  return date.toISOString();
+}
+
 const BrewForm: React.FC = () => {
   const { beans, brews, updateBrew, setBrews } = useBrewContext();
   const { brewId, beanId, baseBrewId } = useParams<{ brewId?: string; beanId?: string; baseBrewId?: string }>();
   const [bean, setBean] = useState<Bean | undefined>(undefined);
-  const [brew, setBrew] = useState<Brew>({brew_date: new Date().toISOString().slice(0, 16)});
+  const [brew, setBrew] = useState<Brew>({ brew_date: new Date().toISOString() });
 
   useEffect(() => {
     if (brewId) {
@@ -24,7 +40,8 @@ const BrewForm: React.FC = () => {
       const baseBrew = brews.find((b: Brew) => b.id === Number(baseBrewId));
       if (!baseBrew) return;
       setBean(baseBrew.bean);
-      setBrew({ ...baseBrew, brew_date: new Date().toISOString().slice(0, 16) });
+      // 新しく作るので日付をリセット
+      setBrew({ ...baseBrew, brew_date: new Date().toISOString() });
     }
   }, [brewId, beanId, baseBrewId, beans, brews]);
 
@@ -149,8 +166,8 @@ const BrewForm: React.FC = () => {
           <label className="block text-sm font-medium">抽出日時</label>
           <input
             type="datetime-local"
-            value={brew.brew_date}
-            onChange={(e) => setBrew({ ...brew, brew_date: e.target.value })}
+            value={fromUtcToLocalDateTime(brew.brew_date)}
+            onChange={(e) => setBrew({ ...brew, brew_date: fromLocalToUtc(e.target.value) })}
             className="mt-1 block w-full border rounded-md p-2"
             required
           />
