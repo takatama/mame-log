@@ -77,12 +77,11 @@ const BrewForm: React.FC = () => {
   const navigate = useNavigate();
 
   const handlePost = async (newBrew: Brew) => {
-    const serializedBrew = { ...newBrew, pours: JSON.stringify(newBrew.pours) };
-    try {  
+    try {
       const response = await fetch('/api/brews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(serializedBrew),
+        body: JSON.stringify(newBrew),
       });
   
       if (!response.ok) {
@@ -90,8 +89,7 @@ const BrewForm: React.FC = () => {
       }
   
       const createdBrew: any = await response.json();
-      const createBrewWithPours = { ...createdBrew, pours: JSON.parse(createdBrew.pours) };
-      setBrews([...brews, createBrewWithPours]);
+      setBrews([...brews, createdBrew]);
       navigate(`/brews/${createdBrew.id}`);
     } catch (error) {
       console.error(error);
@@ -106,11 +104,10 @@ const BrewForm: React.FC = () => {
       // 楽観的に状態を更新
       updateBrew(updatedBrew);
       navigate(`/brews/${brewId}`);
-      const serializedBrew = { ...updatedBrew, pours: JSON.stringify(updatedBrew.pours) };
       const response = await fetch(`/api/brews/${brewId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(serializedBrew),
+        body: JSON.stringify(updatedBrew),
       });
   
       if (!response.ok) {
