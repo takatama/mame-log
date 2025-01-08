@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
+import { Brew } from '../types/Brew';
 
 const BrewDetails: React.FC = () => {
-  const { brews, setBrews } = useBrewContext()
   const { brewId } = useParams<{ brewId?: string }>()
-  const brew = brews.find(brew => brew.id === Number(brewId))
-  if (!brew) {
-    return <div>抽出ログが見つかりません。</div>
-  }
-
   const navigate = useNavigate();
+  const { brews, setBrews } = useBrewContext()
+  const [brew, setBrew] = React.useState<Brew | undefined>(undefined)
+
+  useEffect(() => {
+    if (!brewId) return;
+      const foundBrew = brews.find(brew => brew.id === Number(brewId))
+      setBrew(foundBrew);
+  } , [brewId, brews]);
+
   const handleDelete = async () => {
     if (!brewId) return;
 
@@ -35,6 +39,10 @@ const BrewDetails: React.FC = () => {
       alert('削除に失敗しました。再試行してください。');
     }
   };
+
+  if (!brew) {
+    return <div>抽出ログが見つかりません。</div>
+  }
 
   return (
     <div className="container mx-auto p-4">
