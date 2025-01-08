@@ -164,22 +164,22 @@ app.post('/api/brews', async (c) => {
   try {
     const brew = await c.req.json();
     const parsedBrew = brewSchema.parse(brew);
-
+console.log(parsedBrew);
     const {
       brew_date,
       bean_id,
-      bean_amount,
-      cups,
-      grind_size,
-      water_temp,
-      bloom_water_amount,
-      bloom_time,
-      pours,
-      overall_score,
-      bitterness,
-      acidity,
-      sweetness,
-      notes,
+      bean_amount = 0,
+      cups = 0,
+      grind_size = '',
+      water_temp = 0,
+      bloom_water_amount = 0,
+      bloom_time = 0,
+      pours = [],
+      overall_score = 0,
+      bitterness = 0,
+      acidity = 0,
+      sweetness = 0,
+      notes = '',
     } = parsedBrew;
 
     const insertResult = await c.env.DB.prepare(

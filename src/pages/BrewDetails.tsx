@@ -52,7 +52,7 @@ const BrewDetails: React.FC = () => {
 
       <div className="space-y-4">
         <p><strong>日付:</strong> {brew.brew_date}</p>
-        <p><strong>豆:</strong> {brew.bean.name}</p>
+        <p><strong>豆:</strong> {brew.bean?.name}</p>
         <p><strong>豆の量:</strong> {brew.bean_amount}g</p>
         <p><strong>カップ数:</strong> {brew.cups}</p>
         <p><strong>挽き具合:</strong> {brew.grind_size}</p>
@@ -63,7 +63,7 @@ const BrewDetails: React.FC = () => {
         <div>
           <strong>注湯:</strong>
           <ul className="list-disc pl-5">
-            {brew.pours.map((pourAmount, index) => (
+            {brew.pours?.map((pourAmount, index) => (
               <li key={index}>
                 {index + 1}湯目: {pourAmount}ml
               </li>
