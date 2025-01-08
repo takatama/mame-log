@@ -6,7 +6,7 @@ import { Bean } from '../types/Bean';
 const BeanForm: React.FC = () => {
   const { beans, updateBean, setBeans } = useBrewContext();
   const { beanId } = useParams();
-  const [bean, setBean] = useState<Bean | undefined>(undefined);
+  const [bean, setBean] = useState<Bean>({is_active: true});
 
   const getBeanById = (beanId: number) => {
     return beans.find(bean => bean.id === beanId);
