@@ -14,7 +14,7 @@ const BeanCapture: React.FC = () => {
     if (beanId) {
       navigate(`/beans/${beanId}/edit`, options);
     } else {
-      navigate('/beans', options);
+      navigate('/beans/new', options);
     }
   };
 
