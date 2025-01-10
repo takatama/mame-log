@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 interface Env {
   DB: D1Database;
+  GEMINI_API_KEY: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();
@@ -319,25 +320,117 @@ app.delete('/api/brews/:brewId', async (c) => {
   }
 });
 
-app.post('/api/analyze', async (c: Context<{ Bindings: Env }>) => {
-  const beanFixture = {
-    name: 'Test Bean',
-    country: 'Test Country',
-    area: 'Test Area',
-    drying_method: 'Test Drying Method',
-    processing_method: 'Test Processing Method',
-    roast_level: 'Test Roast Level',
-    roast_date: '2025-01-01',
-    purchase_date: '2025-01-01',
-    purchase_amount: 100,
-    price: 1000,
-    seller: 'Test Seller',
-    seller_url: 'https://example.com',
-    photo_url: 'https://example.com/photo.jpg',
-    notes: 'Test Notes',
-    is_active: 1,
+async function handleGemini(base64Data: string, env: Env): Promise<Response> {
+  // プロンプト：BeanFormにある項目を抽出する指示
+  const prompt = `
+次の画像から以下の項目を抽出してください。
+- 名前 (name)
+- 国 (country)
+- 地域 (area)
+- 乾燥方法 (drying_method)
+- 処理方法 (processing_method)
+- 焙煎度 (roast_level)
+- 焙煎日 (roast_date)
+- 購入日 (purchase_date)
+- 購入量 (purchase_amount)
+- 価格 (price)
+- 販売者 (seller)
+- 販売者URL (seller_url)
+- メモ (notes)
+
+出力形式はJSONでお願いします。含まれていない項目はNULLではなく""にしてください。`;
+
+  const generationConfig = {
+    "response_mime_type": "application/json",
+    "response_schema": {
+      "type": "OBJECT",
+      "properties": {
+        "name": {"type": "STRING"},
+        "country": {"type": "STRING"},
+        "area": {"type": "STRING"},
+        "drying_method": {"type": "STRING"},
+        "processing_method": {"type": "STRING"},
+        "roast_level": {"type": "STRING"},
+        "roast_date": {"type": "STRING"},
+        "purchase_date": {"type": "STRING"},
+        "purchase_amount": {"type": "INTEGER"},
+        "price": {"type": "INTEGER"},
+        "seller": {"type": "STRING"},
+        "seller_url": {"type": "STRING"},
+        "notes": {"type": "STRING"}
+      }
+    }
   };
-  return c.json({ bean: beanFixture }, 201);
+
+  const geminiRequest = {
+    contents: {
+      role: "",
+      parts: [
+        {
+          inlineData: {
+            data: base64Data,
+            mimeType: "image/png",
+          },
+        },
+        {
+          text: prompt,
+        },
+      ],
+    },
+    generationConfig,
+  };
+
+  try {
+    const geminiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(geminiRequest),
+      }
+    );
+
+    const geminiResult: any = await geminiResponse.json();
+
+    if (!geminiResult.candidates || geminiResult.candidates.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "No results from Gemini." }),
+        { status: 500 }
+      );
+    }
+
+    const beanString = geminiResult.candidates[0].content.parts[0].text;
+    console.log("bean:", beanString);
+    return new Response(`{ "bean": ${beanString} }`, {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Error with Gemini request:", error);
+    return new Response("Error processing request", { status: 500 });
+  }
+}
+
+app.post('/api/analyze', async (c: Context<{ Bindings: Env }>) => {
+  try {
+    const { image } = await c.req.json();
+
+    if (!image) {
+      return new Response("Invalid input: Image is required", {
+        status: 400,
+      });
+    }
+
+    // 画像データをBase64形式から抽出
+    const base64Data = image.split(",")[1]; // "data:image/png;base64,..." の形式を想定
+
+    // Geminiに処理を委任
+    return await handleGemini(base64Data, c.env);
+  } catch (error) {
+    console.error("Error processing request:", error);
+    return new Response("Internal Server Error", { status: 500 });
+  }
 });
 
 app.get('*', (c) => {
