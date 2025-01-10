@@ -10,6 +10,7 @@ import BeanForm from './pages/BeanForm';
 import BeanList from './pages/BeanList';
 import BeanDetails from './pages/BeanDetails';
 import { BrewProvider } from './context/BrewContext';
+import BeanCapture from './pages/BeanCapture';
 
 const App: React.FC = () => {
   return (
@@ -25,7 +26,9 @@ const App: React.FC = () => {
               <Route path="/" element={<Home />} />
               <Route path="/beans" element={<BeanList />} />
               <Route path="/beans/new" element={<BeanForm />} />
+              <Route path="/beans/new/capture" element={<BeanCapture />} />
               <Route path="/beans/:beanId" element={<BeanDetails />} />
+              <Route path="/beans/:beanId/capture" element={<BeanCapture />} />
               <Route path="/beans/:beanId/edit" element={<BeanForm />} />
               {/* <Route path="/beans/:beanId/brews" element={<BrewList />} /> */}
               <Route path="/beans/:beanId/brews/new" element={<BrewForm />} />

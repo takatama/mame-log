@@ -319,6 +319,27 @@ app.delete('/api/brews/:brewId', async (c) => {
   }
 });
 
+app.post('/api/analyze', async (c: Context<{ Bindings: Env }>) => {
+  const beanFixture = {
+    name: 'Test Bean',
+    country: 'Test Country',
+    area: 'Test Area',
+    drying_method: 'Test Drying Method',
+    processing_method: 'Test Processing Method',
+    roast_level: 'Test Roast Level',
+    roast_date: '2025-01-01',
+    purchase_date: '2025-01-01',
+    purchase_amount: 100,
+    price: 1000,
+    seller: 'Test Seller',
+    seller_url: 'https://example.com',
+    photo_url: 'https://example.com/photo.jpg',
+    notes: 'Test Notes',
+    is_active: 1,
+  };
+  return c.json({ bean: beanFixture }, 201);
+});
+
 app.get('*', (c) => {
   return c.html(
     renderToString(
