@@ -123,6 +123,15 @@ const BeanForm: React.FC = () => {
       <h1 className="text-2xl font-bold mb-4">
         {beanId ? '豆の編集' : '豆の追加'}
       </h1>
+      {(bean.photo_data_url || bean.photo_url) && (
+        <div className="mb-4">
+          <img
+            src={bean.photo_data_url || bean.photo_url}
+            alt={bean.name || 'Bean'}
+            className="max-w-full h-auto rounded-md"
+          />
+        </div>
+      )}
       <button
           type="button"
           onClick={handleNavigateToCapture}
@@ -246,15 +255,6 @@ const BeanForm: React.FC = () => {
             type="url"
             value={bean.seller_url}
             onChange={(e) => setBean({ ...bean, seller_url: e.target.value })}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">写真URL</label>
-          <input
-            type="url"
-            value={bean.photo_url}
-            onChange={(e) => setBean({ ...bean, photo_url: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>

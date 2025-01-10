@@ -13,6 +13,7 @@ export interface Bean {
   seller?: string;
   seller_url?: string;
   photo_url?: string;
+  photo_data_url?:string;
   notes?: string;
   is_active?: boolean;
 }

@@ -76,9 +76,10 @@ const BeanCapture: React.FC = () => {
         body: JSON.stringify({ image: imageData }),
       });
 
-      const result: { bean?: Bean, is_coffee_label?: Boolean } = await response.json();
-      if (result && result.bean && result.is_coffee_label) {
-          handleGoBack({ state: { bean: result.bean } });
+      const { bean, is_coffee_label }: { bean?: Bean, is_coffee_label?: boolean } = await response.json();
+      if (bean && is_coffee_label) {
+          bean.photo_data_url = imageData;
+          handleGoBack({ state: { bean } });
       } else {
         alert('解析結果を取得できませんでした。');
       }
