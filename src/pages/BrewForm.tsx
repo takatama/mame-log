@@ -147,7 +147,9 @@ const BrewForm: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      {/* <h1 className="text-2xl font-bold mb-4">新しい抽出ログを作成</h1> */}
+      <h1 className="text-2xl font-bold mb-4">
+        {brewId ? '抽出ログを編集' : '新しく淹れる'}
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium">抽出日時</label>

@@ -121,7 +121,7 @@ const BeanForm: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">
-        {beanId ? '豆の編集' : '豆の追加'}
+        {beanId ? '豆を編集' : '豆を追加'}
       </h1>
       {(bean.photo_data_url || bean.photo_url) && (
         <div className="mb-4">
