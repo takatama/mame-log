@@ -225,8 +225,9 @@ const BeanForm: React.FC = () => {
         <div>
           <label className="block text-sm font-medium">購入量 (g)</label>
           <input
-            type="number"
-            value={bean.purchase_amount}
+            type="text"
+            inputMode="numeric"
+            value={bean.purchase_amount || ''}
             onChange={(e) => setBean({ ...bean, purchase_amount: Number(e.target.value) })}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -234,8 +235,9 @@ const BeanForm: React.FC = () => {
         <div>
           <label className="block text-sm font-medium">価格 (円)</label>
           <input
-            type="number"
-            value={bean.price}
+            type="text"
+            inputMode="numeric"
+            value={bean.price || ''}
             onChange={(e) => setBean({ ...bean, price: Number(e.target.value) })}
             className="mt-1 block w-full border rounded-md p-2"
           />

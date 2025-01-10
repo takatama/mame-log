@@ -217,8 +217,9 @@ const BrewForm: React.FC = () => {
                   {index + 1}湯目 [ml] {Array.isArray(baseBrew?.pours) && baseBrew.pours[index] > 0 ? `(${baseBrew.pours[index]})` : '' }
                 </label>
                 <input
-                  type="number"
-                  value={pour}
+                  type="text"
+                  inputMode="numeric"
+                  value={pour || ''}
                   onChange={(e) => handlePourChange(index, Number(e.target.value))}
                   className="mt-1 block w-full border rounded-md p-2"
                   required
