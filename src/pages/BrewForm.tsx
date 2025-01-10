@@ -11,6 +11,7 @@ const BrewForm: React.FC = () => {
   const { brewId, beanId, baseBrewId } = useParams<{ brewId?: string; beanId?: string; baseBrewId?: string }>();
   const [bean, setBean] = useState<Bean | undefined>(undefined);
   const [brew, setBrew] = useState<Brew>({ brew_date: new Date().toISOString() });
+  const [baseBrew, setBaseBrew] = useState<Brew>();
 
   useEffect(() => {
     if (brewId) {
@@ -24,6 +25,7 @@ const BrewForm: React.FC = () => {
     } else if (baseBrewId) {
       const baseBrew = brews.find((b: Brew) => b.id === Number(baseBrewId));
       if (!baseBrew) return;
+      setBaseBrew(baseBrew);
       setBean(baseBrew.bean);
       // 新しく作るので日付をリセット
       setBrew({ ...baseBrew, brew_date: new Date().toISOString() });
@@ -157,9 +159,12 @@ const BrewForm: React.FC = () => {
             required
           />
         </div>
-        {/* コーヒー豆の選択 */}
+        {baseBrew && (
+          <label className="block text-sm font-medium">(カッコ内は前回の選択)</label>
+        )}
         <div>
-          <label className="block text-sm font-medium">コーヒー豆</label>
+          <label className="block text-sm font-medium">コーヒー豆 { baseBrew?.bean ? `(${baseBrew.bean?.name})` : '' }</label>
+
           <select
             value={bean?.id || ''}
             onChange={(e) => {
@@ -180,27 +185,27 @@ const BrewForm: React.FC = () => {
 
         {/* 抽出設定 */}
         <div>
-          <label className="block text-sm font-medium">カップ数</label>
+          <label className="block text-sm font-medium">カップ数 { baseBrew ? `(${baseBrew.cups})` : '' }</label>
           {renderPresetButtons([1, 2, 3, 4], brew?.cups ?? 0, 'cups')}
         </div>
         <div>
-          <label className="block text-sm font-medium">豆の量 (g)</label>
+          <label className="block text-sm font-medium">豆の量 [g] { baseBrew ? `(${baseBrew.bean_amount})` : '' }</label>
           {renderPresetButtons(beanAmountOptions(), brew?.bean_amount ?? '', 'bean_amount')}
         </div>
         <div>
-          <label className="block text-sm font-medium">挽き具合</label>
+          <label className="block text-sm font-medium">挽き具合 { baseBrew ? `(${baseBrew.grind_size})` : '' }</label>
           {renderPresetButtons(['極細', '細', '中細', '中', '粗'], brew?.grind_size ?? '', 'grind_size')}
         </div>
         <div>
-          <label className="block text-sm font-medium">湯温 (℃)</label>
+          <label className="block text-sm font-medium">湯温 [℃] { baseBrew ? `(${baseBrew.water_temp})` : '' }</label>
           {renderPresetButtons([80, 85, 90, 95], brew?.water_temp ?? 0, 'water_temp')}
         </div>
         <div>
-          <label className="block text-sm font-medium">蒸らし湯量 (ml)</label>
+          <label className="block text-sm font-medium">蒸らし湯量 [ml] { baseBrew ? `(${baseBrew.bloom_water_amount})` : '' }</label>
           {renderPresetButtons(bloomAmountOptions(), brew?.bloom_water_amount ?? 0, 'bloom_water_amount')}
         </div>
         <div>
-          <label className="block text-sm font-medium">蒸らし時間 (秒)</label>
+          <label className="block text-sm font-medium">蒸らし時間 [秒] { baseBrew ? `(${baseBrew.bloom_time})` : '' }</label>
           {renderPresetButtons([30, 45, 60], brew?.bloom_time ?? 0, 'bloom_time')}
         </div>
         <div>
@@ -208,7 +213,9 @@ const BrewForm: React.FC = () => {
           {(brew?.pours ?? []).map((pour: number, index: number) => (
             <div key={index} className="space-y-2 mb-4 border p-4 rounded-md">
               <div>
-                <label className="block text-sm font-medium">{index + 1}湯目 (ml)</label>
+                <label className="block text-sm font-medium">
+                  {index + 1}湯目 [ml] {Array.isArray(baseBrew?.pours) && baseBrew.pours[index] > 0 ? `(${baseBrew.pours[index]})` : '' }
+                </label>
                 <input
                   type="number"
                   value={pour}
@@ -221,8 +228,8 @@ const BrewForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                  const updatedPours = (brew?.pours ?? []).filter((_, i) => i !== index);
-                  setBrew({ ...brew, pours: (brew?.pours) ?? [] });
+                    const updatedPours = (brew?.pours ?? []).filter((_, i) => i !== index);
+                    setBrew({ ...brew, pours: updatedPours});
                   }}
                   className="mt-2 bg-red-500 text-white p-2 rounded-md"
                 >
@@ -242,19 +249,19 @@ const BrewForm: React.FC = () => {
 
         {/* 評価 */}
         <div>
-          <label className="block text-sm font-medium">総合評価</label>
+          <label className="block text-sm font-medium">総合評価 { baseBrew ? `(${baseBrew.overall_score})` : '' }</label>
           <StarRating rating={brew?.overall_score ?? 0} onRatingChange={(rating) => setBrew({ ...brew, overall_score: rating })} />
         </div>
         <div>
-          <label className="block text-sm font-medium">苦味</label>
+          <label className="block text-sm font-medium">苦味 { baseBrew ? `(${baseBrew.bitterness})` : '' }</label>
           <StarRating rating={brew?.bitterness ?? 0} onRatingChange={(rating) => setBrew({ ...brew, bitterness: rating })} />
         </div>
         <div>
-          <label className="block text-sm font-medium">酸味</label>
+          <label className="block text-sm font-medium">酸味 { baseBrew ? `(${baseBrew.acidity})` : '' }</label>
           <StarRating rating={brew?.acidity ?? 0} onRatingChange={(rating) => setBrew({ ...brew, acidity: rating })} />
         </div>
         <div>
-          <label className="block text-sm font-medium">甘味</label>
+          <label className="block text-sm font-medium">甘味 { baseBrew ? `(${baseBrew.sweetness})` : '' }</label>
           <StarRating rating={brew?.sweetness ?? 0} onRatingChange={(rating) => setBrew({ ...brew, sweetness: rating })} />
         </div>
         <div>
