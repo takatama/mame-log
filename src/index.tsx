@@ -405,7 +405,10 @@ purchase_dateとroast_dateは日付形式でお願いします。例: "2022-01-0
 
     const beanString = geminiResult.candidates[0].content.parts[0].text;
     console.log("bean:", beanString);
-    return new Response(`{ "bean": ${beanString} }`, {
+    const bean = JSON.parse(beanString);
+    if (bean.purchase_amount < 0) bean.purchase_amount = 0;
+    if (bean.price < 0) bean.price = 0;
+    return new Response(JSON.stringify({ bean }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
