@@ -323,7 +323,9 @@ app.delete('/api/brews/:brewId', async (c) => {
 async function handleGemini(base64Data: string, env: Env): Promise<Response> {
   // プロンプト：BeanFormにある項目を抽出する指示
   const prompt = `
-次の画像から以下の項目を抽出してください。
+次の画像はコーヒー豆のラベルです。
+もしラベルでなければ、"is_coffee_label"をfalseに設定してください。
+ラベルなら、"is_coffee_label"をfalseに設定して、以下の項目を抽出してください。
 - 名前 (name)
 - 国 (country)
 - 地域 (area)
@@ -343,23 +345,24 @@ purchase_dateとroast_dateは日付形式でお願いします。例: "2022-01-0
 `;
 
   const generationConfig = {
-    "response_mime_type": "application/json",
-    "response_schema": {
-      "type": "OBJECT",
-      "properties": {
-        "name": {"type": "STRING"},
-        "country": {"type": "STRING"},
-        "area": {"type": "STRING"},
-        "drying_method": {"type": "STRING"},
-        "processing_method": {"type": "STRING"},
-        "roast_level": {"type": "STRING"},
-        "roast_date": {"type": "STRING"},
-        "purchase_amount": {"type": "INTEGER"},
-        "purchase_date": {"type": "STRING"},
-        "price": {"type": "INTEGER"},
-        "seller": {"type": "STRING"},
-        "seller_url": {"type": "STRING"},
-        "notes": {"type": "STRING"}
+    response_mime_type: "application/json",
+    response_schema: {
+      type: "OBJECT",
+      properties: {
+        is_coffee_label: {type: "BOOLEAN"},
+        name: {type: "STRING"},
+        country: {type: "STRING"},
+        area: {type: "STRING"},
+        drying_method: {type: "STRING"},
+        processing_method: {type: "STRING"},
+        roast_level: {type: "STRING"},
+        roast_date: {type: "STRING"},
+        purchase_amount: {type: "INTEGER"},
+        purchase_date: {type: "STRING"},
+        price: {type: "INTEGER"},
+        seller: {type: "STRING"},
+        seller_url: {type: "STRING"},
+        notes: {type: "STRING"}
       }
     }
   };
@@ -408,7 +411,7 @@ purchase_dateとroast_dateは日付形式でお願いします。例: "2022-01-0
     const bean = JSON.parse(beanString);
     if (bean.purchase_amount < 0) bean.purchase_amount = 0;
     if (bean.price < 0) bean.price = 0;
-    return new Response(JSON.stringify({ bean }), {
+    return new Response(JSON.stringify({ bean, is_coffee_label: bean?.is_coffee_label }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {

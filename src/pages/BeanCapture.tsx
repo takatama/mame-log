@@ -77,9 +77,9 @@ const BeanCapture: React.FC = () => {
         body: JSON.stringify({ image: imageData }),
       });
 
-      const result: { bean?: Bean } = await response.json();
-      if (result && result.bean) {
-        handleGoBack({ state: { bean: result.bean } });
+      const result: { bean?: Bean, is_coffee_label?: Boolean } = await response.json();
+      if (result && result.bean && result.is_coffee_label) {
+          handleGoBack({ state: { bean: result.bean } });
       } else {
         alert('解析結果を取得できませんでした。');
       }
@@ -88,6 +88,7 @@ const BeanCapture: React.FC = () => {
       alert('解析中にエラーが発生しました。');
     } finally {
       setIsAnalyzing(false);
+      setIsCaptured(false);
     }
   };
 
@@ -110,7 +111,7 @@ const BeanCapture: React.FC = () => {
         {!isCaptured && (
           <button
             onClick={handleCapture}
-            className="bg-blue-500 text-white py-2 px-4 rounded-md"
+            className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700"
           >
             撮影して解析
           </button>
@@ -119,7 +120,7 @@ const BeanCapture: React.FC = () => {
           <button
             onClick={analyzeImage}
             disabled={isAnalyzing}
-            className="bg-green-500 text-white py-2 px-4 rounded-md"
+            className="bg-blue-700 text-white py-2 px-4 rounded-md"
           >
             {isAnalyzing ? '解析中...' : '解析を開始'}
           </button>
