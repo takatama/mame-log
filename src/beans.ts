@@ -145,9 +145,7 @@ app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
     if (!id) {
       return c.json({ error: 'Bean ID is required' }, 400);
     }
-
-    // TODO KVの写真を削除
-
+    
     // `brews` を削除
     const deleteBrewsResult = await c.env.DB.prepare(
       `DELETE FROM brews WHERE bean_id = ?`
@@ -157,6 +155,17 @@ app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
 
     if (!deleteBrewsResult.success) {
       throw new Error(`Failed to delete brews for bean ID ${id}`);
+    }
+
+    // KVの写真を削除
+    const beanData = await c.env.DB.prepare('SELECT photo_url FROM beans WHERE id = ?').bind(id).first();
+    if (!beanData) {
+      return c.json({ error: `Bean with ID ${id} not found` }, 404);
+    }
+
+    const photoKey = beanData.photo_url;
+    if (photoKey && typeof photoKey === 'string') {
+      await c.env.MAME_LOG_IMAGES.delete(photoKey);
     }
 
     // `beans` を削除
