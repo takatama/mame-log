@@ -338,7 +338,9 @@ async function handleGemini(base64Data: string, env: Env): Promise<Response> {
 - 販売者URL (seller_url)
 - メモ (notes)
 
-出力形式はJSONでお願いします。含まれていない項目はNULLではなく""にしてください。`;
+出力形式はJSONでお願いします。含まれていない項目はNULLではなく""にしてください。
+purchase_dateとroast_dateは日付形式でお願いします。例: "2022-01-01"
+`;
 
   const generationConfig = {
     "response_mime_type": "application/json",
@@ -352,8 +354,8 @@ async function handleGemini(base64Data: string, env: Env): Promise<Response> {
         "processing_method": {"type": "STRING"},
         "roast_level": {"type": "STRING"},
         "roast_date": {"type": "STRING"},
-        "purchase_date": {"type": "STRING"},
         "purchase_amount": {"type": "INTEGER"},
+        "purchase_date": {"type": "STRING"},
         "price": {"type": "INTEGER"},
         "seller": {"type": "STRING"},
         "seller_url": {"type": "STRING"},

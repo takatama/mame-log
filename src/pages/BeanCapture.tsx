@@ -8,6 +8,7 @@ const BeanCapture: React.FC = () => {
   const navigate = useNavigate();
   const { beanId } = useParams();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isCaptured, setIsCaptured] = useState(false);
 
   useEffect(() => {
     const initCamera = async () => {
@@ -33,31 +34,39 @@ const BeanCapture: React.FC = () => {
     return () => {
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
 
   const handleCapture = () => {
     if (!videoRef.current || !canvasRef.current) return;
-
+  
     const canvas = canvasRef.current;
     const video = videoRef.current;
     const context = canvas.getContext('2d');
     if (!context) return;
-
+  
+    // ビデオフレームをキャプチャしてキャンバスに描画
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const imageData = canvas.toDataURL('image/png');
-    analyzeImage(imageData);
+  
+    // キャプチャ後、ビデオを非表示にしてキャンバスを表示
+    setIsCaptured(true);
+  
+    // キャプチャ後にAI解析を自動的に開始
+    analyzeImage();
   };
+  
+  const analyzeImage = async () => {
+    if (!canvasRef.current) return;
 
-  const analyzeImage = async (imageData: string) => {
     setIsAnalyzing(true);
+    const canvas = canvasRef.current;
 
     try {
+      const imageData = canvas.toDataURL('image/png'); // 画像データを取得
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -66,7 +75,6 @@ const BeanCapture: React.FC = () => {
 
       const result: { bean?: Bean } = await response.json();
       if (result && result.bean) {
-        // BeanFormにデータを送信
         navigate(`/beans/${beanId || 'new'}`, { state: { bean: result.bean } });
       } else {
         alert('解析結果を取得できませんでした。');
@@ -87,17 +95,35 @@ const BeanCapture: React.FC = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">ラベルを撮影して解析</h1>
       <div className="camera-section mb-4">
-        <video ref={videoRef} autoPlay playsInline className="w-full bg-gray-300" />
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className={`w-full bg-gray-300 ${isCaptured ? 'hidden' : ''}`}
+        />
+        <canvas
+          ref={canvasRef}
+          className={`w-full bg-gray-300 ${isCaptured ? '' : 'hidden'}`}
+        />
       </div>
       <div className="button-group space-y-4 space-x-4">
-        <button
-          onClick={handleCapture}
-          disabled={isAnalyzing}
-          className="bg-blue-500 text-white py-2 px-4 rounded-md"
-        >
-          {isAnalyzing ? '解析中...' : '撮影して解析'}
-        </button>
+        {!isCaptured && (
+          <button
+            onClick={handleCapture}
+            className="bg-blue-500 text-white py-2 px-4 rounded-md"
+          >
+            撮影して解析
+          </button>
+        )}
+        {isCaptured && (
+          <button
+            onClick={analyzeImage}
+            disabled={isAnalyzing}
+            className="bg-green-500 text-white py-2 px-4 rounded-md"
+          >
+            {isAnalyzing ? '解析中...' : '解析を開始'}
+          </button>
+        )}
         <button
           onClick={handleGoBack}
           className="bg-gray-500 text-white py-2 px-4 rounded-md"
