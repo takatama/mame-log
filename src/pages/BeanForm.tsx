@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
 import { fromUtcToLocalDate, fromLocalToUtc } from '../utils/date';
@@ -25,17 +25,30 @@ const BeanForm: React.FC = () => {
     notes: '',
   });
   const navigate = useNavigate();
+  const location = useLocation();
 
   const getBeanById = (beanId: number) => {
     return beans.find(bean => bean.id === beanId);
   }
 
   useEffect(() => {
-    if (!beanId) return;
-    const bean = getBeanById(Number(beanId));
-    if (!bean) return;
-    setBean(bean);
-  }, [beanId]);
+    // `location.state`からデータを取得して反映
+    if (location.state && typeof location.state?.bean === 'object') {
+      setBean((prevBean) => ({
+        ...prevBean,
+        ...(location.state.bean as Bean),
+      }));
+      return;
+    }
+
+    // `beanId`がある場合、既存のデータを取得
+    if (beanId) {
+      const existingBean = getBeanById(Number(beanId));
+      if (existingBean) {
+        setBean(existingBean);
+      }
+    }
+  }, [beanId, location.state]);
 
   const handlePost = async (newBean: Bean) => {
     try {
@@ -97,13 +110,26 @@ const BeanForm: React.FC = () => {
     }
   };
 
+  const handleNavigateToCapture = () => {
+    navigate(`/beans/${beanId || 'new'}/capture`);
+  };
+
   if (!bean) {
     return <div>豆が見つかりません。</div>
   }
 
   return (
     <div className="container mx-auto p-4">
-      {/* <h1 className="text-2xl font-bold mb-4">新しいコーヒー豆を追加</h1> */}
+      <h1 className="text-2xl font-bold mb-4">
+        {beanId ? '豆の編集' : '豆の追加'}
+      </h1>
+      <button
+          type="button"
+          onClick={handleNavigateToCapture}
+          className="bg-green-500 text-white py-2 px-4 rounded-md mr-2"
+        >
+          AIでラベルを解析
+      </button>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium">有効</label>
