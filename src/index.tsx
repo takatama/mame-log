@@ -6,6 +6,8 @@ import { z } from 'zod';
 interface Env {
   DB: D1Database;
   GEMINI_API_KEY: string;
+  MAME_LOG_IMAGES: KVNamespace;
+  HOST_NAME: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();
@@ -24,6 +26,7 @@ const beanSchema = z.object({
   seller: z.string().optional(),
   seller_url: z.string().optional(), // string().url() にすると空の場合にエラーになる
   photo_url: z.string().optional(),
+  photo_data_url: z.string().optional(),
   notes: z.string().optional(),
   is_active: z.number().nonnegative().optional(),
 });
@@ -65,20 +68,33 @@ app.post('/api/beans', async (c: Context<{ Bindings: Env }>) => {
       seller = '',
       seller_url = '',
       photo_url = '',
+      photo_data_url = '',
       notes = '',
       is_active = 0
     } = parsedBean;
+
+    const photoKey = photo_url || `/images/coffee-labels/${crypto.randomUUID()}.png`;
+
+    if (photo_data_url) {
+      const photoData = photo_data_url.split(",")[1]; // "data:image/png;base64,..." の形式を想定
+      const photoBuffer = Buffer.from(photoData, "base64");
+      const photoArrayBuffer = photoBuffer.buffer; // BufferをArrayBufferに変換
+    
+      await c.env.MAME_LOG_IMAGES.put(photoKey, photoArrayBuffer, {
+        metadata: { contentType: "image/png" },
+      });
+    }
 
     const result = await c.env.DB.prepare(
       `INSERT INTO beans (name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-      .bind(name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active)
+      .bind(name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photoKey, notes, is_active)
       .run();
 
     const insertedBean = {
       id: result.meta.last_row_id,
-      name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active
+      name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url: photoKey, notes, is_active
     }
     return c.json(insertedBean, 201);
   } catch (error) {
@@ -88,6 +104,39 @@ app.post('/api/beans', async (c: Context<{ Bindings: Env }>) => {
     } else {
       return c.json({ error: 'An unexpected error occurred' }, 400);
     }
+  }
+});
+
+app.get('/images/coffee-labels/:id', async (c: Context<{ Bindings: Env }>) => {
+  try {
+    const { id } = c.req.param();
+
+    if (!id) {
+      return c.json({ error: "Image ID is required" }, 400);
+    }
+
+    // KVストアのKeyを生成
+    const photoKey = `/images/coffee-labels/${id}`;
+
+    // KVストアから画像データを取得
+    const imageData = await c.env.MAME_LOG_IMAGES.get(photoKey, { type: 'arrayBuffer' });
+    const metadata = await c.env.MAME_LOG_IMAGES.getWithMetadata(photoKey);
+    const contentType = (metadata?.metadata as { contentType?: string })?.contentType;
+
+    if (!imageData || !contentType) {
+      return c.json({ error: "Image not found" }, 404);
+    }
+
+    // 画像データを返却
+    return new Response(imageData, {
+      headers: {
+        'Content-Type': contentType, // KVに保存されたContent-Type
+        'Cache-Control': 'public, max-age=3600', // キャッシュを有効化
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching image:", error);
+    return c.json({ error: "Internal Server Error" }, 500);
   }
 });
 
@@ -110,14 +159,26 @@ app.put('/api/beans/:id', async (c: Context<{ Bindings: Env }>) => {
     const bean = await c.req.json();
     bean.is_active = bean.is_active ? 1 : 0;
     const parsedBean = beanSchema.parse(bean);
-    const { name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active } = parsedBean;
+    const { name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, photo_data_url, notes, is_active } = parsedBean;
+
+    const photoKey = photo_url || `/images/coffee-labels/${crypto.randomUUID()}.png`;
+
+    if (photo_data_url) {
+      const photoData = photo_data_url.split(",")[1]; // "data:image/png;base64,..." の形式を想定
+      const photoBuffer = Buffer.from(photoData, "base64");
+      const photoArrayBuffer = photoBuffer.buffer; // BufferをArrayBufferに変換
+    
+      await c.env.MAME_LOG_IMAGES.put(photoKey, photoArrayBuffer, {
+        metadata: { contentType: "image/png" },
+      });
+    }
 
     const updateResult = await c.env.DB.prepare(
       `UPDATE beans
        SET name = ?, country = ?, area = ?, drying_method = ?, processing_method = ?, roast_level = ?, roast_date = ?, purchase_date = ?, purchase_amount = ?, price = ?, seller = ?, seller_url = ?, photo_url = ?, notes = ?, is_active = ?
        WHERE id = ?`
     )
-      .bind(name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active, c.req.param('id'))
+      .bind(name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photoKey, notes, is_active, c.req.param('id'))
       .run();
 
     if (!updateResult.success) {
@@ -142,6 +203,8 @@ app.delete('/api/beans/:beanId', async (c: Context<{ Bindings: Env }>) => {
     if (!beanId) {
       return c.json({ error: 'Bean ID is required' }, 400);
     }
+
+    // TODO KVの写真を削除
 
     // `brews` を削除
     const deleteBrewsResult = await c.env.DB.prepare(
@@ -407,7 +470,7 @@ purchase_dateとroast_dateは日付形式でお願いします。例: "2022-01-0
     }
 
     const beanString = geminiResult.candidates[0].content.parts[0].text;
-    console.log("bean:", beanString);
+    console.log(beanString);
     const bean = JSON.parse(beanString);
     if (bean.purchase_amount < 0) bean.purchase_amount = 0;
     if (bean.price < 0) bean.price = 0;
