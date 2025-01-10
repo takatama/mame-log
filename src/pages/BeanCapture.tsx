@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { NavigateOptions, useNavigate, useParams } from 'react-router-dom';
 import { Bean } from '../types/Bean';
 
 const BeanCapture: React.FC = () => {
@@ -9,6 +9,14 @@ const BeanCapture: React.FC = () => {
   const { beanId } = useParams();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isCaptured, setIsCaptured] = useState(false);
+
+  const handleGoBack = (options?: NavigateOptions) => {
+    if (beanId) {
+      navigate(`/beans/${beanId}/edit`, options);
+    } else {
+      navigate('/beans', options);
+    }
+  };
 
   useEffect(() => {
     const initCamera = async () => {
@@ -22,11 +30,7 @@ const BeanCapture: React.FC = () => {
       } catch (error) {
         console.error('Failed to access camera:', error);
         alert('カメラにアクセスできませんでした。');
-        if (beanId) {
-          navigate(`/beans/${beanId}`);
-        } else {
-          navigate('/beans');
-        }
+        handleGoBack();
       }
     };
 
@@ -75,7 +79,7 @@ const BeanCapture: React.FC = () => {
 
       const result: { bean?: Bean } = await response.json();
       if (result && result.bean) {
-        navigate(`/beans/${beanId || 'new'}`, { state: { bean: result.bean } });
+        handleGoBack({ state: { bean: result.bean } });
       } else {
         alert('解析結果を取得できませんでした。');
       }
@@ -85,10 +89,6 @@ const BeanCapture: React.FC = () => {
     } finally {
       setIsAnalyzing(false);
     }
-  };
-
-  const handleGoBack = () => {
-    navigate(`/beans/${beanId || 'new'}`);
   };
 
   return (
@@ -125,7 +125,7 @@ const BeanCapture: React.FC = () => {
           </button>
         )}
         <button
-          onClick={handleGoBack}
+          onClick={() => handleGoBack()}
           className="bg-gray-500 text-white py-2 px-4 rounded-md"
         >
           戻る
