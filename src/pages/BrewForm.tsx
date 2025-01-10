@@ -4,7 +4,6 @@ import { Bean } from '../types/Bean';
 import { Brew } from '../types/Brew';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
-import { fromUtcToLocalDateTime, fromLocalToUtc } from '../utils/date';
 
 const BrewForm: React.FC = () => {
   const { beans, brews, updateBrew, setBrews } = useBrewContext();
@@ -151,16 +150,6 @@ const BrewForm: React.FC = () => {
         {brewId ? '抽出ログを編集' : '新しく淹れる'}
       </h1>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium">抽出日時</label>
-          <input
-            type="datetime-local"
-            value={fromUtcToLocalDateTime(brew.brew_date)}
-            onChange={(e) => setBrew({ ...brew, brew_date: fromLocalToUtc(e.target.value) })}
-            className="mt-1 block w-full border rounded-md p-2"
-            required
-          />
-        </div>
         {baseBrew && (
           <label className="block text-sm font-medium">(カッコ内は前回の選択)</label>
         )}
