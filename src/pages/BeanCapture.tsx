@@ -11,36 +11,35 @@ const BeanCapture: React.FC = () => {
   const [isCaptured, setIsCaptured] = useState(false);
 
   const handleGoBack = (options?: NavigateOptions) => {
-    if (beanId) {
-      navigate(`/beans/${beanId}/edit`, options);
-    } else {
-      navigate('/beans/new', options);
+    const path = beanId ? `/beans/${beanId}/edit` : '/beans/new';
+    navigate(path, options);
+  };
+  
+  const initCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.error('Failed to access camera:', error);
+      alert('カメラにアクセスできませんでした。');
+      handleGoBack();
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
     }
   };
 
   useEffect(() => {
-    const initCamera = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (error) {
-        console.error('Failed to access camera:', error);
-        alert('カメラにアクセスできませんでした。');
-        handleGoBack();
-      }
-    };
-
     initCamera();
-    return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach((track) => track.stop());
-      }
-    };
+    return () => stopCamera();
   }, []);
 
   const handleCapture = () => {
