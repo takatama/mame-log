@@ -41,7 +41,7 @@ const BeanDetail: React.FC = () => {
   };
 
   if (!bean) {
-    return <div>豆が見つかりません。</div>
+    return <div>読み込み中...</div>
   }
 
   return (

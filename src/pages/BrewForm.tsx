@@ -143,7 +143,7 @@ const BrewForm: React.FC = () => {
     return Array.from({ length: 6 }, (_, i) => (brew?.bean_amount ?? 20) * 2 + (i - 2) * 5);
   }
 
-  if (!brew) return <div>Loading...</div>;
+  if (!brew) return <div>読み込み中...</div>;
 
   return (
     <div className="container mx-auto p-4">

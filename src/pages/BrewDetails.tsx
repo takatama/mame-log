@@ -42,7 +42,7 @@ const BrewDetails: React.FC = () => {
   };
 
   if (!brew) {
-    return <div>抽出ログが見つかりません。</div>
+    return <div>読み込み中...</div>
   }
 
   return (
