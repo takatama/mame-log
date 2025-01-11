@@ -129,17 +129,17 @@ const BrewForm: React.FC = () => {
   );
 
   const beanAmountOptions = (): number[] => {
-    // 1 cups 10g がデフォルト
+    // 1 cup 10g がデフォルト
     // 2g刻みで5段階に増減できるようにする
     // 2 cups の場合は [16, 18, 20, 22, 24]
     return Array.from({ length: 5 }, (_, i) => (brew?.cups ?? 1) * 10 + (i - 2) * 2);
   }
 
   const bloomAmountOptions = (): number[] => {
-    // コーヒーの量の2倍がデフォルト
+    // 1 cup 10g の2倍がデフォルト
     // 5ml刻みで6段階に増減できるようにする
-    // 20g の場合は [30, 35, 40, 45, 50, 55]
-    return Array.from({ length: 6 }, (_, i) => (brew?.bean_amount ?? 20) * 2 + (i - 2) * 5);
+    // 20g の場合は [35, 40, 45, 50, 55, 60]
+    return Array.from({ length: 6 }, (_, i) => (brew?.cups ?? 2) * 20 + (i - 2) * 5 + 5);
   }
 
   if (!brew) return <div>読み込み中...</div>;
