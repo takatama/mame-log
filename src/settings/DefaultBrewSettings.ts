@@ -1,4 +1,5 @@
 import { BrewSettings, DynamicBrewSettingOption, FixedBrewSettingOption } from "../types/Brew";
+import { generateDynamicOptions } from "../utils/dynamicOptions"
 
 const cups: FixedBrewSettingOption<number> = {
   type: "fixed",
@@ -17,12 +18,7 @@ const beanAmount: DynamicBrewSettingOption<number> = {
   baseAmountPerCup: 10, // 1カップにつき10g
   stepSize: 2,          // 増減幅2g
   numSteps: 5,          // 5段階
-  dynamicOptions: (cups, baseAmountPerCup, stepSize, numSteps) => {
-    // 2g刻みで5段階に増減できるようにする
-    // 2 cups の場合は [16, 18, 20, 22, 24]
-    const options = Array.from({ length: numSteps }, (_, i) => (cups ?? 1) * baseAmountPerCup + (i - 2) * stepSize);
-    return options.filter(option => option > 0);
-  }
+  dynamicOptions: generateDynamicOptions
 };
 
 const grindSize: FixedBrewSettingOption<string> = {
@@ -49,14 +45,9 @@ const bloomWaterAmount: DynamicBrewSettingOption<number> = {
   unitLabel: "ml",
   isNumeric: true,
   baseAmountPerCup: 20, // 1カップにつき20ml
-  stepSize: 5,          // 増減幅 5ml
+  stepSize: 10,         // 増減幅 10ml
   numSteps: 6,          // 6段階
-  dynamicOptions: (cups, baseAmountPerCup, stepSize, numSteps) => {
-    // 5ml刻みで6段階に増減できるようにする
-    // 2カップの場合は [35, 40, 45, 50, 55, 60]
-    const options = Array.from({ length: numSteps }, (_, i) => (cups ?? 1) * baseAmountPerCup + (i - 2) * stepSize + stepSize);
-    return options.filter(option => option > 0);
-  }
+  dynamicOptions: generateDynamicOptions
 };
 
 const bloomTime: FixedBrewSettingOption<number> = {

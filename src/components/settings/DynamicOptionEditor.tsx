@@ -16,7 +16,7 @@ const DynamicOptionEditor: React.FC<DynamicOptionEditorProps> = ({ setting, onCh
 
   return (
     <>
-      <div className="mb-4">
+      <div className="mb-2">
         <label className="block text-sm font-medium">カップあたりの量</label>
         <input
           type="number"
@@ -28,7 +28,7 @@ const DynamicOptionEditor: React.FC<DynamicOptionEditorProps> = ({ setting, onCh
           className="block border rounded-md p-2 w-full"
         />
       </div>
-      <div>
+      <div className="mb-2">
         <label className="block text-sm font-medium">増減幅</label>
         <input
           type="string"
@@ -40,7 +40,7 @@ const DynamicOptionEditor: React.FC<DynamicOptionEditorProps> = ({ setting, onCh
           className="block border rounded-md p-2 w-full"
         />
       </div>
-      <div>
+      <div className="mb-2">
         <label className="block text-sm font-medium">段階数</label>
         <input
           type="string"
@@ -52,9 +52,9 @@ const DynamicOptionEditor: React.FC<DynamicOptionEditorProps> = ({ setting, onCh
           className="block border rounded-md p-2 w-full"
         />
       </div>
-      <div className="mt-4">
-        <h4 className="text-sm font-medium">1カップの場合の選択肢</h4>
-        <div className="mt-2 p-2 border rounded-md bg-gray-50">
+      <div className="mb-2">
+        <label className="text-sm font-medium">1カップの場合の選択肢</label>
+        <div className="p-2 border rounded-md bg-gray-50">
           {setting.baseAmountPerCup &&
             setting.stepSize &&
             setting.numSteps &&
