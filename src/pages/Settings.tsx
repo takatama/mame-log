@@ -7,45 +7,45 @@ const Settings: React.FC = () => {
 
   // 固定選択肢を編集
   const handleFixedOptionChange = (key: string, index: number, value: string) => {
-    const updatedOptions = [...(localSettings[key].options || [])];
+    const updatedOptions = [...(localSettings[key].fixedOptions || [])];
     updatedOptions[index] = value;
     setLocalSettings({
       ...localSettings,
       [key]: {
         ...localSettings[key],
-        options: updatedOptions,
+        fixedOptions: updatedOptions,
       },
     });
   };
 
   // 固定選択肢を追加
   const handleAddFixedOption = (key: string) => {
-    const updatedOptions = [...(localSettings[key].options || []), ''];
+    const updatedOptions = [...(localSettings[key].fixedOptions || []), ''];
     setLocalSettings({
       ...localSettings,
       [key]: {
         ...localSettings[key],
-        options: updatedOptions,
+        fixedOptions: updatedOptions,
       },
     });
   };
 
   // 固定選択肢を削除
   const handleDeleteFixedOption = (key: string, index: number) => {
-    const updatedOptions = (localSettings[key].options || []).filter(
+    const updatedOptions = (localSettings[key].fixedOptions || []).filter(
       (_, i) => i !== index
     );
     setLocalSettings({
       ...localSettings,
       [key]: {
         ...localSettings[key],
-        options: updatedOptions,
+        fixedOptions: updatedOptions,
       },
     });
   };
 
   // 動的値を編集
-  const handleDynamicValueChange = (key: string, field: 'amountPerCup' | 'step', value: number) => {
+  const handleDynamicValueChange = (key: string, field: 'baseAmountPerCup' | 'stepSize' | 'numSteps', value: number) => {
     setLocalSettings({
       ...localSettings,
       [key]: {
@@ -68,11 +68,11 @@ const Settings: React.FC = () => {
       <form className="space-y-6">
         {Object.entries(localSettings).map(([key, setting]) => (
           <div key={key} className="mb-6 border p-4 rounded-md">
-            <h2 className="text-xl font-semibold mb-2">{setting.label} {setting.unit ? `[${setting.unit}]` : ""}</h2>
-            {setting.options ? (
+            <h2 className="text-xl font-semibold mb-2">{setting.displayName} {setting.unitLabel ? `[${setting.unitLabel}]` : ""}</h2>
+            {setting.fixedOptions ? (
               <>
                 {/* <p className="text-sm text-gray-600">固定の選択肢を編集</p> */}
-                {setting.options.map((option, index) => (
+                {setting.fixedOptions.map((option, index) => (
                   <div key={index} className="flex items-center space-x-2 mb-2">
                     <input
                       type="text"
@@ -106,9 +106,9 @@ const Settings: React.FC = () => {
                   <label className="block text-sm font-medium">カップあたりの量</label>
                   <input
                     type="number"
-                    value={setting.amountPerCup || ''}
+                    value={setting.baseAmountPerCup || ''}
                     onChange={(e) =>
-                      handleDynamicValueChange(key, 'amountPerCup', Number(e.target.value))
+                      handleDynamicValueChange(key, 'baseAmountPerCup', Number(e.target.value))
                     }
                     className="block border rounded-md p-2 w-full"
                   />
@@ -117,9 +117,20 @@ const Settings: React.FC = () => {
                   <label className="block text-sm font-medium">増減幅</label>
                   <input
                     type="number"
-                    value={setting.step || ''}
+                    value={setting.stepSize || ''}
                     onChange={(e) =>
-                      handleDynamicValueChange(key, 'step', Number(e.target.value))
+                      handleDynamicValueChange(key, 'stepSize', Number(e.target.value))
+                    }
+                    className="block border rounded-md p-2 w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">段階数</label>
+                  <input
+                    type="number"
+                    value={setting.numSteps || ''}
+                    onChange={(e) =>
+                      handleDynamicValueChange(key, 'numSteps', Number(e.target.value))
                     }
                     className="block border rounded-md p-2 w-full"
                   />

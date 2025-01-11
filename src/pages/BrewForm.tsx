@@ -116,20 +116,20 @@ const BrewForm: React.FC = () => {
   const renderBrewForm = () => {
     const cups = brew?.cups ?? 1; // デフォルトで1カップ
     return Object.entries(settings).map(([key, setting]) => {
-      const diff = (baseBrew && baseBrew[setting.property]) ? `(${baseBrew[setting.property]})` : '';
+      const diff = (baseBrew && baseBrew[setting.key]) ? `(${baseBrew[setting.key]})` : '';
       return (
         <div key={key}>
           <label className="block text-sm font-medium">
-            {setting.label} {setting.unit ? `[${setting.unit}]` : ""} {diff || ""}
+            {setting.displayName} {setting.unitLabel ? `[${setting.unitLabel}]` : ""} {diff || ""}
           </label>
           <div className="flex space-x-4 py-2">
             {generateOptions(setting, cups).map((option, _, array) => (
               <button
                 type="button"
                 key={option}
-                onClick={() => setBrew({ ...brew, [setting.property]: option })}
+                onClick={() => setBrew({ ...brew, [setting.key]: option })}
                 className={`p-2 rounded-md flex-1 w-1/${array.length} ${
-                  brew[setting.property] === option
+                  brew[setting.key] === option
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200"
                 }`}
