@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
-import { Brew } from '../types/Brew';
+import { Brew, BrewSettings, generateOptions } from '../types/Brew';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
+import { DefaultBewSettings } from '../settings/DefaultBrewSettings';
 
 const BrewForm: React.FC = () => {
   const { beans, brews, updateBrew, setBrews } = useBrewContext();
@@ -11,6 +12,7 @@ const BrewForm: React.FC = () => {
   const [bean, setBean] = useState<Bean | undefined>(undefined);
   const [brew, setBrew] = useState<Brew>({ brew_date: new Date().toISOString() });
   const [baseBrew, setBaseBrew] = useState<Brew>();
+  const [brewSettings] = useState<BrewSettings>(DefaultBewSettings);
 
   useEffect(() => {
     if (brewId) {
@@ -109,42 +111,39 @@ const BrewForm: React.FC = () => {
     }
   };
   
-  const renderPresetButtons = <T extends string | number>(
-    options: T[],
-    selectedOption: T,
-    property: keyof Brew
-  ) => (
-    <div className="flex space-x-4 py-2">
-      {options.map((option) => (
-        <button
-          type='button'
-          key={option}
-          onClick={() => setBrew({ ...brew, [property]: option })}
-          className={`p-2 rounded-md flex-1 w-1/${options.length} ${selectedOption === option ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        >
-          {option}
-        </button>
-      ))}
-    </div>
-  );
-
-  const beanAmountOptions = (): number[] => {
-    // 1 cup 10g がデフォルト
-    // 2g刻みで5段階に増減できるようにする
-    // 2 cups の場合は [16, 18, 20, 22, 24]
-    return Array.from({ length: 5 }, (_, i) => (brew?.cups ?? 1) * 10 + (i - 2) * 2);
-  }
-
-  const bloomAmountOptions = (): number[] => {
-    // 1 cup 10g の2倍がデフォルト
-    // 5ml刻みで6段階に増減できるようにする
-    // 20g の場合は [35, 40, 45, 50, 55, 60]
-    return Array.from({ length: 6 }, (_, i) => (brew?.cups ?? 2) * 20 + (i - 2) * 5 + 5);
-  }
-
-  if (!brew) return <div>読み込み中...</div>;
-
   const isPositive = (num : number | undefined) => num && num > 0;
+
+  const renderBrewForm = () => {
+    const cups = brew?.cups ?? 1; // デフォルトで1カップ
+    return Object.entries(brewSettings).map(([key, setting]) => {
+      const diff = (baseBrew && baseBrew[setting.property]) ? `(${baseBrew[setting.property]})` : '';
+      return (
+        <div key={key}>
+          <label className="block text-sm font-medium">
+            {setting.label} {setting.unit ? `[${setting.unit}]` : ""} {diff || ""}
+          </label>
+          <div className="flex space-x-4 py-2">
+            {generateOptions(setting, cups).map((option, _, array) => (
+              <button
+                type="button"
+                key={option}
+                onClick={() => setBrew({ ...brew, [setting.property]: option })}
+                className={`p-2 rounded-md flex-1 w-1/${array.length} ${
+                  brew[setting.property] === option
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200"
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    });
+  };
+    
+  if (!brew) return <div>読み込み中...</div>;
 
   return (
     <div className="container mx-auto p-4">
@@ -177,30 +176,7 @@ const BrewForm: React.FC = () => {
         </div>
 
         {/* 抽出設定 */}
-        <div>
-          <label className="block text-sm font-medium">カップ数 { isPositive(baseBrew?.cups) ? `(${baseBrew?.cups})` : '' }</label>
-          {renderPresetButtons([1, 2, 3, 4], brew?.cups ?? 0, 'cups')}
-        </div>
-        <div>
-          <label className="block text-sm font-medium">豆の量 [g] { isPositive(baseBrew?.bean_amount) ? `(${baseBrew?.bean_amount})` : '' }</label>
-          {renderPresetButtons(beanAmountOptions(), brew?.bean_amount ?? '', 'bean_amount')}
-        </div>
-        <div>
-          <label className="block text-sm font-medium">挽き具合 { baseBrew?.grind_size ? `(${baseBrew.grind_size})` : '' }</label>
-          {renderPresetButtons(['極細', '細', '中細', '中', '粗'], brew?.grind_size ?? '', 'grind_size')}
-        </div>
-        <div>
-          <label className="block text-sm font-medium">湯温 [℃] { isPositive(baseBrew?.water_temp) ? `(${baseBrew?.water_temp})` : '' }</label>
-          {renderPresetButtons([80, 85, 90, 95], brew?.water_temp ?? 0, 'water_temp')}
-        </div>
-        <div>
-          <label className="block text-sm font-medium">蒸らし湯量 [ml] { isPositive(baseBrew?.bloom_water_amount) ? `(${baseBrew?.bloom_water_amount})` : '' }</label>
-          {renderPresetButtons(bloomAmountOptions(), brew?.bloom_water_amount ?? 0, 'bloom_water_amount')}
-        </div>
-        <div>
-          <label className="block text-sm font-medium">蒸らし時間 [秒] { isPositive(baseBrew?.bloom_time) ? `(${baseBrew?.bloom_time})` : '' }</label>
-          {renderPresetButtons([30, 45, 60], brew?.bloom_time ?? 0, 'bloom_time')}
-        </div>
+        {renderBrewForm()}
         <div>
           <label className="block text-sm font-medium mb-2">注湯</label>
           {(brew?.pours ?? []).map((pour: number, index: number) => (
