@@ -31,7 +31,6 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const setBeans = (newBeans: Bean[]) => {
     setBeansState(newBeans);
     setBrewsState(updateBrewsWithBeans(newBeans, brews));
-    beans.sort((a, b) => b.purchase_date.localeCompare(a.purchase_date));
   };
 
   const setBrews = (newBrews: Brew[]) => {

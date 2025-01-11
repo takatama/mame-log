@@ -12,21 +12,14 @@ CREATE TABLE IF NOT EXISTS beans (
     drying_method TEXT,
     processing_method TEXT,
     roast_level TEXT,
-    roast_date DATE,
-    purchase_date DATE,
-    purchase_amount INTEGER,
-    price INTEGER,
-    seller TEXT,
-    seller_url TEXT,
     photo_url TEXT,
-    notes TEXT,
-    is_active INTEGER DEFAULT 1
+    notes TEXT
 );
 
-INSERT INTO beans (id, name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active)
+INSERT INTO beans (id, name, country, area, drying_method, processing_method, roast_level, photo_url, notes)
 VALUES
-(1, 'メキシコ オアハカ ハニー', 'メキシコ', 'オアハカ', 'ペタテドライ', 'ハニー', '中煎り', '2024-11-30T15:00:00.000Z', '2024-12-01T15:00:00.000Z', 200, 1500, 'コーヒー豆専門店A', 'https://example.com', 'https://via.placeholder.com/150', '', 1),
-(2, 'オリエンテナチュラル', 'グアテマラ', 'オリエンテ', 'ナチュラル', 'ナチュラル', '浅煎り', '2024-12-31T15:00:00.000Z', '2025-01-02T15:00:00.000Z', 250, 1800, 'コーヒー豆太郎', 'https://example.com', 'https://via.placeholder.com/150', '', 1);
+(1, 'メキシコ オアハカ ハニー', 'メキシコ', 'オアハカ', 'ペタテドライ', 'ハニー', '中煎り', '', ''),
+(2, 'オリエンテナチュラル', 'グアテマラ', 'オリエンテ', 'ナチュラル', 'ナチュラル', '浅煎り', '', '');
 
 -- 抽出記録テーブル
 DROP TABLE IF EXISTS brews;

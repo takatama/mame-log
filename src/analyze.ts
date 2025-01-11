@@ -16,12 +16,6 @@ async function handleGemini(base64Data: string, env: Env): Promise<Response> {
 - 乾燥方法 (drying_method)
 - 処理方法 (processing_method)
 - 焙煎度 (roast_level)
-- 焙煎日 (roast_date)
-- 購入日 (purchase_date)
-- 購入量 (purchase_amount)
-- 価格 (price)
-- 販売者 (seller)
-- 販売者URL (seller_url)
 - メモ (notes)
 
 出力形式はJSONでお願いします。含まれていない項目はNULLではなく""にしてください。
@@ -40,12 +34,6 @@ purchase_dateとroast_dateは日付形式でお願いします。例: "2022-01-0
         drying_method: {type: "STRING"},
         processing_method: {type: "STRING"},
         roast_level: {type: "STRING"},
-        roast_date: {type: "STRING"},
-        purchase_amount: {type: "INTEGER"},
-        purchase_date: {type: "STRING"},
-        price: {type: "INTEGER"},
-        seller: {type: "STRING"},
-        seller_url: {type: "STRING"},
         notes: {type: "STRING"}
       }
     }

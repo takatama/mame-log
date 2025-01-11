@@ -11,16 +11,9 @@ const beanSchema = z.object({
   drying_method: z.string().optional(),
   processing_method: z.string().optional(),
   roast_level: z.string().optional(),
-  roast_date: z.string().optional(),
-  purchase_date: z.string().optional(),
-  purchase_amount: z.number().nonnegative().optional(),
-  price: z.number().nonnegative().optional(),
-  seller: z.string().optional(),
-  seller_url: z.string().optional(), // string().url() にすると空の場合にエラーになる
   photo_url: z.string().optional(),
   photo_data_url: z.string().optional(),
   notes: z.string().optional(),
-  is_active: z.number().nonnegative().optional(),
 });
 
 app.post('/', async (c: Context<{ Bindings: Env }>) => {
@@ -36,16 +29,9 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
       drying_method = '',
       processing_method = '',
       roast_level = '',
-      roast_date = '',
-      purchase_date = '',
-      purchase_amount = '',
-      price = 0,
-      seller = '',
-      seller_url = '',
       photo_url = '',
       photo_data_url = '',
       notes = '',
-      is_active = 0
     } = parsedBean;
 
     const photoKey = photo_url || `/images/coffee-labels/${crypto.randomUUID()}.png`;
@@ -61,15 +47,15 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
     }
 
     const result = await c.env.DB.prepare(
-      `INSERT INTO beans (name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, notes, is_active)
+      `INSERT INTO beans (name, country, area, drying_method, processing_method, roast_level, photo_url, notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-      .bind(name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photoKey, notes, is_active)
+      .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes)
       .run();
 
     const insertedBean = {
       id: result.meta.last_row_id,
-      name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url: photoKey, notes, is_active
+      name, country, area, drying_method, processing_method, roast_level, photo_url: photoKey, notes
     }
     return c.json(insertedBean, 201);
   } catch (error) {
@@ -101,7 +87,7 @@ app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
     const bean = await c.req.json();
     bean.is_active = bean.is_active ? 1 : 0;
     const parsedBean = beanSchema.parse(bean);
-    const { name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photo_url, photo_data_url, notes, is_active } = parsedBean;
+    const { name, country, area, drying_method, processing_method, roast_level, photo_url, photo_data_url, notes } = parsedBean;
 
     const photoKey = photo_url || `/images/coffee-labels/${crypto.randomUUID()}.png`;
 
@@ -117,10 +103,10 @@ app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
 
     const updateResult = await c.env.DB.prepare(
       `UPDATE beans
-       SET name = ?, country = ?, area = ?, drying_method = ?, processing_method = ?, roast_level = ?, roast_date = ?, purchase_date = ?, purchase_amount = ?, price = ?, seller = ?, seller_url = ?, photo_url = ?, notes = ?, is_active = ?
+       SET name = ?, country = ?, area = ?, drying_method = ?, processing_method = ?, roast_level = ?, photo_url = ?, notes = ?
        WHERE id = ?`
     )
-      .bind(name, country, area, drying_method, processing_method, roast_level, roast_date, purchase_date, purchase_amount, price, seller, seller_url, photoKey, notes, is_active, c.req.param('id'))
+      .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes, c.req.param('id'))
       .run();
 
     if (!updateResult.success) {
