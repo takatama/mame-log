@@ -19,29 +19,50 @@ export interface Brew {
   notes?: string;
 }
 
-export interface BrewSettingOption<T> {
+export interface BaseSettingOption<T> {
   key: keyof Brew;           // 対応するBrewのプロパティ名
   displayName: string;       // 項目の表示名
   isNumeric: boolean;        // 項目が数字かどうか
   unitLabel?: string;        // 項目の単位（例: "ml", "g"）
-  fixedOptions?: T[];        // 固定選択肢（動的生成がない場合）
-  baseAmountPerCup?: number; // カップ数に対する基本量
-  stepSize?: number;         // 増減幅
-  numSteps?: number;         // 段階数
+}
+
+export interface FixedBrewSettingOption<T> extends BaseSettingOption<T> {
+  type: 'fixed';
+  fixedOptions: T[];        // 固定選択肢（動的生成がない場合）
+}
+
+export interface DynamicBrewSettingOption<T> extends BaseSettingOption<T> {
+  type: 'dynamic';
+  baseAmountPerCup: number; // カップ数に対する基本量
+  stepSize: number;         // 増減幅
+  numSteps: number;         // 段階数
   // 動的選択肢生成
-  dynamicOptions?: (cups: number, baseAmountPerCup: number, stepSize: number, numSteps: number) => T[];
+  dynamicOptions: (cups: number, baseAmountPerCup: number, stepSize: number, numSteps: number) => T[];
+}
+
+export type BrewSettingOption<T> = FixedBrewSettingOption<T> | DynamicBrewSettingOption<T>;
+
+export function isFixedOption<T>(setting: BrewSettingOption<T>): setting is FixedBrewSettingOption<T> {
+  return setting.type === 'fixed'
+}
+
+export function isDynamicOption<T>(setting: BrewSettingOption<T>): setting is DynamicBrewSettingOption<T> {
+  return setting.type === 'dynamic'
 }
 
 export const generateOptions = <T>(
   setting: BrewSettingOption<T>,
-  cups: number
+  cups: number = 1
 ): T[] => {
-  if (setting.dynamicOptions && setting.baseAmountPerCup && setting.stepSize && setting.numSteps) {
+  if (isDynamicOption(setting)) {
     return setting.dynamicOptions(cups, setting.baseAmountPerCup, setting.stepSize, setting.numSteps);
   }
-  return setting.fixedOptions ?? [];
+  if (isFixedOption(setting)) {
+    return setting.fixedOptions ?? [];
+  }
+  return [];
 };
 
 export type BrewSettings = {
-  [key: string]: BrewSettingOption<any>;
+  [key: string]: BrewSettingOption<string | number>;
 };
