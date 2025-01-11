@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server'
 import beans from './beans'
 import brews from './brews'
 import analyze from './analyze'
+import settings from './api/settings'
 
 export interface Env {
   DB: D1Database;
@@ -16,6 +17,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.route('/api/beans', beans)
 app.route('/api/brews', brews)
 app.route('/api/analyze', analyze)
+app.route('/api/settings', settings)
 
 app.get('/images/coffee-labels/:id', async (c: Context<{ Bindings: Env }>) => {
   try {

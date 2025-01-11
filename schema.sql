@@ -1,5 +1,5 @@
 -- FOREING KEY制約が影響を受けない順番で削除する
-DROP TABLE IF EXISTS pours;
+DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS brews;
 DROP TABLE IF EXISTS beans;
 
@@ -22,7 +22,6 @@ VALUES
 (2, 'オリエンテナチュラル', 'グアテマラ', 'オリエンテ', 'ナチュラル', 'ナチュラル', '浅煎り', '', '');
 
 -- 抽出記録テーブル
-DROP TABLE IF EXISTS brews;
 CREATE TABLE IF NOT EXISTS brews (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     brew_date DATETIME NOT NULL,
@@ -45,3 +44,12 @@ CREATE TABLE IF NOT EXISTS brews (
 INSERT INTO brews (id, brew_date, bean_id, bean_amount, grind_size, cups, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes)
 VALUES
 (1, '2024-12-29T23:00:00.000Z', 1, 20, '中細', 2, 85, 55, 45, '[140, 220, 300]', 4, 3, 2, 4, 'フルーティーでおいしい');
+
+-- 設定情報テーブル
+CREATE TABLE IF NOT EXISTS settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    settings JSON NOT NULL
+);
+INSERT INTO settings (id, settings)
+VALUES
+(1, '{}');
