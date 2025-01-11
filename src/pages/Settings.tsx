@@ -5,31 +5,15 @@ import FixedOptionEditor from '../components/settings/FixedOptionEditor';
 import DynamicOptionEditor from '../components/settings/DynamicOptionEditor';
 
 const Settings: React.FC = () => {
-  const { settings, updateSettings, saveSettings, loadSettings } = useSettingsContext();
+  const { settings, saveSettings, loadSettings } = useSettingsContext();
   const [localSettings, setLocalSettings] = useState(settings);
 
   useEffect(() => {
     setLocalSettings(settings);
   }, [settings]);
-  
-  const handleSave = () => {
-    const sanitizedSettings = Object.entries(localSettings).reduce((acc, [key, setting]) => {
-      acc[key] = {
-        ...setting,
-        ...(isFixedOption(setting) && {
-          fixedOptions: setting.fixedOptions
-            ?.flatMap((option) => {
-              if (typeof option !== 'string') return option;
-              const trimmed = option.trim();
-              return trimmed ? trimmed : [];
-            }) as (string | number)[] || undefined,
-        }),
-      };
-      return acc;
-    }, {} as typeof localSettings);
-    setLocalSettings(sanitizedSettings);
-    updateSettings(sanitizedSettings);
-    saveSettings();
+
+  const handleSave = async () => {
+    await saveSettings(localSettings);
     alert("設定が保存されました！");
   };
 

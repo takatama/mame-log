@@ -1,16 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { BrewSettings, BrewSettingOption } from '../types/Brew';
+import { BrewSettings } from '../types/Brew';
 import { DefaultBrewSettings as initialSettings } from '../settings/DefaultBrewSettings';
 import { isDynamicOption } from '../types/Brew';
+import { isFixedOption } from '../types/Brew';
 
 const SettingsContext = createContext<{
   settings: BrewSettings;
-  updateSettings: (newSettings: Partial<BrewSettings>) => void;
-  saveSettings: () => void;
+  saveSettings: (newSettings: BrewSettings) => void;
   loadSettings: () => void;
 }>({
   settings: initialSettings,
-  updateSettings: () => {},
   saveSettings: () => {},
   loadSettings: () => {},
 });
@@ -18,25 +17,29 @@ const SettingsContext = createContext<{
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<BrewSettings>(initialSettings);
 
-  const updateSettings = (newSettings: Partial<BrewSettings>) => {
-    setSettings((prev) => {
-      const updatedSettings: BrewSettings = { ...prev };
-      Object.entries(newSettings).forEach(([key, value]) => {
-        if (value) {
-          updatedSettings[key] = value as BrewSettingOption<any>;
-        }
-      });
-      return updatedSettings;
-    });
-  };
+  const saveSettings = async (newSettings: BrewSettings) => {
+    const sanitizedSettings = Object.entries(newSettings).reduce((acc, [key, setting]) => {
+      acc[key] = {
+        ...setting,
+        ...(isFixedOption(setting) && {
+          fixedOptions: setting.fixedOptions
+            ?.flatMap((option) => {
+              if (typeof option !== 'string') return option;
+              const trimmed = option.trim();
+              return trimmed ? trimmed : [];
+            }) as (string | number)[] || undefined,
+        }),
+      };
+      return acc;
+    }, {} as typeof newSettings);
 
-  const saveSettings = async () => {
-    console.log('save', settings)
+    setSettings(sanitizedSettings);
+
     try {
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(sanitizedSettings),
       });
 
       if (!response.ok) {
@@ -65,10 +68,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (isDynamicOption(updatedSettings[settingKey]) && isDynamicOption(initialSettings[settingKey])) {
           updatedSettings[settingKey].dynamicOptions = initialSettings[settingKey].dynamicOptions;
         }
-    });
+      });
   
-      console.log('loadedSettings', loadedSettings)
-      console.log('updatedSettings', updatedSettings);
       setSettings(updatedSettings);
     } catch (error) {
       console.error(error);
@@ -81,7 +82,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, loadSettings }}>
+    <SettingsContext.Provider value={{ settings, saveSettings, loadSettings }}>
       {children}
     </SettingsContext.Provider>
   );
