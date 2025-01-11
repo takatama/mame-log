@@ -6,7 +6,7 @@ const Settings: React.FC = () => {
   const [localSettings, setLocalSettings] = useState(settings);
 
   // 固定選択肢を編集
-  const handleFixedOptionChange = (key: string, index: number, value: string) => {
+  const handleFixedOptionChange = (key: string, index: number, value: string | number) => {
     const updatedOptions = [...(localSettings[key].fixedOptions || [])];
     updatedOptions[index] = value;
     setLocalSettings({
@@ -90,9 +90,13 @@ const Settings: React.FC = () => {
                     <input
                       type="text"
                       value={option}
+                      inputMode={setting.isNumeric ? "numeric" : undefined}
                       onChange={(e) =>
-                        handleFixedOptionChange(key, index, e.target.value)
-                      }
+                        handleFixedOptionChange(
+                          key,
+                          index,
+                          setting.isNumeric ? Number(e.target.value) : e.target.value
+                      )}
                       className="block border rounded-md p-2 w-3/4"
                     />
                     <button
@@ -119,6 +123,7 @@ const Settings: React.FC = () => {
                   <label className="block text-sm font-medium">カップあたりの量</label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     value={setting.baseAmountPerCup || ''}
                     onChange={(e) =>
                       handleDynamicValueChange(key, 'baseAmountPerCup', Number(e.target.value))
@@ -129,7 +134,8 @@ const Settings: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium">増減幅</label>
                   <input
-                    type="number"
+                    type="string"
+                    inputMode="numeric"
                     value={setting.stepSize || ''}
                     onChange={(e) =>
                       handleDynamicValueChange(key, 'stepSize', Number(e.target.value))
@@ -140,7 +146,8 @@ const Settings: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium">段階数</label>
                   <input
-                    type="number"
+                    type="string"
+                    inputMode="numeric"
                     value={setting.numSteps || ''}
                     onChange={(e) =>
                       handleDynamicValueChange(key, 'numSteps', Number(e.target.value))

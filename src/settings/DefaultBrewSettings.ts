@@ -4,12 +4,14 @@ export const DefaultBrewSettings: BrewSettings = {
   cups: {
     key: "cups",
     displayName: "カップ数",
+    isNumeric: true,
     fixedOptions: [1, 2, 3, 4],
   },
   beanAmount: {
     key: "bean_amount",
     displayName: "豆の量",
     unitLabel: "g",
+    isNumeric: true,
     baseAmountPerCup: 10, // 1カップにつき10g
     stepSize: 2, // 増減幅2g
     numSteps: 5, // 5段階
@@ -21,18 +23,21 @@ export const DefaultBrewSettings: BrewSettings = {
   grindSize: {
     key: "grind_size",
     displayName: "挽き具合",
+    isNumeric: false,
     fixedOptions: ['極細', '細', '中細', '中', '粗']
   },
   waterTemp: {
     key: "water_temp",
     displayName: "湯温",
     unitLabel: "℃",
+    isNumeric: true,
     fixedOptions: [80, 85, 90, 95],
   },
   bloomWaterAmount: {
     key: "bloom_water_amount",
     displayName: "蒸らし湯量",
     unitLabel: "ml",
+    isNumeric: true,
     baseAmountPerCup: 20, // 1カップにつき20ml
     stepSize: 5, // 増減幅 5ml
     numSteps: 6, // 6段階
@@ -44,6 +49,7 @@ export const DefaultBrewSettings: BrewSettings = {
   bloomTime: {
     key: "bloom_time",
     displayName: "蒸らし時間",
+    isNumeric: true,
     unitLabel: "秒",
     fixedOptions: [30, 45, 60],
   },

@@ -20,14 +20,16 @@ export interface Brew {
 }
 
 export interface BrewSettingOption<T> {
-  key: keyof Brew; // 対応するBrewのプロパティ名
-  displayName: string; // 項目の表示名
-  unitLabel?: string; // 項目の単位（例: "ml", "g"）
-  fixedOptions?: T[]; // 固定選択肢（動的生成がない場合）
+  key: keyof Brew;           // 対応するBrewのプロパティ名
+  displayName: string;       // 項目の表示名
+  isNumeric: boolean;        // 項目が数字かどうか
+  unitLabel?: string;        // 項目の単位（例: "ml", "g"）
+  fixedOptions?: T[];        // 固定選択肢（動的生成がない場合）
   baseAmountPerCup?: number; // カップ数に対する基本量
-  stepSize?: number; // 増減幅
-  numSteps?: number; // 段階数
-  dynamicOptions?: (cups: number, baseAmountPerCup: number, stepSize: number, numSteps: number) => T[]; // 動的選択肢生成
+  stepSize?: number;         // 増減幅
+  numSteps?: number;         // 段階数
+  // 動的選択肢生成
+  dynamicOptions?: (cups: number, baseAmountPerCup: number, stepSize: number, numSteps: number) => T[];
 }
 
 export const generateOptions = <T>(
