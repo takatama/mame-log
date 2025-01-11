@@ -2,7 +2,7 @@ import { Bean } from "./Bean";
 
 export interface Brew {
   id?: number;
-  brew_date?: string;
+  brew_date: string;
   bean?: Bean;
   bean_id?: number;
   cups?: number;

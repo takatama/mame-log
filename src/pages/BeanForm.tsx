@@ -2,25 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
-import { fromUtcToLocalDate, fromLocalToUtc } from '../utils/date';
 
 const BeanForm: React.FC = () => {
   const { beans, updateBean, setBeans } = useBrewContext();
   const { beanId } = useParams();
   const [bean, setBean] = useState<Bean>({
-    is_active: true,
     name: '',
     country: '',
     area: '',
     drying_method: '',
     processing_method: '',
     roast_level: '',
-    roast_date: '',
-    purchase_date: '',
-    purchase_amount: 0,
-    price: 0,
-    seller: '',
-    seller_url: '',
     photo_url: '',
     notes: '',
   });
@@ -141,15 +133,6 @@ const BeanForm: React.FC = () => {
       </button>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium">有効</label>
-          <input
-            type="checkbox"
-            checked={bean.is_active}
-            onChange={(e) => setBean({ ...bean, is_active: e.target.checked })}
-            className="mt-1"
-          />
-        </div>
-        <div>
           <label className="block text-sm font-medium">豆の名前</label>
           <input
             type="text"
@@ -201,62 +184,6 @@ const BeanForm: React.FC = () => {
             type="text"
             value={bean.roast_level}
             onChange={(e) => setBean({ ...bean, roast_level: e.target.value })}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">焙煎日</label>
-          <input
-            type="date"
-            value={fromUtcToLocalDate(bean.roast_date)}
-            onChange={(e) => setBean({ ...bean, roast_date: fromLocalToUtc(e.target.value) })}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">購入日</label>
-          <input
-            type="date"
-            value={fromUtcToLocalDate(bean.purchase_date)}
-            onChange={(e) => setBean({ ...bean, purchase_date: fromLocalToUtc(e.target.value) })}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">購入量 (g)</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={bean.purchase_amount || ''}
-            onChange={(e) => setBean({ ...bean, purchase_amount: Number(e.target.value) })}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">価格 (円)</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={bean.price || ''}
-            onChange={(e) => setBean({ ...bean, price: Number(e.target.value) })}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">販売者</label>
-          <input
-            type="text"
-            value={bean.seller}
-            onChange={(e) => setBean({ ...bean, seller: e.target.value })}
-            className="mt-1 block w-full border rounded-md p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">販売者URL</label>
-          <input
-            type="url"
-            value={bean.seller_url}
-            onChange={(e) => setBean({ ...bean, seller_url: e.target.value })}
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>

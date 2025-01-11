@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useBrewContext } from '../context/BrewContext';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
-import { formatLocalDate } from '../utils/date';
 
 const BeanDetail: React.FC = () => {
   const { beans, setBeans } = useBrewContext()
@@ -69,27 +68,9 @@ const BeanDetail: React.FC = () => {
       {bean.roast_level && (<p>
         <strong>焙煎度:</strong> {bean.roast_level}
       </p>)}
-      {bean.roast_date && (<p>
-        <strong>焙煎日:</strong> {formatLocalDate(bean.roast_date)}
-      </p>)}
-      {(bean.purchase_amount != null && bean.purchase_amount > 0) && (<p>
-        <strong>購入量:</strong> {bean.purchase_amount} g
-      </p>)}
-      {bean.purchase_date && (<p>
-        <strong>購入日:</strong> {formatLocalDate(bean.purchase_date)}
-      </p>)}
-      {(bean.price != null && bean.price > 0) && (<p>
-        <strong>価格:</strong> {bean.price} 円
-      </p>)}
-      {bean.seller && (<p>
-        <strong>販売者:</strong> <a href={bean.seller_url} target='_blank'>{bean.seller}</a>
-      </p>)}
       {bean.notes && (<p>
         <strong>メモ:</strong> {bean.notes}
       </p>)}
-      <p>
-        <strong>有効:</strong> {bean.is_active ? 'はい' : 'いいえ'}
-      </p>
       <div className="mt-4 py-2">
         <Link
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
