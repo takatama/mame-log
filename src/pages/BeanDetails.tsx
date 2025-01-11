@@ -41,7 +41,7 @@ const BeanDetail: React.FC = () => {
   };
 
   if (!bean) {
-    return <div>豆が見つかりません。</div>
+    return <div>読み込み中...</div>
   }
 
   return (
@@ -54,39 +54,39 @@ const BeanDetail: React.FC = () => {
           className="mb-4 w-32 h-32 object-cover"
         />
       )}
-      <p>
+      {bean.country && (<p>
         <strong>国:</strong> {bean.country}
-      </p>
-      <p>
+      </p>)}
+      {bean.area && (<p>
         <strong>地域:</strong> {bean.area}
-      </p>
-      <p>
+      </p>)}
+      {bean.drying_method && (<p>
         <strong>乾燥方法:</strong> {bean.drying_method}
-      </p>
-      <p>
+      </p>)}
+      {bean.processing_method && (<p>
         <strong>精製方法:</strong> {bean.processing_method}
-      </p>
-      <p>
+      </p>)}
+      {bean.roast_level && (<p>
         <strong>焙煎度:</strong> {bean.roast_level}
-      </p>
-      <p>
+      </p>)}
+      {bean.roast_date && (<p>
         <strong>焙煎日:</strong> {formatLocalDate(bean.roast_date)}
-      </p>
-      <p>
+      </p>)}
+      {(bean.purchase_amount != null && bean.purchase_amount > 0) && (<p>
         <strong>購入量:</strong> {bean.purchase_amount} g
-      </p>
-      <p>
+      </p>)}
+      {bean.purchase_date && (<p>
         <strong>購入日:</strong> {formatLocalDate(bean.purchase_date)}
-      </p>
-      <p>
+      </p>)}
+      {(bean.price != null && bean.price > 0) && (<p>
         <strong>価格:</strong> {bean.price} 円
-      </p>
-      <p>
+      </p>)}
+      {bean.seller && (<p>
         <strong>販売者:</strong> <a href={bean.seller_url} target='_blank'>{bean.seller}</a>
-      </p>
-      <p>
+      </p>)}
+      {bean.notes && (<p>
         <strong>メモ:</strong> {bean.notes}
-      </p>
+      </p>)}
       <p>
         <strong>有効:</strong> {bean.is_active ? 'はい' : 'いいえ'}
       </p>

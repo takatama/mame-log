@@ -115,13 +115,13 @@ const BeanForm: React.FC = () => {
   };
 
   if (!bean) {
-    return <div>豆が見つかりません。</div>
+    return <div>読み込み中...</div>
   }
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">
-        {beanId ? '豆の編集' : '豆の追加'}
+        {beanId ? '豆を編集' : '豆を追加'}
       </h1>
       {(bean.photo_data_url || bean.photo_url) && (
         <div className="mb-4">
@@ -225,8 +225,9 @@ const BeanForm: React.FC = () => {
         <div>
           <label className="block text-sm font-medium">購入量 (g)</label>
           <input
-            type="number"
-            value={bean.purchase_amount}
+            type="text"
+            inputMode="numeric"
+            value={bean.purchase_amount || ''}
             onChange={(e) => setBean({ ...bean, purchase_amount: Number(e.target.value) })}
             className="mt-1 block w-full border rounded-md p-2"
           />
@@ -234,8 +235,9 @@ const BeanForm: React.FC = () => {
         <div>
           <label className="block text-sm font-medium">価格 (円)</label>
           <input
-            type="number"
-            value={bean.price}
+            type="text"
+            inputMode="numeric"
+            value={bean.price || ''}
             onChange={(e) => setBean({ ...bean, price: Number(e.target.value) })}
             className="mt-1 block w-full border rounded-md p-2"
           />

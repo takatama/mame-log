@@ -42,35 +42,37 @@ const BrewDetails: React.FC = () => {
   };
 
   if (!brew) {
-    return <div>抽出ログが見つかりません。</div>
+    return <div>読み込み中...</div>
   }
+
+  const isPositive = (number: number | undefined) => number != null && number > 0;
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">抽出ログの詳細</h1>
+        <h1 className="text-2xl font-bold">抽出ログ一覧</h1>
       </div>
 
       <div className="space-y-4">
         <p><strong>日付:</strong> {formatLocalDateTime(brew.brew_date)}</p>
-        <p><strong>豆:</strong> {brew.bean?.name}</p>
-        <p><strong>豆の量:</strong> {brew.bean_amount}g</p>
-        <p><strong>カップ数:</strong> {brew.cups}</p>
-        <p><strong>挽き具合:</strong> {brew.grind_size}</p>
-        <p><strong>湯温:</strong> {brew.water_temp}℃</p>
-        <p><strong>蒸らし湯量:</strong> {brew.bloom_water_amount}ml</p>
-        <p><strong>蒸らし時間:</strong> {brew.bloom_time}秒</p>
+        {brew.bean && (<p><strong>豆:</strong> {brew.bean?.name}</p>)}
+        {isPositive(brew.bean_amount) && (<p><strong>豆の量:</strong> {brew.bean_amount} [g]</p>)}
+        {isPositive(brew.cups) && (<p><strong>カップ数:</strong> {brew.cups}</p>)}
+        {brew.grind_size && (<p><strong>挽き具合:</strong> {brew.grind_size}</p>)}
+        {isPositive(brew.water_temp) && (<p><strong>湯温:</strong> {brew.water_temp} [℃]</p>)}
+        {isPositive(brew.bloom_water_amount) && (<p><strong>蒸らし湯量:</strong> {brew.bloom_water_amount} [ml]</p>)}
+        {isPositive(brew.bloom_time) && (<p><strong>蒸らし時間:</strong> {brew.bloom_time} [秒]</p>)}
 
-        <div>
+        {isPositive(brew.pours?.length) && (<div>
           <strong>注湯:</strong>
           <ul className="list-disc pl-5">
             {brew.pours?.map((pourAmount, index) => (
               <li key={index}>
-                {index + 1}湯目: {pourAmount}ml
+                {index + 1}湯目: {pourAmount} [ml]
               </li>
             ))}
           </ul>
-        </div>
+        </div>)}
 
         <div>
           <strong>総合評価:</strong>

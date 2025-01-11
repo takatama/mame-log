@@ -21,13 +21,10 @@ const BeanListItem: React.FC<BeanListItemProps> = ({ bean }) => {
         <Link to={`/beans/${bean.id}`} className="text-blue-500 hover:underline">
           <h2 className="font-bold">{bean.name}</h2>
         </Link>
-        <p>
+        {bean.country && (<p>
           {bean.country} ({bean.area})
-        </p>
-        <p>{bean.roast_level}</p>
-        <p>
-          {bean.purchase_amount} g {bean.price} 円
-        </p>
+        </p>)}
+        {bean.roast_level && (<p>{bean.roast_level}</p>)}
       </div>
     </li>
   );
