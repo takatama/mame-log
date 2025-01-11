@@ -57,9 +57,22 @@ const Settings: React.FC = () => {
 
   // 保存処理
   const handleSave = () => {
-    updateSettings(localSettings);
-    alert('設定が保存されました！');
-    console.log(localSettings, settings);
+    // fixedOptions内の無効な値を削除
+    const sanitizedSettings = Object.entries(localSettings).reduce((acc, [key, setting]) => {
+      acc[key] = {
+        ...setting,
+        fixedOptions: setting.fixedOptions
+          ?.flatMap((option) => {
+            if (typeof option !== 'string') return [option];
+            const trimmed = option.trim();
+            return trimmed ? [trimmed] : []; // trim後に空文字の場合も削除
+          }) || undefined,
+      };
+      return acc;
+    }, {} as typeof localSettings);
+    setLocalSettings(sanitizedSettings);
+    updateSettings(sanitizedSettings);
+    alert("設定が保存されました！");
   };
 
   return (
