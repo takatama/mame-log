@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSettingsContext } from '../context/SettingsContext';
 import { isFixedOption, isDynamicOption } from '../types/Brew';
 import FixedOptionEditor from '../components/settings/FixedOptionEditor';
@@ -8,6 +8,10 @@ const Settings: React.FC = () => {
   const { settings, updateSettings, saveSettings, loadSettings } = useSettingsContext();
   const [localSettings, setLocalSettings] = useState(settings);
 
+  useEffect(() => {
+    setLocalSettings(settings);
+  }, [settings]);
+  
   const handleSave = () => {
     const sanitizedSettings = Object.entries(localSettings).reduce((acc, [key, setting]) => {
       acc[key] = {

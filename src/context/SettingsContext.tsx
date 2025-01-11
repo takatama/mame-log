@@ -31,6 +31,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const saveSettings = async () => {
+    console.log('save', settings)
     try {
       const response = await fetch('/api/settings', {
         method: 'POST',
@@ -61,9 +62,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (loadedSettings[settingKey] !== undefined) {
           updatedSettings[settingKey] = loadedSettings[settingKey]!;
         }
-      });
+        if (isDynamicOption(updatedSettings[settingKey]) && isDynamicOption(initialSettings[settingKey])) {
+          updatedSettings[settingKey].dynamicOptions = initialSettings[settingKey].dynamicOptions;
+        }
+    });
   
-      console.log(updatedSettings);
+      console.log('loadedSettings', loadedSettings)
+      console.log('updatedSettings', updatedSettings);
       setSettings(updatedSettings);
     } catch (error) {
       console.error(error);
