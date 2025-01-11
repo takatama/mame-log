@@ -129,20 +129,22 @@ const BrewForm: React.FC = () => {
   );
 
   const beanAmountOptions = (): number[] => {
-    // 1 cups 10g がデフォルト
+    // 1 cup 10g がデフォルト
     // 2g刻みで5段階に増減できるようにする
     // 2 cups の場合は [16, 18, 20, 22, 24]
     return Array.from({ length: 5 }, (_, i) => (brew?.cups ?? 1) * 10 + (i - 2) * 2);
   }
 
   const bloomAmountOptions = (): number[] => {
-    // コーヒーの量の2倍がデフォルト
+    // 1 cup 10g の2倍がデフォルト
     // 5ml刻みで6段階に増減できるようにする
-    // 20g の場合は [30, 35, 40, 45, 50, 55]
-    return Array.from({ length: 6 }, (_, i) => (brew?.bean_amount ?? 20) * 2 + (i - 2) * 5);
+    // 20g の場合は [35, 40, 45, 50, 55, 60]
+    return Array.from({ length: 6 }, (_, i) => (brew?.cups ?? 2) * 20 + (i - 2) * 5 + 5);
   }
 
   if (!brew) return <div>読み込み中...</div>;
+
+  const isPositive = (num : number | undefined) => num && num > 0;
 
   return (
     <div className="container mx-auto p-4">
@@ -176,27 +178,27 @@ const BrewForm: React.FC = () => {
 
         {/* 抽出設定 */}
         <div>
-          <label className="block text-sm font-medium">カップ数 { baseBrew ? `(${baseBrew.cups})` : '' }</label>
+          <label className="block text-sm font-medium">カップ数 { isPositive(baseBrew?.cups) ? `(${baseBrew?.cups})` : '' }</label>
           {renderPresetButtons([1, 2, 3, 4], brew?.cups ?? 0, 'cups')}
         </div>
         <div>
-          <label className="block text-sm font-medium">豆の量 [g] { baseBrew ? `(${baseBrew.bean_amount})` : '' }</label>
+          <label className="block text-sm font-medium">豆の量 [g] { isPositive(baseBrew?.bean_amount) ? `(${baseBrew?.bean_amount})` : '' }</label>
           {renderPresetButtons(beanAmountOptions(), brew?.bean_amount ?? '', 'bean_amount')}
         </div>
         <div>
-          <label className="block text-sm font-medium">挽き具合 { baseBrew ? `(${baseBrew.grind_size})` : '' }</label>
+          <label className="block text-sm font-medium">挽き具合 { baseBrew?.grind_size ? `(${baseBrew.grind_size})` : '' }</label>
           {renderPresetButtons(['極細', '細', '中細', '中', '粗'], brew?.grind_size ?? '', 'grind_size')}
         </div>
         <div>
-          <label className="block text-sm font-medium">湯温 [℃] { baseBrew ? `(${baseBrew.water_temp})` : '' }</label>
+          <label className="block text-sm font-medium">湯温 [℃] { isPositive(baseBrew?.water_temp) ? `(${baseBrew?.water_temp})` : '' }</label>
           {renderPresetButtons([80, 85, 90, 95], brew?.water_temp ?? 0, 'water_temp')}
         </div>
         <div>
-          <label className="block text-sm font-medium">蒸らし湯量 [ml] { baseBrew ? `(${baseBrew.bloom_water_amount})` : '' }</label>
+          <label className="block text-sm font-medium">蒸らし湯量 [ml] { isPositive(baseBrew?.bloom_water_amount) ? `(${baseBrew?.bloom_water_amount})` : '' }</label>
           {renderPresetButtons(bloomAmountOptions(), brew?.bloom_water_amount ?? 0, 'bloom_water_amount')}
         </div>
         <div>
-          <label className="block text-sm font-medium">蒸らし時間 [秒] { baseBrew ? `(${baseBrew.bloom_time})` : '' }</label>
+          <label className="block text-sm font-medium">蒸らし時間 [秒] { isPositive(baseBrew?.bloom_time) ? `(${baseBrew?.bloom_time})` : '' }</label>
           {renderPresetButtons([30, 45, 60], brew?.bloom_time ?? 0, 'bloom_time')}
         </div>
         <div>
@@ -241,19 +243,19 @@ const BrewForm: React.FC = () => {
 
         {/* 評価 */}
         <div>
-          <label className="block text-sm font-medium">総合評価 { baseBrew ? `(${baseBrew.overall_score})` : '' }</label>
+          <label className="block text-sm font-medium">総合評価 { isPositive(baseBrew?.overall_score) ? `(${baseBrew?.overall_score})` : '' }</label>
           <StarRating rating={brew?.overall_score ?? 0} onRatingChange={(rating) => setBrew({ ...brew, overall_score: rating })} />
         </div>
         <div>
-          <label className="block text-sm font-medium">苦味 { baseBrew ? `(${baseBrew.bitterness})` : '' }</label>
+          <label className="block text-sm font-medium">苦味 { isPositive(baseBrew?.bitterness) ? `(${baseBrew?.bitterness})` : '' }</label>
           <StarRating rating={brew?.bitterness ?? 0} onRatingChange={(rating) => setBrew({ ...brew, bitterness: rating })} />
         </div>
         <div>
-          <label className="block text-sm font-medium">酸味 { baseBrew ? `(${baseBrew.acidity})` : '' }</label>
+          <label className="block text-sm font-medium">酸味 { isPositive(baseBrew?.acidity) ? `(${baseBrew?.acidity})` : '' }</label>
           <StarRating rating={brew?.acidity ?? 0} onRatingChange={(rating) => setBrew({ ...brew, acidity: rating })} />
         </div>
         <div>
-          <label className="block text-sm font-medium">甘味 { baseBrew ? `(${baseBrew.sweetness})` : '' }</label>
+          <label className="block text-sm font-medium">甘味 { isPositive(baseBrew?.sweetness) ? `(${baseBrew?.sweetness})` : '' }</label>
           <StarRating rating={brew?.sweetness ?? 0} onRatingChange={(rating) => setBrew({ ...brew, sweetness: rating })} />
         </div>
         <div>
