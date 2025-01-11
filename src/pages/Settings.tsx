@@ -5,7 +5,7 @@ import FixedOptionEditor from '../components/settings/FixedOptionEditor';
 import DynamicOptionEditor from '../components/settings/DynamicOptionEditor';
 
 const Settings: React.FC = () => {
-  const { settings, updateSettings } = useSettingsContext();
+  const { settings, updateSettings, saveSettings, loadSettings } = useSettingsContext();
   const [localSettings, setLocalSettings] = useState(settings);
 
   const handleSave = () => {
@@ -25,6 +25,7 @@ const Settings: React.FC = () => {
     }, {} as typeof localSettings);
     setLocalSettings(sanitizedSettings);
     updateSettings(sanitizedSettings);
+    saveSettings();
     alert("設定が保存されました！");
   };
 
@@ -62,6 +63,13 @@ const Settings: React.FC = () => {
           className="bg-blue-500 text-white p-2 rounded-md"
         >
           保存する
+        </button>
+        <button
+          type="button"
+          onClick={loadSettings}
+          className="bg-gray-500 text-white p-2 rounded-md ml-2"
+        >
+          設定を読み込む
         </button>
       </form>
     </div>
