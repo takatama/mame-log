@@ -1,5 +1,5 @@
 import React from 'react';
-import { DynamicBrewSettingOption } from '../../types/Brew';
+import { DynamicBrewSettingOption, generateOptions } from '../../types/Brew';
 
 interface DynamicOptionEditorProps {
   setting: DynamicBrewSettingOption<number | string>;
@@ -55,15 +55,7 @@ const DynamicOptionEditor: React.FC<DynamicOptionEditorProps> = ({ setting, onCh
       <div className="mb-2">
         <label className="text-sm font-medium">1カップの場合の選択肢</label>
         <div className="p-2 border rounded-md bg-gray-50">
-          {setting.baseAmountPerCup &&
-            setting.stepSize &&
-            setting.numSteps &&
-            setting.dynamicOptions(
-              1,
-              setting.baseAmountPerCup,
-              setting.stepSize,
-              setting.numSteps
-            ).map((option, index) => (
+          {generateOptions(setting).map((option, index) => (
               <span
                 key={index}
                 className="text-center p-1 bg-blue-100 rounded-md m-1"

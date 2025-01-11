@@ -52,6 +52,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!response.ok) {
         throw new Error(`Failed to load settings: ${response.statusText}`);
       }
+
+      // データベースに空の設定が保存される可能性があるため、デフォルト設定をベースにする
       const loadedSettings: Partial<BrewSettings> = await response.json();
       const updatedSettings: BrewSettings = { ...initialSettings };
 
@@ -59,9 +61,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const settingKey = key as keyof BrewSettings;
         if (loadedSettings[settingKey] !== undefined) {
           updatedSettings[settingKey] = loadedSettings[settingKey]!;
-        }
-        if (isDynamicOption(updatedSettings[settingKey]) && isDynamicOption(initialSettings[settingKey])) {
-          updatedSettings[settingKey].dynamicOptions = initialSettings[settingKey].dynamicOptions;
         }
       });
 
