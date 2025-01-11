@@ -135,6 +135,31 @@ const Settings: React.FC = () => {
                     className="block border rounded-md p-2 w-full"
                   />
                 </div>
+                {/* プレビュー */}
+                {setting.dynamicOptions && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium">1カップの場合の選択肢</h4>
+                    <div className="mt-2 p-2 border rounded-md bg-gray-50">
+                      {setting.baseAmountPerCup &&
+                        setting.stepSize &&
+                        setting.numSteps &&
+                        setting.dynamicOptions(
+                          1,
+                          setting.baseAmountPerCup,
+                          setting.stepSize,
+                          setting.numSteps
+                        ).map((option, index) => (
+                          <span
+                            key={index}
+                            className="text-center p-1 bg-blue-100 rounded-md m-1"
+                          >
+                            {option}
+                          </span>
+                        )
+                        )}
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>
