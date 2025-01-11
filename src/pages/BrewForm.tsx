@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
-import { Brew, BrewSettings, generateOptions } from '../types/Brew';
+import { Brew, generateOptions } from '../types/Brew';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
-import { DefaultBewSettings } from '../settings/DefaultBrewSettings';
+import { useSettingsContext } from '../context/SettingsContext';
 
 const BrewForm: React.FC = () => {
   const { beans, brews, updateBrew, setBrews } = useBrewContext();
@@ -12,8 +12,8 @@ const BrewForm: React.FC = () => {
   const [bean, setBean] = useState<Bean | undefined>(undefined);
   const [brew, setBrew] = useState<Brew>({ brew_date: new Date().toISOString() });
   const [baseBrew, setBaseBrew] = useState<Brew>();
-  const [brewSettings] = useState<BrewSettings>(DefaultBewSettings);
-
+  const { settings } = useSettingsContext();
+  
   useEffect(() => {
     if (brewId) {
       const selectedBrew = brews.find((b: Brew) => b.id === Number(brewId));
@@ -115,7 +115,7 @@ const BrewForm: React.FC = () => {
 
   const renderBrewForm = () => {
     const cups = brew?.cups ?? 1; // デフォルトで1カップ
-    return Object.entries(brewSettings).map(([key, setting]) => {
+    return Object.entries(settings).map(([key, setting]) => {
       const diff = (baseBrew && baseBrew[setting.property]) ? `(${baseBrew[setting.property]})` : '';
       return (
         <div key={key}>

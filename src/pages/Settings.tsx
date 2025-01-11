@@ -1,50 +1,141 @@
 import React, { useState } from 'react';
+import { useSettingsContext } from '../context/SettingsContext';
 
 const Settings: React.FC = () => {
-  const [theme, setTheme] = useState('light'); // テーマ設定
-  const [notifications, setNotifications] = useState(true); // 通知設定
+  const { settings, updateSettings } = useSettingsContext();
+  const [localSettings, setLocalSettings] = useState(settings);
 
-  const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setTheme(event.target.value);
+  // 固定選択肢を編集
+  const handleFixedOptionChange = (key: string, index: number, value: string) => {
+    const updatedOptions = [...(localSettings[key].options || [])];
+    updatedOptions[index] = value;
+    setLocalSettings({
+      ...localSettings,
+      [key]: {
+        ...localSettings[key],
+        options: updatedOptions,
+      },
+    });
   };
 
-  const handleNotificationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNotifications(event.target.checked);
+  // 固定選択肢を追加
+  const handleAddFixedOption = (key: string) => {
+    const updatedOptions = [...(localSettings[key].options || []), ''];
+    setLocalSettings({
+      ...localSettings,
+      [key]: {
+        ...localSettings[key],
+        options: updatedOptions,
+      },
+    });
+  };
+
+  // 固定選択肢を削除
+  const handleDeleteFixedOption = (key: string, index: number) => {
+    const updatedOptions = (localSettings[key].options || []).filter(
+      (_, i) => i !== index
+    );
+    setLocalSettings({
+      ...localSettings,
+      [key]: {
+        ...localSettings[key],
+        options: updatedOptions,
+      },
+    });
+  };
+
+  // 動的値を編集
+  const handleDynamicValueChange = (key: string, field: 'amountPerCup' | 'step', value: number) => {
+    setLocalSettings({
+      ...localSettings,
+      [key]: {
+        ...localSettings[key],
+        [field]: value,
+      },
+    });
+  };
+
+  // 保存処理
+  const handleSave = () => {
+    updateSettings(localSettings);
+    alert('設定が保存されました！');
+    console.log(localSettings, settings);
   };
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">設定</h1>
-
-      <div className="space-y-6">
-        {/* テーマ設定 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">テーマ</label>
-          <select
-            value={theme}
-            onChange={handleThemeChange}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-          >
-            <option value="light">ライトモード</option>
-            <option value="dark">ダークモード</option>
-          </select>
-        </div>
-
-        {/* 通知設定 */}
-        <div>
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={notifications}
-              onChange={handleNotificationChange}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-            />
-            <span className="text-sm font-medium text-gray-700">通知を有効にする</span>
-          </label>
-        </div>
-
-        <button className="bg-blue-500 text-white p-2 rounded-md">設定を保存</button>
-      </div>
+      <h1 className="text-2xl font-bold mb-4">設定を変更</h1>
+      <form className="space-y-6">
+        {Object.entries(localSettings).map(([key, setting]) => (
+          <div key={key} className="mb-6 border p-4 rounded-md">
+            <h2 className="text-xl font-semibold mb-2">{setting.label} {setting.unit ? `[${setting.unit}]` : ""}</h2>
+            {setting.options ? (
+              <>
+                {/* <p className="text-sm text-gray-600">固定の選択肢を編集</p> */}
+                {setting.options.map((option, index) => (
+                  <div key={index} className="flex items-center space-x-2 mb-2">
+                    <input
+                      type="text"
+                      value={option}
+                      onChange={(e) =>
+                        handleFixedOptionChange(key, index, e.target.value)
+                      }
+                      className="block border rounded-md p-2 w-3/4"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteFixedOption(key, index)}
+                      className="bg-red-500 text-white p-2 rounded-md w-1/4"
+                    >
+                      削除
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => handleAddFixedOption(key)}
+                  className="bg-green-500 text-white p-2 rounded-md"
+                >
+                  選択肢を追加
+                </button>
+              </>
+            ) : (
+              <>
+                {/* <p className="text-sm text-gray-600">動的な値を編集</p> */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium">カップあたりの量</label>
+                  <input
+                    type="number"
+                    value={setting.amountPerCup || ''}
+                    onChange={(e) =>
+                      handleDynamicValueChange(key, 'amountPerCup', Number(e.target.value))
+                    }
+                    className="block border rounded-md p-2 w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">増減幅</label>
+                  <input
+                    type="number"
+                    value={setting.step || ''}
+                    onChange={(e) =>
+                      handleDynamicValueChange(key, 'step', Number(e.target.value))
+                    }
+                    className="block border rounded-md p-2 w-full"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={handleSave}
+          className="bg-blue-500 text-white p-2 rounded-md"
+        >
+          保存する
+        </button>
+      </form>
     </div>
   );
 };

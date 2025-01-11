@@ -1,6 +1,6 @@
 import { BrewSettings } from "../types/Brew";
 
-export const DefaultBewSettings: BrewSettings = {
+export const DefaultBrewSettings: BrewSettings = {
   cups: {
     property: "cups",
     label: "カップ数",
