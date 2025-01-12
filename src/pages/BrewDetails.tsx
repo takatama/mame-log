@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
-import { Brew } from '../types/Brew';
+import { Brew, totalWaterAmount } from '../types/Brew';
 import { formatLocalDateTime } from '../utils/date';
 
 const BrewDetails: React.FC = () => {
@@ -64,11 +64,11 @@ const BrewDetails: React.FC = () => {
         {isPositive(brew.bloom_time) && (<p><strong>蒸らし時間:</strong> {brew.bloom_time} [秒]</p>)}
 
         {isPositive(brew.pours?.length) && (<div>
-          <strong>注湯:</strong>
+          <strong>注湯:</strong> (カッコ内は累計)
           <ul className="list-disc pl-5">
             {brew.pours?.map((pourAmount, index) => (
               <li key={index}>
-                {index + 1}湯目: {pourAmount} [ml]
+                {index + 1}湯目: {pourAmount} ({totalWaterAmount(brew, index)}) [ml]
               </li>
             ))}
           </ul>
