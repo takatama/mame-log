@@ -8,7 +8,7 @@ export const requireUserMiddleware: MiddlewareHandler = async (c: Context, next)
 
     if (!auth || !auth.token) {
       // If user is not authenticated, redirect to the terms agreement page
-      return c.redirect('/users/new');
+      return c.json({ error: 'Unauthorized' }, 401);
     }
 
     const { email } = auth.token;
@@ -22,7 +22,7 @@ export const requireUserMiddleware: MiddlewareHandler = async (c: Context, next)
 
     if (!existingUser) {
       // Redirect to the terms agreement page if user does not exist
-      return c.redirect('/api/users/new');
+      return c.json({ error: 'Forbidden' }, 403);
     }
 
     // Set the user in the context for downstream handlers
