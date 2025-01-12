@@ -1,8 +1,8 @@
 import { Hono, Context } from 'hono'
 import { renderToString } from 'react-dom/server'
-import beans from './beans'
-import brews from './brews'
-import analyze from './analyze'
+import beans from './api/beans'
+import brews from './api/brews'
+import analyze from './api/analyze'
 import settings from './api/settings'
 
 export interface Env {
