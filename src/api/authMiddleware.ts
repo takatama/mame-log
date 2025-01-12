@@ -8,7 +8,7 @@ export const requireUserMiddleware: MiddlewareHandler = async (c: Context, next)
 
     if (!auth || !auth.token) {
       // If user is not authenticated, redirect to the terms agreement page
-      return c.redirect('/api/users/new');
+      return c.redirect('/users/new');
     }
 
     const { sub } = auth.token;
