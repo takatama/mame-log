@@ -19,7 +19,7 @@ const TermsAgreement: React.FC = () => {
             4. 本サービスの内容は予告なく変更される場合があります。
           </p>
         </div>
-        <form action="/api/users" method="POST">
+        <form action="/users" method="POST">
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"

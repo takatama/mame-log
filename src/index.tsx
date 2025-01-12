@@ -44,11 +44,12 @@ app.use('/api/auth/*', authHandler());
 app.use('/api/*', verifyAuth())
 app.use('/signup', verifyAuth())
 app.use('/images/*', verifyAuth())
+app.use('/users', verifyAuth())
 app.use('/api/*', requireUserMiddleware);
 app.use('/images/*', requireUserMiddleware);
 
 app.route('/api/status', status);
-app.route('/api/users', users)
+app.route('/users', users)
 app.route('/api/beans', beans)
 app.route('/api/brews', brews)
 app.route('/api/analyze', analyze)
