@@ -1,8 +1,6 @@
 import { Hono, Context } from 'hono'
 import { Env } from '../index'
 import { z } from 'zod'
-import { requireUserMiddleware } from './authMiddleware';
-import users from './users';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -17,8 +15,6 @@ const beanSchema = z.object({
   photo_data_url: z.string().optional(),
   notes: z.string().optional(),
 });
-
-app.use('*', requireUserMiddleware);
 
 app.post('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user')

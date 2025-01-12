@@ -8,6 +8,7 @@ import { authHandler, initAuthConfig, verifyAuth } from '@hono/auth-js'
 import Google from '@auth/core/providers/google'
 import { HTTPException } from 'hono/http-exception'
 import users from './api/users'
+import { requireUserMiddleware } from './api/authMiddleware';
 
 export interface Env {
   DB: D1Database;
@@ -44,6 +45,8 @@ app.use('/api/auth/*', (c, next) => {
   return authHandler()(c, next);
 });
 app.use('*', verifyAuth())
+
+app.use('*', requireUserMiddleware);
 
 app.route('/api/users', users)
 app.route('/api/beans', beans)
