@@ -8,7 +8,7 @@ users.post('/', async (c) => {
   try {
     // Extract user information from the request context
     const auth = c.get('authUser');
-    console.log('auth', JSON.stringify(auth, null, 2));
+
     if (!auth || !auth.token) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -23,8 +23,8 @@ users.post('/', async (c) => {
 
     // Check if the user already exists
     const existingUser = await db
-      .prepare('SELECT * FROM users WHERE sub = ?')
-      .bind(sub)
+      .prepare('SELECT * FROM users WHERE email = ?')
+      .bind(email)
       .first();
 
     if (existingUser) {

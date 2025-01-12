@@ -33,16 +33,19 @@ app.use(
   }))
 )
 
-// app.onError((err, c) => {
-//   if (err instanceof HTTPException && err.status === 401) {
-//     return c.redirect('/api/auth/signin')
-//   }
-//   return c.text(err.message, 500)
-// })
+app.onError((err, c) => {
+  if (err instanceof HTTPException && err.status === 401) {
+    return c.redirect('/api/auth/signin')
+  }
+  return c.text(err.message, 500)
+})
 
 app.use('/api/auth/*', authHandler());
 app.use('/api/*', verifyAuth())
-// app.use('*', requireUserMiddleware);
+app.use('/signup', verifyAuth())
+app.use('/images/*', verifyAuth())
+app.use('/api/*', requireUserMiddleware);
+app.use('/images/*', requireUserMiddleware);
 
 app.route('/api/status', status);
 app.route('/api/users', users)

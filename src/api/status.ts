@@ -12,13 +12,13 @@ status.get('/', async (c: Context<{ Bindings: Env }>) => {
       return c.json({ isSignedIn: false });
     }
 
-    const { sub } = auth.token;
+    const { email } = auth.token;
 
     // Check if the user exists in the database
     const db = c.env.DB;
     const existingUser = await db
-      .prepare('SELECT * FROM users WHERE sub = ?')
-      .bind(sub)
+      .prepare('SELECT * FROM users WHERE email = ?')
+      .bind(email)
       .first();
 
     if (!existingUser) {
