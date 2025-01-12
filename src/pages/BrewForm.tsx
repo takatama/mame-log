@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
-import { Brew, generateOptions, totalWaterAmount } from '../types/Brew';
+import { Brew, totalWaterAmount } from '../types/Brew';
+import { generateOptions } from '../types/Settings';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 import { useSettingsContext } from '../context/SettingsContext';
@@ -194,7 +195,7 @@ const BrewForm: React.FC = () => {
                   required
                 />
                 <label className="block text-sm font-medium">
-                  湯量: {totalWaterAmount(brew, index)} [ml]
+                  湯量の累計: {totalWaterAmount(brew, index)} [ml]
                 </label>
                 </div>
                 {index === (brew?.pours ?? []).length - 1 && (

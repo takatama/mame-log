@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSettingsContext } from '../context/SettingsContext';
-import { isFixedOption, isDynamicOption } from '../types/Brew';
+import { isFixedOption, isDynamicOption } from '../types/Settings';
 import FixedOptionEditor from '../components/settings/FixedOptionEditor';
 import DynamicOptionEditor from '../components/settings/DynamicOptionEditor';
 
 const Settings: React.FC = () => {
   const { settings, updateSettings, saveSettings, loadSettings } = useSettingsContext();
+  const [previewCups, setPreviewCups] = useState<number>(1);
 
   const handleSave = async () => {
     const sanitizedSettings = Object.entries(settings).reduce((acc, [key, setting]) => {
@@ -44,10 +45,21 @@ const Settings: React.FC = () => {
                 key={key}
                 setting={setting}
                 onChange={(newSetting) => updateSettings(key, newSetting)}
+                previewCups={previewCups}
               />
             )}
           </div>
         ))}
+        <div className="mb-6 border p-4 rounded-md">
+          <h2 className="text-xl font-semibold mb-2">プレビューのカップ数</h2>
+          <input
+            type="number"
+            min="1"
+            value={previewCups}
+            onChange={(e) => setPreviewCups(Number(e.target.value))}
+            className="w-full p-2 border rounded-md"
+          />
+        </div>
         <button type="submit" className="bg-blue-500 text-white p-2 rounded-md">
           設定を保存する
         </button>
