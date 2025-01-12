@@ -16,7 +16,8 @@ const beanAmount: DynamicBrewSettingOption<number> = {
   isNumeric: true,
   baseAmountPerCup: 10, // 1カップにつき10g
   stepSize: 2,          // 増減幅2g
-  numSteps: 5           // 5段階
+  numSteps: 5,          // 5段階
+  offset: 0
 };
 
 const grindSize: FixedBrewSettingOption<string> = {
@@ -44,7 +45,8 @@ const bloomWaterAmount: DynamicBrewSettingOption<number> = {
   isNumeric: true,
   baseAmountPerCup: 20, // 1カップにつき20ml
   stepSize: 10,         // 増減幅 10ml
-  numSteps: 6           // 6段階
+  numSteps: 6,          // 6段階
+  offset: 10
 };
 
 const bloomTime: FixedBrewSettingOption<number> = {
