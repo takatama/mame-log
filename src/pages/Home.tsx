@@ -3,14 +3,25 @@ import { Link } from 'react-router-dom';
 
 const Home: React.FC = () => {
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">豆ログへようこそ</h1>
-      <div className="space-y-4">
-        <Link to="/brews" className="block bg-blue-500 text-white p-4 rounded-lg text-center">抽出ログ</Link>
-        <Link to="/beans" className="block bg-green-500 text-white p-4 rounded-lg text-center">豆の管理</Link>
-        <Link to="/settings" className="block bg-green-500 text-white p-4 rounded-lg text-center">設定</Link>
+    <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
+      <h1 className="text-4xl font-bold mb-6">豆ログへようこそ</h1>
+      <p className="text-lg text-gray-700 mb-6 text-center">
+        あなたのコーヒー体験を記録し、最高の一杯を見つけるお手伝いをします。
+      </p>
+      <div className="flex space-x-4">
+        <a
+          href="/api/auth/signin"
+          className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600"
+        >
+          サインイン
+        </a>
+        <Link
+          to="/signup"
+          className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600"
+        >
+          サインアップ
+        </Link>
       </div>
-      {/* 最近のログや統計情報の表示 */}
     </div>
   );
 };
