@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
-import { Brew, generateOptions } from '../types/Brew';
+import { Brew, generateOptions, totalWaterAmount } from '../types/Brew';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 import { useSettingsContext } from '../context/SettingsContext';
@@ -142,7 +142,7 @@ const BrewForm: React.FC = () => {
       );
     });
   };
-    
+
   if (!brew) return <div>読み込み中...</div>;
 
   return (
@@ -193,7 +193,10 @@ const BrewForm: React.FC = () => {
                   className="mt-1 block w-full border rounded-md p-2"
                   required
                 />
-              </div>
+                <label className="block text-sm font-medium">
+                  湯量: {totalWaterAmount(brew, index)} [ml]
+                </label>
+                </div>
                 {index === (brew?.pours ?? []).length - 1 && (
                 <button
                   type="button"

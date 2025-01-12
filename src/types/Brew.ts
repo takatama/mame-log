@@ -77,3 +77,9 @@ export const generateOptions = <T>(
 export type BrewSettings = {
   [key: string]: BrewSettingOption<string | number>;
 };
+
+export const totalWaterAmount = (brew: Brew, pourIndex: number): number => {
+  const bloomWaterAmount = brew.bloom_water_amount ?? 0;
+  const pourAmount = brew.pours ? brew.pours.slice(0, pourIndex + 1).reduce((sum, value) => sum + value, 0) : 0;
+  return bloomWaterAmount + pourAmount;
+}
