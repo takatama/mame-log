@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Bean } from '../types/Bean';
 import { Brew } from '../types/Brew';
+import { useAuth } from './AuthContext'; // 認証状態を確認する
 
 interface BrewContextProps {
   beans: Bean[];
@@ -16,6 +17,8 @@ const BrewContext = createContext<BrewContextProps | undefined>(undefined);
 export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [beans, setBeansState] = useState<Bean[]>([]);
   const [brews, setBrewsState] = useState<Brew[]>([]);
+  const { isSignedIn, isRegistered } = useAuth(); // 認証状態を確認
+  const [isInitialized, setIsInitialized] = useState(false); // 初期化済みフラグ
 
   // beans または brews の再計算ロジック
   const updateBrewsWithBeans = (beans: Bean[], brews: Brew[]) => {
@@ -45,9 +48,11 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setBrewsState(updateBrewsWithBeans(fetchedBeans, fetchedBrews));
     }
 
-    fetchBeansAndBrews();
-  }, []);
-
+    if (isSignedIn && isRegistered && !isInitialized) {
+      fetchBeansAndBrews().then(() => setIsInitialized(true));
+    }
+  }, [isSignedIn, isRegistered, isInitialized]);
+  
   const updateBean = (bean: Bean) => {
     const updatedBeans = beans.map((b) => (b.id === bean.id ? bean : b));
     setBeans(updatedBeans);

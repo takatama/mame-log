@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { BrewSettings } from '../types/Settings';
 import { DefaultBrewSettings as initialSettings } from '../settings/DefaultBrewSettings';
+import { useAuth } from './AuthContext'; // 認証状態を確認する
 
 interface SettingsContextProps {
   settings: BrewSettings;
@@ -17,7 +18,9 @@ const SettingsContext = createContext<SettingsContextProps>({
 });
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isSignedIn, isRegistered } = useAuth(); // 認証状態を確認
   const [settings, setSettings] = useState<BrewSettings>(initialSettings);
+  const [isInitialized, setIsInitialized] = useState(false); // 初期化済みフラグ
 
   const updateSettings = (key: string, newSetting: BrewSettings[keyof BrewSettings]) => {
     setSettings((prevSettings) => ({
@@ -52,7 +55,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!response.ok) {
         throw new Error(`Failed to load settings: ${response.statusText}`);
       }
-
       // データベースに空の設定が保存される可能性があるため、デフォルト設定をベースにする
       const loadedSettings: Partial<BrewSettings> = await response.json();
       const updatedSettings: BrewSettings = { ...initialSettings };
@@ -72,12 +74,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   useEffect(() => {
-    loadSettings();
-  }, []);
+    if (isSignedIn && isRegistered && !isInitialized) {
+      loadSettings().then(() => setIsInitialized(true));
+    }
+  }, [isSignedIn, isRegistered, isInitialized]);
 
   return (
     <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, loadSettings }}>
-      {children}
+      {isInitialized ? children : null} {/* 初期化済みなら子要素を表示 */}
     </SettingsContext.Provider>
   );
 };
