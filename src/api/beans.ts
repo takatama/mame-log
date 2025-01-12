@@ -43,7 +43,7 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
       const photoArrayBuffer = photoBuffer.buffer; // BufferをArrayBufferに変換
     
       await c.env.MAME_LOG_IMAGES.put(photoKey, photoArrayBuffer, {
-        metadata: { contentType: "image/png" },
+        metadata: { contentType: "image/png", user_id: user.id },
       });
     }
 
@@ -102,7 +102,7 @@ app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
       const photoArrayBuffer = photoBuffer.buffer; // BufferをArrayBufferに変換
     
       await c.env.MAME_LOG_IMAGES.put(photoKey, photoArrayBuffer, {
-        metadata: { contentType: "image/png" },
+        metadata: { contentType: "image/png", user_id: user.id },
       });
     }
 
