@@ -36,6 +36,7 @@ export interface DynamicBrewSettingOption<T> extends BaseSettingOption<T> {
   baseAmountPerCup: number; // カップ数に対する基本量
   stepSize: number;         // 増減幅
   numSteps: number;         // 段階数
+  offset: number;           // 調整値
 }
 
 export type BrewSettingOption<T> = FixedBrewSettingOption<T> | DynamicBrewSettingOption<T>;
@@ -52,10 +53,11 @@ function generateDynamicOptions<T>(
   cups: number,
   baseAmountPerCup: number,
   stepSize: number,
-  numSteps: number
+  numSteps: number,
+  offset: number
 ): T[] {
   return Array.from({ length: numSteps }, (_, i) => 
-    cups * baseAmountPerCup + (i - Math.floor(numSteps / 2)) * stepSize
+    cups * baseAmountPerCup + (i - Math.floor(numSteps / 2)) * stepSize + offset
   ).filter(option => option > 0).map(option => option as T);
 }
 
@@ -64,7 +66,7 @@ export const generateOptions = <T>(
   cups: number = 1
 ): T[] => {
   if (isDynamicOption(setting)) {
-    return generateDynamicOptions(cups, setting.baseAmountPerCup, setting.stepSize, setting.numSteps);
+    return generateDynamicOptions(cups, setting.baseAmountPerCup, setting.stepSize, setting.numSteps, setting.offset);
   }
   if (isFixedOption(setting)) {
     return setting.fixedOptions ?? [];

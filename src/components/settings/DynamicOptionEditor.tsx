@@ -7,7 +7,7 @@ interface DynamicOptionEditorProps {
 }
 
 const DynamicOptionEditor: React.FC<DynamicOptionEditorProps> = ({ setting, onChange }) => {
-  const handleDynamicValueChange = (field: 'baseAmountPerCup' | 'stepSize' | 'numSteps', value: number) => {
+  const handleDynamicValueChange = (field: 'baseAmountPerCup' | 'stepSize' | 'numSteps' | 'offset', value: number) => {
     onChange({
       ...setting,
       [field]: value,
@@ -48,6 +48,18 @@ const DynamicOptionEditor: React.FC<DynamicOptionEditorProps> = ({ setting, onCh
           value={setting.numSteps || ''}
           onChange={(e) =>
             handleDynamicValueChange('numSteps', Number(e.target.value))
+          }
+          className="block border rounded-md p-2 w-full"
+        />
+      </div>
+      <div className="mb-2">
+        <label className="block text-sm font-medium">調整値</label>
+        <input
+          type="string"
+          inputMode="numeric"
+          value={setting.offset || 0}
+          onChange={(e) =>
+            handleDynamicValueChange('offset', Number(e.target.value))
           }
           className="block border rounded-md p-2 w-full"
         />
