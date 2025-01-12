@@ -194,7 +194,7 @@ const BrewForm: React.FC = () => {
                   required
                 />
                 <label className="block text-sm font-medium">
-                  湯量: {totalWaterAmount(brew, index)} [ml]
+                  湯量の累計: {totalWaterAmount(brew, index)} [ml]
                 </label>
                 </div>
                 {index === (brew?.pours ?? []).length - 1 && (
