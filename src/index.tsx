@@ -7,6 +7,7 @@ import settings from './api/settings'
 import { authHandler, initAuthConfig, verifyAuth } from '@hono/auth-js'
 import Google from '@auth/core/providers/google'
 import { HTTPException } from 'hono/http-exception'
+import users from './api/users'
 
 export interface Env {
   DB: D1Database;
@@ -14,6 +15,7 @@ export interface Env {
   MAME_LOG_IMAGES: KVNamespace;
   HOST_NAME: string;
   AUTH_SECRET: string;
+  JWT_SECRET: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();
@@ -35,14 +37,27 @@ app.onError((err, c) => {
   return c.text(err.message, 500)
 })
 
-app.use('/api/auth/*', authHandler())
+app.use('/api/auth/*', (c, next) => {
+  if (c.req.path === '/api/auth/google/callback') {
+    return next();
+  }
+  return authHandler()(c, next);
+});
 app.use('*', verifyAuth())
 
+app.route('/api/users', users)
 app.route('/api/beans', beans)
 app.route('/api/brews', brews)
 app.route('/api/analyze', analyze)
 app.route('/api/settings', settings)
-
+app.get('/api/protected', (c) => {
+  const auth = c.get('authUser')
+  const googleId = auth.user?.id;
+  const email = auth.user?.emailVerified;
+  const name = auth.user?.name;
+  const photoUrl = auth.user?.image;
+  return c.json({auth, googleId, email, name, photoUrl});
+})
 app.get('/images/coffee-labels/:id', async (c: Context<{ Bindings: Env }>) => {
   try {
     const { id } = c.req.param();
