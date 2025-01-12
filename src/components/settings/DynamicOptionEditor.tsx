@@ -1,12 +1,13 @@
 import React from 'react';
-import { DynamicBrewSettingOption, generateOptions } from '../../types/Brew';
+import { DynamicBrewSettingOption, generateOptions } from '../../types/Settings';
 
 interface DynamicOptionEditorProps {
   setting: DynamicBrewSettingOption<number | string>;
   onChange: (updatedSetting: DynamicBrewSettingOption<number | string>) => void;
+  previewCups: number;
 }
 
-const DynamicOptionEditor: React.FC<DynamicOptionEditorProps> = ({ setting, onChange }) => {
+const DynamicOptionEditor: React.FC<DynamicOptionEditorProps> = ({ setting, onChange, previewCups }) => {
   const handleDynamicValueChange = (field: 'baseAmountPerCup' | 'stepSize' | 'numSteps' | 'offset', value: number) => {
     onChange({
       ...setting,
@@ -65,9 +66,9 @@ const DynamicOptionEditor: React.FC<DynamicOptionEditorProps> = ({ setting, onCh
         />
       </div>
       <div className="mb-2">
-        <label className="text-sm font-medium">1カップの場合の選択肢</label>
+        <label className="text-sm font-medium">{previewCups}カップの場合の選択肢</label>
         <div className="p-2 border rounded-md bg-gray-50">
-          {generateOptions(setting).map((option, index) => (
+          {generateOptions(setting, previewCups).map((option, index) => (
               <span
                 key={index}
                 className="text-center p-1 bg-blue-100 rounded-md m-1"
