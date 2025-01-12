@@ -10,6 +10,8 @@
     "reset-remote-db": "npx wrangler d1 execute mame-log --file=./schema.sql --remote"
   },
   "dependencies": {
+    "@auth/core": "^0.37.4",
+    "@hono/auth-js": "^1.0.15",
     "hono": "^4.6.15",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

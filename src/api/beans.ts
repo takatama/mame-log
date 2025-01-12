@@ -1,5 +1,5 @@
 import { Hono, Context } from 'hono'
-import { Env } from './index'
+import { Env } from '../index'
 import { z } from 'zod'
 
 const app = new Hono<{ Bindings: Env }>();
@@ -17,6 +17,7 @@ const beanSchema = z.object({
 });
 
 app.post('/', async (c: Context<{ Bindings: Env }>) => {
+  const user = c.get('user')
   try {
     const bean = await c.req.json();
     bean.is_active = bean.is_active ? 1 : 0;
@@ -47,10 +48,10 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
     }
 
     const result = await c.env.DB.prepare(
-      `INSERT INTO beans (name, country, area, drying_method, processing_method, roast_level, photo_url, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO beans (name, country, area, drying_method, processing_method, roast_level, photo_url, notes, user_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-      .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes)
+      .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes, user.id)
       .run();
 
     const insertedBean = {
@@ -69,8 +70,11 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
 });
 
 app.get('/', async (c: Context<{ Bindings: Env }>) => {
+  const user = c.get('user');
   try {
-    const { results } = await c.env.DB.prepare('SELECT * FROM beans').all();
+    const { results } = await c.env.DB.prepare(
+      'SELECT * FROM beans WHERE user_id = ?'
+    ).bind(user.id).all();
     return c.json(results);
   } catch (error) {
     console.error(error);
@@ -83,6 +87,7 @@ app.get('/', async (c: Context<{ Bindings: Env }>) => {
 });
 
 app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
+  const user = c.get('user');
   try {
     const bean = await c.req.json();
     bean.is_active = bean.is_active ? 1 : 0;
@@ -104,9 +109,9 @@ app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
     const updateResult = await c.env.DB.prepare(
       `UPDATE beans
        SET name = ?, country = ?, area = ?, drying_method = ?, processing_method = ?, roast_level = ?, photo_url = ?, notes = ?
-       WHERE id = ?`
+       WHERE id = ? AND user_id = ?`
     )
-      .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes, c.req.param('id'))
+      .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes, c.req.param('id'), user.id)
       .run();
 
     if (!updateResult.success) {
@@ -125,6 +130,7 @@ app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
 });
 
 app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
+  const user = c.get('user');
   try {
     const id = c.req.param('id');
 
@@ -134,9 +140,9 @@ app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
     
     // `brews` を削除
     const deleteBrewsResult = await c.env.DB.prepare(
-      `DELETE FROM brews WHERE bean_id = ?`
+      `DELETE FROM brews WHERE bean_id = ? AND user_id = ?`
     )
-      .bind(id)
+      .bind(id, user.id)
       .run();
 
     if (!deleteBrewsResult.success) {
@@ -144,7 +150,9 @@ app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
     }
 
     // KVの写真を削除
-    const beanData = await c.env.DB.prepare('SELECT photo_url FROM beans WHERE id = ?').bind(id).first();
+    const beanData = await c.env.DB.prepare(
+      'SELECT photo_url FROM beans WHERE id = ? AND user_id = ?'
+    ).bind(id, user.id).first();
     if (!beanData) {
       return c.json({ error: `Bean with ID ${id} not found` }, 404);
     }
@@ -156,9 +164,9 @@ app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
 
     // `beans` を削除
     const deleteBeanResult = await c.env.DB.prepare(
-      `DELETE FROM beans WHERE id = ?`
+      `DELETE FROM beans WHERE id = ? AND user_id = ?`
     )
-      .bind(id)
+      .bind(id, user.id)
       .run();
 
     if (!deleteBeanResult.success) {

@@ -12,6 +12,7 @@ import BeanDetails from './pages/BeanDetails';
 import { BrewProvider } from './context/BrewContext';
 import BeanCapture from './pages/BeanCapture';
 import { SettingsProvider } from './context/SettingsContext';
+import TermsAgreement from './pages/TermsAgreement';
 
 const App: React.FC = () => {
   return (
@@ -41,6 +42,7 @@ const App: React.FC = () => {
                 {/* <Route path="/brews/:brewId/brews" element={<BrewList />} /> */}
                 <Route path="/brews/:baseBrewId/brews/new" element={<BrewForm />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/users/new" element={<TermsAgreement />} />
               </Routes>
             </main>
 

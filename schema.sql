@@ -1,7 +1,19 @@
--- FOREING KEY制約が影響を受けない順番で削除する
+-- FOREIGN KEY制約が影響を受けない順番で削除する
 DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS brews;
 DROP TABLE IF EXISTS beans;
+DROP TABLE IF EXISTS users;
+
+-- ユーザー情報テーブル
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sub TEXT UNIQUE NOT NULL,                     -- Googleのサブジェクト識別子
+    email TEXT UNIQUE NOT NULL,                   -- メールアドレス
+    name TEXT,                                    -- 表示名
+    photo_url TEXT,                               -- プロフィール画像URL
+    terms_agreed_at DATETIME,                     -- 利用規約同意日時
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP -- ユーザー作成日時
+);
 
 -- コーヒー豆情報テーブル
 CREATE TABLE IF NOT EXISTS beans (
@@ -13,13 +25,10 @@ CREATE TABLE IF NOT EXISTS beans (
     processing_method TEXT,
     roast_level TEXT,
     photo_url TEXT,
-    notes TEXT
+    notes TEXT,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
-
-INSERT INTO beans (id, name, country, area, drying_method, processing_method, roast_level, photo_url, notes)
-VALUES
-(1, 'メキシコ オアハカ ハニー', 'メキシコ', 'オアハカ', 'ペタテドライ', 'ハニー', '中煎り', '', ''),
-(2, 'オリエンテナチュラル', 'グアテマラ', 'オリエンテ', 'ナチュラル', 'ナチュラル', '浅煎り', '', '');
 
 -- 抽出記録テーブル
 CREATE TABLE IF NOT EXISTS brews (
@@ -38,18 +47,33 @@ CREATE TABLE IF NOT EXISTS brews (
     acidity INTEGER,
     sweetness INTEGER,
     notes TEXT,
-    FOREIGN KEY (bean_id) REFERENCES beans (id)
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (bean_id) REFERENCES beans (id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
-
-INSERT INTO brews (id, brew_date, bean_id, bean_amount, grind_size, cups, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes)
-VALUES
-(1, '2024-12-29T23:00:00.000Z', 1, 20, '中細', 2, 85, 55, 45, '[140, 220, 300]', 4, 3, 2, 4, 'フルーティーでおいしい');
 
 -- 設定情報テーブル
 CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    settings JSON NOT NULL
+    settings JSON NOT NULL,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
-INSERT INTO settings (id, settings)
+
+-- サンプルデータ挿入
+INSERT INTO users (id, sub, email, name)
 VALUES
-(1, '{}');
+(1, 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', 'foobar@example.com', 'foo bar');
+
+INSERT INTO beans (id, name, country, area, drying_method, processing_method, roast_level, photo_url, notes, user_id)
+VALUES
+(1, 'メキシコ オアハカ ハニー', 'メキシコ', 'オアハカ', 'ペタテドライ', 'ハニー', '中煎り', '', '', 1),
+(2, 'オリエンテナチュラル', 'グアテマラ', 'オリエンテ', 'ナチュラル', 'ナチュラル', '浅煎り', '', '', 1);
+
+INSERT INTO brews (id, brew_date, bean_id, bean_amount, grind_size, cups, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, user_id)
+VALUES
+(1, '2024-12-29T23:00:00.000Z', 1, 20, '中細', 2, 85, 55, 45, '[140, 220, 300]', 4, 3, 2, 4, 'フルーティーでおいしい', 1);
+
+INSERT INTO settings (id, settings, user_id)
+VALUES
+(1, '{}', 1);

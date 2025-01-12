@@ -1,5 +1,5 @@
 import { Hono, Context } from 'hono'
-import { Env } from './index'
+import { Env } from '../index'
 import { z } from 'zod'
 
 const app = new Hono<{ Bindings: Env }>();
@@ -22,6 +22,7 @@ const brewSchema = z.object({
 });
 
 app.post('/', async (c) => {
+  const user = c.get('user');
   try {
     const brew = await c.req.json();
     const parsedBrew = brewSchema.parse(brew);
@@ -44,8 +45,8 @@ app.post('/', async (c) => {
     } = parsedBrew;
 
     const insertResult = await c.env.DB.prepare(
-      `INSERT INTO brews (brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO brews (brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, user_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         brew_date,
@@ -61,7 +62,8 @@ app.post('/', async (c) => {
         bitterness,
         acidity,
         sweetness,
-        notes
+        notes,
+        user.id
       )
       .run();
 
@@ -85,6 +87,7 @@ app.post('/', async (c) => {
 });
 
 app.put('/:id', async (c) => {
+  const user = c.get('user');
   try {
     const brew = await c.req.json();
     const parsedBrew = brewSchema.parse(brew);
@@ -94,9 +97,9 @@ app.put('/:id', async (c) => {
     const updateResult = await c.env.DB.prepare(
       `UPDATE brews
        SET brew_date = ?, bean_id = ?, bean_amount = ?, cups = ?, grind_size = ?, water_temp = ?, bloom_water_amount = ?, bloom_time = ?, pours = ?, overall_score = ?, bitterness = ?, acidity = ?, sweetness = ?, notes = ?
-       WHERE id = ?`
+       WHERE id = ? AND user_id = ?`
     )
-      .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, JSON.stringify(pours), overall_score, bitterness, acidity, sweetness, notes, c.req.param('id'))
+      .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, JSON.stringify(pours), overall_score, bitterness, acidity, sweetness, notes, c.req.param('id'), user.id)
       .run();
 
     if (!updateResult.success) {
@@ -116,8 +119,11 @@ app.put('/:id', async (c) => {
 });
 
 app.get('/', async (c: Context<{ Bindings: Env }>) => {
+  const user = c.get('user');
   try {
-    const { results } = await c.env.DB.prepare('SELECT * FROM brews').all();
+    const { results } = await c.env.DB.prepare(
+      'SELECT * FROM brews WHERE user_id = ?'
+    ).bind(user.id).all();
     const parsedResults = results.map((brew: any) => ({
       ...brew,
       pours: JSON.parse(brew.pours)
@@ -134,6 +140,7 @@ app.get('/', async (c: Context<{ Bindings: Env }>) => {
 });
 
 app.delete('/:id', async (c) => {
+  const user = c.get('user');
   try {
     const id = c.req.param('id');
 
@@ -143,9 +150,9 @@ app.delete('/:id', async (c) => {
 
     // `brews` テーブルのデータを削除
     const deleteBrewResult = await c.env.DB.prepare(
-      `DELETE FROM brews WHERE id = ?`
+      `DELETE FROM brews WHERE id = ? AND user_id = ?`
     )
-      .bind(id)
+      .bind(id, user.id)
       .run();
 
     if (!deleteBrewResult.success) {
