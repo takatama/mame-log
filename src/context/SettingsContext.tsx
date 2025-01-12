@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { BrewSettings, isDynamicOption, isFixedOption } from '../types/Brew';
+import { BrewSettings } from '../types/Settings';
 import { DefaultBrewSettings as initialSettings } from '../settings/DefaultBrewSettings';
 
 interface SettingsContextProps {
