@@ -4,15 +4,39 @@ import beans from './api/beans'
 import brews from './api/brews'
 import analyze from './api/analyze'
 import settings from './api/settings'
+import { authHandler, initAuthConfig, verifyAuth } from '@hono/auth-js'
+import Google from '@auth/core/providers/google'
+import { HTTPException } from 'hono/http-exception'
 
 export interface Env {
   DB: D1Database;
   GEMINI_API_KEY: string;
   MAME_LOG_IMAGES: KVNamespace;
   HOST_NAME: string;
+  AUTH_SECRET: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();
+
+app.use(
+  '*',
+  initAuthConfig((c) => ({
+    secret: c.env.AUTH_SECRET,
+    providers: [
+      Google,
+    ],
+  }))
+)
+
+app.onError((err, c) => {
+  if (err instanceof HTTPException && err.status === 401) {
+    return c.redirect('/api/auth/signin')
+  }
+  return c.text(err.message, 500)
+})
+
+app.use('/api/auth/*', authHandler())
+app.use('*', verifyAuth())
 
 app.route('/api/beans', beans)
 app.route('/api/brews', brews)
