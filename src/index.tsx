@@ -10,6 +10,7 @@ import { HTTPException } from 'hono/http-exception'
 import users from './api/users'
 import { requireUserMiddleware } from './api/authMiddleware';
 import images from './images'
+import status from './api/status'
 
 export interface Env {
   DB: D1Database;
@@ -39,17 +40,14 @@ app.onError((err, c) => {
   return c.text(err.message, 500)
 })
 
-app.use('/api/auth/*', (c, next) => {
-  if (c.req.path === '/api/auth/google/callback') {
-    return next();
-  }
-  return authHandler()(c, next);
-});
+app.use('/api/auth/*', authHandler());
+app.use('/api/*', verifyAuth())
+app.use('/signup', verifyAuth())
+app.use('/images/*', verifyAuth())
+app.use('/api/*', requireUserMiddleware);
+app.use('/images/*', requireUserMiddleware);
 
-app.use('*', verifyAuth())
-
-app.use('*', requireUserMiddleware);
-
+app.route('/api/status', status);
 app.route('/api/users', users)
 app.route('/api/beans', beans)
 app.route('/api/brews', brews)

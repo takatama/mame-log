@@ -1,14 +1,15 @@
-import { MiddlewareHandler } from 'hono';
-import { Context } from 'hono';
+import { Hono, Context } from 'hono'
+import { Env } from '../index'
 
-export const requireUserMiddleware: MiddlewareHandler = async (c: Context, next) => {
+const status = new Hono<{ Bindings: Env }>();
+status.get('/', async (c: Context<{ Bindings: Env }>) => {
   try {
     // Extract authUser from the context
     const auth = c.get('authUser');
 
     if (!auth || !auth.token) {
       // If user is not authenticated, redirect to the terms agreement page
-      return c.redirect('/users/new');
+      return c.json({ isSignedIn: false });
     }
 
     const { email } = auth.token;
@@ -21,16 +22,13 @@ export const requireUserMiddleware: MiddlewareHandler = async (c: Context, next)
       .first();
 
     if (!existingUser) {
-      // Redirect to the terms agreement page if user does not exist
-      return c.redirect('/api/users/new');
+      return c.json({ isSignedIn: true, isRegistered: false });
     }
-
-    // Set the user in the context for downstream handlers
-    c.set('user', existingUser);
-
-    await next();
+    return c.json({ isSignedIn: true, isRegistered: true });
   } catch (error) {
-    console.error('Error in requireUserMiddleware:', error);
+    console.error('Error in auth:', error);
     return c.json({ error: 'Unauthorized' }, 401);
   }
-};
+});
+
+export default status;
