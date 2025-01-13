@@ -3,7 +3,7 @@ import { Env } from './index'
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.get('/coffee-labels/:id', async (c: Context<{ Bindings: Env }>) => {
+app.get('/:id', async (c: Context<{ Bindings: Env }>) => {
   try {
     const { id } = c.req.param();
 
@@ -18,7 +18,7 @@ app.get('/coffee-labels/:id', async (c: Context<{ Bindings: Env }>) => {
     }
 
     // KVストアのKeyを生成
-    const photoKey = `/images/coffee-labels/${id}`;
+    const photoKey = `/api/images/coffee-labels/${id}`;
 
     // KVストアから画像データとメタデータを取得
     const { value: imageData, metadata } = await c.env.MAME_LOG_IMAGES.getWithMetadata(photoKey, { type: 'arrayBuffer' });

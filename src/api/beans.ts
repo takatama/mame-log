@@ -16,6 +16,19 @@ const beanSchema = z.object({
   notes: z.string().optional(),
 });
 
+const getPhotoKey = (photo_url: string | undefined): string => photo_url || `/api/images/coffee-labels/${crypto.randomUUID()}.png`;
+
+const updatePhoto = async (c: Context, user_id: number, photoKey: string, photo_data_url: string | undefined) => {
+  if (!photo_data_url) return;
+  const photoData = photo_data_url.split(",")[1]; // "data:image/png;base64,..." の形式を想定
+  const photoBuffer = Buffer.from(photoData, "base64");
+  const photoArrayBuffer = photoBuffer.buffer; // BufferをArrayBufferに変換
+
+  await c.env.MAME_LOG_IMAGES.put(photoKey, photoArrayBuffer, {
+    metadata: { contentType: "image/png", user_id },
+  });
+}
+
 app.post('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user')
   try {
@@ -35,17 +48,9 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
       notes = '',
     } = parsedBean;
 
-    const photoKey = photo_url || `/images/coffee-labels/${crypto.randomUUID()}.png`;
+    const photoKey = getPhotoKey(photo_url);
 
-    if (photo_data_url) {
-      const photoData = photo_data_url.split(",")[1]; // "data:image/png;base64,..." の形式を想定
-      const photoBuffer = Buffer.from(photoData, "base64");
-      const photoArrayBuffer = photoBuffer.buffer; // BufferをArrayBufferに変換
-    
-      await c.env.MAME_LOG_IMAGES.put(photoKey, photoArrayBuffer, {
-        metadata: { contentType: "image/png", user_id: user.id },
-      });
-    }
+    updatePhoto(c, user.id, photoKey, photo_data_url);
 
     const result = await c.env.DB.prepare(
       `INSERT INTO beans (name, country, area, drying_method, processing_method, roast_level, photo_url, notes, user_id)
@@ -94,17 +99,9 @@ app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
     const parsedBean = beanSchema.parse(bean);
     const { name, country, area, drying_method, processing_method, roast_level, photo_url, photo_data_url, notes } = parsedBean;
 
-    const photoKey = photo_url || `/images/coffee-labels/${crypto.randomUUID()}.png`;
+    const photoKey = getPhotoKey(photo_url);
 
-    if (photo_data_url) {
-      const photoData = photo_data_url.split(",")[1]; // "data:image/png;base64,..." の形式を想定
-      const photoBuffer = Buffer.from(photoData, "base64");
-      const photoArrayBuffer = photoBuffer.buffer; // BufferをArrayBufferに変換
-    
-      await c.env.MAME_LOG_IMAGES.put(photoKey, photoArrayBuffer, {
-        metadata: { contentType: "image/png", user_id: user.id },
-      });
-    }
+    updatePhoto(c, user.id, photoKey, photo_data_url);
 
     const updateResult = await c.env.DB.prepare(
       `UPDATE beans
