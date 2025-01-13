@@ -127,7 +127,7 @@ const BeanForm: React.FC = () => {
       <button
           type="button"
           onClick={handleNavigateToCapture}
-          className="bg-green-500 text-white py-2 px-4 rounded-md mr-2"
+          className="bg-green-500 text-white py-2 px-4 rounded-md mr-2 mb-4"
         >
           AIでラベルを解析
       </button>

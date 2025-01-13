@@ -10,9 +10,9 @@ interface BeanListItemProps {
 const BeanListItem: React.FC<BeanListItemProps> = ({ bean }) => {
   return (
     <li key={bean.id} className="p-4 border rounded-md flex items-center">
-      {bean.photo_url && (
+      {bean.photo_data_url || bean.photo_url && (
         <img
-          src={bean.photo_url}
+          src={bean.photo_data_url || bean.photo_url}
           alt={bean.name}
           className="w-16 h-16 object-cover rounded-full mr-4"
         />
