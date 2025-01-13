@@ -33,13 +33,6 @@ app.use(
   }))
 )
 
-// app.onError((err, c) => {
-//   if (err instanceof HTTPException && err.status === 401) {
-//     return c.redirect('/api/auth/signin')
-//   }
-//   return c.text(err.message, 500)
-// })
-
 app.use('/api/auth/*', authHandler());
 
 app.use('/users', verifyAuth())
@@ -52,10 +45,7 @@ app.route('/api/beans', beans)
 app.route('/api/brews', brews)
 app.route('/api/analyze', analyze)
 app.route('/api/settings', settings)
-
-app.use('/images/*', verifyAuth())
-app.use('/images/*', requireUserMiddleware);
-app.route('/images', images)
+app.route('/api/images/*', images)
 
 app.get('*', (c) => {
   return c.html(
