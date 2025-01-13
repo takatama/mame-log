@@ -33,27 +33,28 @@ app.use(
   }))
 )
 
-app.onError((err, c) => {
-  if (err instanceof HTTPException && err.status === 401) {
-    return c.redirect('/api/auth/signin')
-  }
-  return c.text(err.message, 500)
-})
+// app.onError((err, c) => {
+//   if (err instanceof HTTPException && err.status === 401) {
+//     return c.redirect('/api/auth/signin')
+//   }
+//   return c.text(err.message, 500)
+// })
 
 app.use('/api/auth/*', authHandler());
-app.use('/api/*', verifyAuth())
-app.use('/signup', verifyAuth())
-app.use('/images/*', verifyAuth())
-app.use('/users', verifyAuth())
-app.use('/api/*', requireUserMiddleware);
-app.use('/images/*', requireUserMiddleware);
 
-app.route('/api/status', status);
+app.use('/users', verifyAuth())
 app.route('/users', users)
+
+app.use('/api/*', verifyAuth())
+app.use('/api/*', requireUserMiddleware);
+app.route('/api/status', status);
 app.route('/api/beans', beans)
 app.route('/api/brews', brews)
 app.route('/api/analyze', analyze)
 app.route('/api/settings', settings)
+
+app.use('/images/*', verifyAuth())
+app.use('/images/*', requireUserMiddleware);
 app.route('/images', images)
 
 app.get('*', (c) => {
