@@ -18,7 +18,7 @@ const beanSchema = z.object({
 
 const getPhotoKey = (photo_url: string | undefined): string => photo_url || `/api/images/coffee-labels/${crypto.randomUUID()}.png`;
 
-const updatePhoto = async (c: Context, user_id: number, photoKey: string, photo_data_url: string | undefined) => {
+const updatePhoto = async (c: Context, user_id: string, photoKey: string, photo_data_url: string | undefined) => {
   if (!photo_data_url) return;
   const photoData = photo_data_url.split(",")[1]; // "data:image/png;base64,..." の形式を想定
   const photoBuffer = Buffer.from(photoData, "base64");

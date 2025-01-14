@@ -42,23 +42,26 @@ export const authConfig = (c: Context<{ Bindings: Env }>) =>
 
         return token;
       },
+      async session({ session, token }) {
+        if (token.user_id) {
+          session.user.id = token.user_id.toString();
+        }
+        return session
+      }
     },
   }))
 
 export const userMiddleware: MiddlewareHandler = async (c: Context, next) => {
   try {
-    // Extract authUser from the context
     const auth = c.get('authUser');
-    const user_id = auth?.token?.user_id as number;
-    if (!user_id) {
-      // If user is not authenticated, redirect to the terms agreement page
+    const id = auth?.session?.user?.id;
+    if (!id) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
-    c.set('user', { id: user_id });
-
+    c.set('user', { id });
     await next();
   } catch (error) {
-    console.error('Error in requireUserMiddleware:', error);
+    console.error('Error in userMiddleware:', error);
     return c.json({ error: 'Unauthorized' }, 401);
   }
 };
