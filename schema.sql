@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS users;
 -- ユーザー情報テーブル
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sub TEXT UNIQUE NOT NULL,                     -- Googleのサブジェクト識別子
+    provider_account_id TEXT NOT NULL UNIQUE,     -- GoogleユーザーID
     email TEXT UNIQUE NOT NULL,                   -- メールアドレス
     name TEXT,                                    -- 表示名
     photo_url TEXT,                               -- プロフィール画像URL
@@ -61,9 +61,9 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 -- サンプルデータ挿入
-INSERT INTO users (id, sub, email, name)
+INSERT INTO users (id, provider_account_id, email, name)
 VALUES
-(1, 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', 'foobar@example.com', 'foo bar');
+(1, '000000000000000000000', 'foobar@example.com', 'foo bar');
 
 INSERT INTO beans (id, name, country, area, drying_method, processing_method, roast_level, photo_url, notes, user_id)
 VALUES
