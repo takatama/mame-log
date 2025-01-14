@@ -4,13 +4,11 @@ import beans from './api/beans'
 import brews from './api/brews'
 import analyze from './api/analyze'
 import settings from './api/settings'
-import { authHandler, initAuthConfig, verifyAuth } from '@hono/auth-js'
-import Google from '@auth/core/providers/google'
-import { HTTPException } from 'hono/http-exception'
+import { authHandler, verifyAuth } from '@hono/auth-js'
 import users from './api/users'
-import { requireUserMiddleware } from './api/authMiddleware';
 import images from './images'
 import status from './api/status'
+import { authConfig, userMiddleware } from './middlewares/auth'
 
 export interface Env {
   DB: D1Database;
@@ -23,15 +21,10 @@ export interface Env {
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.use(
-  '*',
-  initAuthConfig((c) => ({
-    secret: c.env.AUTH_SECRET,
-    providers: [
-      Google,
-    ],
-  }))
-)
+app.use('*', async (c, next) => {
+  const auth = authConfig(c);
+  await auth(c, next);
+});
 
 app.use('/api/auth/*', authHandler());
 
@@ -39,7 +32,7 @@ app.use('/users', verifyAuth())
 app.route('/users', users)
 
 app.use('/api/*', verifyAuth())
-app.use('/api/*', requireUserMiddleware);
+app.use('/api/*', userMiddleware);
 app.route('/api/status', status);
 app.route('/api/beans', beans)
 app.route('/api/brews', brews)
