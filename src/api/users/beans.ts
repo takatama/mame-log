@@ -1,6 +1,7 @@
 import { Hono, Context } from 'hono'
 import { Env } from '../../index'
 import { z } from 'zod'
+import { deleteBrew } from './brews';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -272,16 +273,19 @@ app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
     if (!beanId) {
       return c.json({ error: 'Bean ID is required' }, 400);
     }
-    
-    // `brews` を削除
-    const deleteBrewsResult = await c.env.DB.prepare(
-      `DELETE FROM brews WHERE bean_id = ? AND user_id = ?`
+
+    // 1. 関連する `brews` を取得
+    const { results: brews } = await c.env.DB.prepare(
+      `SELECT id FROM brews WHERE bean_id = ? AND user_id = ?`
     )
       .bind(beanId, user.id)
-      .run();
+      .all();
 
-    if (!deleteBrewsResult.success) {
-      throw new Error(`Failed to delete brews for bean ID ${beanId}`);
+    if (brews && brews.length > 0) {
+      // 2. 関連する抽出ログを削除
+      for (const brew of brews) {
+          await deleteBrew(c, Number(brew.id), user.id);
+      }
     }
 
     // `bean_tags` を削除
