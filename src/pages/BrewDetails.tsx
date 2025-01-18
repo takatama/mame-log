@@ -54,7 +54,7 @@ const BrewDetails: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <p><strong>日付:</strong> {formatLocalDateTime(brew.brew_date)}</p>
+        <p><strong>日付:</strong> {formatLocalDateTime(brew.created_at)}</p>
         {brew.bean && (<p><strong>豆:</strong> <Link to={`/beans/${brew.bean_id}`} className="text-blue-500 hover:underline">{brew.bean?.name}</Link></p>)}
         {isPositive(brew.bean_amount) && (<p><strong>豆の量:</strong> {brew.bean_amount} [g]</p>)}
         {isPositive(brew.cups) && (<p><strong>カップ数:</strong> {brew.cups}</p>)}

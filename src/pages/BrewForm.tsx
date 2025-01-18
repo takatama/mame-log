@@ -11,7 +11,7 @@ const BrewForm: React.FC = () => {
   const { beans, brews, updateBrew, setBrews } = useBrewContext();
   const { brewId, beanId, baseBrewId } = useParams<{ brewId?: string; beanId?: string; baseBrewId?: string }>();
   const [bean, setBean] = useState<Bean | undefined>(undefined);
-  const [brew, setBrew] = useState<Brew>({ brew_date: new Date().toISOString() });
+  const [brew, setBrew] = useState<Brew>({ created_at: new Date().toISOString() });
   const [baseBrew, setBaseBrew] = useState<Brew>();
   const { settings } = useSettingsContext();
   
@@ -30,7 +30,7 @@ const BrewForm: React.FC = () => {
       setBaseBrew(baseBrew);
       setBean(baseBrew.bean);
       // 新しく作るので日付をリセット
-      setBrew({ ...baseBrew, brew_date: new Date().toISOString() });
+      setBrew({ ...baseBrew, created_at: new Date().toISOString() });
     }
   }, [brewId, beanId, baseBrewId, beans, brews]);
 

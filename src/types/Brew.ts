@@ -2,7 +2,6 @@ import { Bean } from "./Bean";
 
 export interface Brew {
   id?: number;
-  brew_date: string;
   bean?: Bean;
   bean_id?: number;
   cups?: number;
@@ -17,6 +16,7 @@ export interface Brew {
   acidity?: number;
   sweetness?: number;
   notes?: string;
+  created_at?: string;
 }
 
 export const totalWaterAmount = (brew: Brew, pourIndex: number): number => {

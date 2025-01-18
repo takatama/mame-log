@@ -5,7 +5,6 @@ import { z } from 'zod'
 const app = new Hono<{ Bindings: Env }>();
 
 const brewSchema = z.object({
-  brew_date: z.string(),
   bean_id: z.number().int().positive(),
   bean_amount: z.number().nonnegative().optional(),
   cups: z.number().int().nonnegative().optional(),
@@ -28,7 +27,6 @@ app.post('/', async (c) => {
     const parsedBrew = brewSchema.parse(brew);
 
     const {
-      brew_date,
       bean_id,
       bean_amount = 0,
       cups = 0,
@@ -45,11 +43,10 @@ app.post('/', async (c) => {
     } = parsedBrew;
 
     const insertResult = await c.env.DB.prepare(
-      `INSERT INTO brews (brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, user_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO brews (bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, user_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
-        brew_date,
         bean_id,
         bean_amount,
         cups,
@@ -92,14 +89,14 @@ app.put('/:id', async (c) => {
     const brew = await c.req.json();
     const parsedBrew = brewSchema.parse(brew);
 
-    const { brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount: bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes } = parsedBrew;
+    const { bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount: bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes } = parsedBrew;
 
     const updateResult = await c.env.DB.prepare(
       `UPDATE brews
-       SET brew_date = ?, bean_id = ?, bean_amount = ?, cups = ?, grind_size = ?, water_temp = ?, bloom_water_amount = ?, bloom_time = ?, pours = ?, overall_score = ?, bitterness = ?, acidity = ?, sweetness = ?, notes = ?
+       SET bean_id = ?, bean_amount = ?, cups = ?, grind_size = ?, water_temp = ?, bloom_water_amount = ?, bloom_time = ?, pours = ?, overall_score = ?, bitterness = ?, acidity = ?, sweetness = ?, notes = ?
        WHERE id = ? AND user_id = ?`
     )
-      .bind(brew_date, bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, JSON.stringify(pours), overall_score, bitterness, acidity, sweetness, notes, c.req.param('id'), user.id)
+      .bind(bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, JSON.stringify(pours), overall_score, bitterness, acidity, sweetness, notes, c.req.param('id'), user.id)
       .run();
 
     if (!updateResult.success) {
@@ -122,7 +119,7 @@ app.get('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');
   try {
     const { results } = await c.env.DB.prepare(
-      `SELECT * FROM brews WHERE user_id = ? ORDER BY brew_date DESC`
+      `SELECT * FROM brews WHERE user_id = ? ORDER BY created_at DESC`
     ).bind(user.id).all();
     const parsedResults = results.map((brew: any) => ({
       ...brew,
