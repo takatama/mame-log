@@ -122,12 +122,26 @@ app.post('/', async (c) => {
 app.put('/:id', async (c) => {
   const user = c.get('user');
   try {
+    const brewId = c.req.param('id');
     const brew = await c.req.json();
     const parsedBrew = brewSchema.parse(brew);
+    const {
+      bean_id = '',
+      bean_amount = '',
+      cups = '',
+      grind_size = '',
+      water_temp = '',
+      bloom_water_amount = '',
+      bloom_time = '',
+      pours = [],
+      overall_score = '',
+      bitterness = '',
+      acidity = '',
+      sweetness = '',
+      notes = '',
+      tags = []
+    } = parsedBrew;
 
-    const { bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount: bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, tags = [] } = parsedBrew;
-
-    const brewId = c.req.param('id');
     const updateResult = await c.env.DB.prepare(
       `UPDATE brews
        SET bean_id = ?, bean_amount = ?, cups = ?, grind_size = ?, water_temp = ?, bloom_water_amount = ?, bloom_time = ?, pours = ?, overall_score = ?, bitterness = ?, acidity = ?, sweetness = ?, notes = ?
