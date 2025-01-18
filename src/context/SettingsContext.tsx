@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { BrewSettings } from '../types/Settings';
 import { DefaultBrewSettings as initialSettings } from '../settings/DefaultBrewSettings';
-import { useAuth } from './AuthContext'; // 認証状態を確認する
+import { useSession } from '@hono/auth-js/react';
 
 interface SettingsContextProps {
   settings: BrewSettings;
@@ -18,7 +18,7 @@ const SettingsContext = createContext<SettingsContextProps>({
 });
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isSignedIn, isRegistered } = useAuth(); // 認証状態を確認
+  const { status } = useSession();
   const [settings, setSettings] = useState<BrewSettings>(initialSettings);
   const [isInitialized, setIsInitialized] = useState(false); // 初期化済みフラグ
 
@@ -74,10 +74,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   useEffect(() => {
-    if (isSignedIn && isRegistered && !isInitialized) {
+    if (status === 'authenticated' && !isInitialized) {
       loadSettings().then(() => setIsInitialized(true));
     }
-  }, [isSignedIn, isRegistered, isInitialized]);
+  }, [status, isInitialized]);
   
   return (
     <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, loadSettings }}>

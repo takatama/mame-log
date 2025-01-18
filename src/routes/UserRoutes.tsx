@@ -1,11 +1,11 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useSession } from '@hono/auth-js/react';
 
 const UserRoutes: React.FC = () => {
-  const { isSignedIn } = useAuth();
+  const { status } = useSession();
 
-  if (!isSignedIn) {
+  if (status !== 'authenticated') {
     return <Navigate to="/" />
   }
 
