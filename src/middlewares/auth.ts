@@ -19,8 +19,8 @@ export const authConfig = (c: Context<{ Bindings: Env }>) =>
 
         // ユーザー情報をDBに保存し、user_idをJWTトークンに追加
         const query = `
-          INSERT INTO users (provider_account_id, email, name, photo_url, terms_agreed_at)
-          VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+          INSERT INTO users (provider_account_id, email, name, photo_url)
+          VALUES (?, ?, ?, ?)
           ON CONFLICT(provider_account_id) DO UPDATE SET
               email = excluded.email,
               name = excluded.name,

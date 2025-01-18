@@ -7,7 +7,6 @@ import settings from './api/settings'
 import { authHandler, verifyAuth } from '@hono/auth-js'
 import users from './api/users'
 import images from './images'
-import status from './api/status'
 import { authConfig, userMiddleware } from './middlewares/auth'
 
 export interface Env {
@@ -33,7 +32,6 @@ app.route('/users', users)
 
 app.use('/api/*', verifyAuth())
 app.use('/api/*', userMiddleware);
-app.route('/api/status', status);
 app.route('/api/beans', beans)
 app.route('/api/brews', brews)
 app.route('/api/analyze', analyze)
