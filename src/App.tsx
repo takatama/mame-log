@@ -38,7 +38,7 @@ const App: React.FC = () => {
                   </SettingsProvider>
                 </BrewProvider>
               }>
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard" element={<BeanList />} />
                 <Route path="/beans" element={<BeanList />} />
                 <Route path="/beans/new" element={<BeanForm />} />
                 <Route path="/beans/new/capture" element={<BeanCapture />} />
