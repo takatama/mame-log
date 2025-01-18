@@ -4,6 +4,7 @@ import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 import { Brew, totalWaterAmount } from '../types/Brew';
 import { formatLocalDateTime } from '../utils/date';
+import TagList from '../components/TagList';
 
 const BrewDetails: React.FC = () => {
   const { brewId } = useParams<{ brewId?: string }>()
@@ -47,13 +48,18 @@ const BrewDetails: React.FC = () => {
 
   const isPositive = (number: number | undefined) => number != null && number > 0;
 
+  const handleTagClick = (tag: string) => {
+    navigate(`/brews?tag=${encodeURIComponent(tag)}`); // タグでフィルタした豆一覧を表示
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">抽出ログ</h1>
       </div>
+      <TagList tags={brew.tags || []} onTagClick={handleTagClick} />
 
-      <div className="space-y-4">
+      <div className="space-y-4 mt-2">
         <p><strong>日付:</strong> {formatLocalDateTime(brew.created_at)}</p>
         {brew.bean && (<p><strong>豆:</strong> <Link to={`/beans/${brew.bean_id}`} className="text-blue-500 hover:underline">{brew.bean?.name}</Link></p>)}
         {isPositive(brew.bean_amount) && (<p><strong>豆の量:</strong> {brew.bean_amount} [g]</p>)}

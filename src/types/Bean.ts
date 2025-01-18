@@ -1,3 +1,5 @@
+import { Tag } from "./Tag";
+
 export interface Bean {
   id?: number;
   name?: string;
@@ -9,4 +11,5 @@ export interface Bean {
   photo_url?: string;
   photo_data_url?:string;
   notes?: string;
+  tags: Tag[];
 }

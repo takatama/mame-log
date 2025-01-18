@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
+import TagManager from '../components/TagManager';
 
 const BeanForm: React.FC = () => {
   const { beans, updateBean, setBeans } = useBrewContext();
@@ -15,6 +16,7 @@ const BeanForm: React.FC = () => {
     roast_level: '',
     photo_url: '',
     notes: '',
+    tags: [],
   });
   const navigate = useNavigate();
   const location = useLocation();
@@ -108,6 +110,14 @@ const BeanForm: React.FC = () => {
     navigate(`/beans/${beanId || 'new'}/capture`);
   };
 
+  const handleAddTag = (tagName: string) => {
+    setBean((prev) => ({ ...prev, tags: [...(prev.tags || []), { name: tagName }] }));
+  };
+
+  const handleRemoveTag = (tagName: string) => {
+    setBean((prev) => ({ ...prev, tags: prev.tags?.filter((t) => t.name !== tagName) }));
+  };
+
   if (!bean) {
     return <div>読み込み中...</div>
   }
@@ -197,6 +207,12 @@ const BeanForm: React.FC = () => {
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
+        <TagManager
+          tags={bean.tags || []}
+          onAdd={handleAddTag}
+          onRemove={handleRemoveTag}
+          tagSuggestions={['お気に入り']}
+        />
         <button className="bg-blue-500 text-white p-2 rounded-md">保存する</button>
       </form>
     </div>

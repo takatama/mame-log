@@ -6,6 +6,7 @@ import { generateOptions } from '../types/Settings';
 import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 import { useSettingsContext } from '../context/SettingsContext';
+import TagManager from '../components/TagManager';
 
 const BrewForm: React.FC = () => {
   const { beans, brews, updateBrew, setBrews } = useBrewContext();
@@ -144,6 +145,14 @@ const BrewForm: React.FC = () => {
     });
   };
 
+  const handleAddTag = (tagName: string) => {
+    setBrew((prev) => ({ ...prev, tags: [...(prev.tags || []), { name: tagName }] }));
+  };
+
+  const handleRemoveTag = (tagName: string) => {
+    setBrew((prev) => ({ ...prev, tags: prev.tags?.filter((t) => t.name !== tagName) }));
+  };
+
   if (!brew) return <div>読み込み中...</div>;
 
   return (
@@ -246,6 +255,12 @@ const BrewForm: React.FC = () => {
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
+        <TagManager
+          tags={brew.tags || []}
+          onAdd={handleAddTag}
+          onRemove={handleRemoveTag}
+          tagSuggestions={['お気に入り']}
+        />
         <button type="submit" className="bg-blue-500 text-white p-2 rounded-md">
           保存する
         </button>

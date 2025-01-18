@@ -4,6 +4,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
 import { Brew } from '../types/Brew';
 import { BrewListItem } from './BrewList';
+import TagList from '../components/TagList';
 
 const BeanDetail: React.FC = () => {
   const { beans, setBeans, brews } = useBrewContext();
@@ -43,18 +44,23 @@ const BeanDetail: React.FC = () => {
     }
   };
 
+  const handleTagClick = (tag: string) => {
+    navigate(`/beans?tag=${encodeURIComponent(tag)}`); // タグでフィルタした豆一覧を表示
+  };
+
   if (!bean) {
     return <div>読み込み中...</div>
   }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{bean.name}</h1>
+      <h1 className="text-2xl font-bold mb-2">{bean.name}</h1>
+      <TagList tags={bean.tags || []} onTagClick={handleTagClick} />
       {(bean.photo_data_url || bean.photo_url) && (
         <img
           src={bean.photo_data_url || bean.photo_url}
           alt={bean.name}
-          className="mb-4 w-32 h-32 object-cover"
+          className="mt-4 mb-4 w-32 h-32 object-cover"
         />
       )}
       {bean.country && (<p>
