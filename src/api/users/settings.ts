@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { Env } from '../index';
-import { DefaultBrewSettings as initialSettings } from '../settings/DefaultBrewSettings';
+import { Env } from '../../index';
+import { DefaultBrewSettings as initialSettings } from '../../settings/DefaultBrewSettings';
 
 const settings = new Hono<{ Bindings: Env }>();
 

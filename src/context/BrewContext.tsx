@@ -39,11 +39,11 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     async function fetchBeansAndBrews() {
-      const beansResponse = await fetch('/api/beans');
+      const beansResponse = await fetch('/api/users/beans');
       const fetchedBeans: Bean[] = await beansResponse.json();
       setBeansState(fetchedBeans);
 
-      const brewsResponse = await fetch('/api/brews');
+      const brewsResponse = await fetch('/api/users/brews');
       const fetchedBrews: Brew[] = await brewsResponse.json();
       setBrewsState(updateBrewsWithBeans(fetchedBeans, fetchedBrews));
     }

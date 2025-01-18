@@ -1,5 +1,5 @@
 import { Hono, Context } from 'hono'
-import { Env } from '../index'
+import { Env } from '../../index'
 import { z } from 'zod'
 
 const app = new Hono<{ Bindings: Env }>();
@@ -16,7 +16,7 @@ const beanSchema = z.object({
   notes: z.string().optional(),
 });
 
-const getPhotoKey = (photo_url: string | undefined): string => photo_url || `/api/images/coffee-labels/${crypto.randomUUID()}.png`;
+const getPhotoKey = (photo_url: string | undefined): string => photo_url || `/api/users/images/coffee-labels/${crypto.randomUUID()}.png`;
 
 const updatePhoto = async (c: Context, user_id: string, photoKey: string, photo_data_url: string | undefined) => {
   if (!photo_data_url) return;

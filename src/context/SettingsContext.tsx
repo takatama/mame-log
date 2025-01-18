@@ -31,7 +31,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const saveSettings = async (newSettings: BrewSettings) => {
     try {
-      const response = await fetch('/api/settings', {
+      const response = await fetch('/api/users/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const loadSettings = async () => {
     try {
-      const response = await fetch('/api/settings');
+      const response = await fetch('/api/users/settings');
       if (!response.ok) {
         throw new Error(`Failed to load settings: ${response.statusText}`);
       }

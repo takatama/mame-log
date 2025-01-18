@@ -1,13 +1,13 @@
 import { Hono } from 'hono'
 import { renderToString } from 'react-dom/server'
-import beans from './api/beans'
-import brews from './api/brews'
-import analyze from './api/analyze'
-import settings from './api/settings'
 import { authHandler, verifyAuth } from '@hono/auth-js'
-import users from './api/users'
-import images from './images'
 import { authConfig, userMiddleware } from './middlewares/auth'
+import users from './api/users'
+import beans from './api/users/beans'
+import brews from './api/users/brews'
+import analyze from './api/users/analyze'
+import settings from './api/users/settings'
+import images from './api/users/images'
 
 export interface Env {
   DB: D1Database;
@@ -27,16 +27,15 @@ app.use('*', async (c, next) => {
 
 app.use('/api/auth/*', authHandler());
 
-app.use('/users', verifyAuth())
-app.route('/users', users)
-
 app.use('/api/*', verifyAuth())
-app.use('/api/*', userMiddleware);
-app.route('/api/beans', beans)
-app.route('/api/brews', brews)
-app.route('/api/analyze', analyze)
-app.route('/api/settings', settings)
-app.route('/api/images/*', images)
+app.route('/api/users', users)
+
+app.use('/api/users/*', userMiddleware);
+app.route('/api/users/beans', beans)
+app.route('/api/users/brews', brews)
+app.route('/api/users/analyze', analyze)
+app.route('/api/users/settings', settings)
+app.route('/api/users/images/*', images)
 
 app.get('*', (c) => {
   return c.html(
