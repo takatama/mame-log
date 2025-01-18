@@ -53,7 +53,7 @@ const BrewForm: React.FC = () => {
 
   const handlePost = async (newBrew: Brew) => {
     try {
-      const response = await fetch('/api/brews', {
+      const response = await fetch('/api/users/brews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newBrew),

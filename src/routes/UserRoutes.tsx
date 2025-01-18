@@ -1,18 +1,12 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useSession } from '@hono/auth-js/react';
 
 const UserRoutes: React.FC = () => {
-  const { isSignedIn, isRegistered } = useAuth();
+  const { status } = useSession();
 
-  if (!isSignedIn) {
-    // return <Navigate to="/api/auth/signin" />;
-    window.location.href = '/api/auth/signin'; // 外部リンクへのリダイレクト
-    return null; // コンポーネントをレンダリングしない
-  }
-
-  if (!isRegistered) {
-    return <Navigate to="/signup" />;
+  if (status !== 'authenticated') {
+    return <Navigate to="/" />
   }
 
   return <Outlet />

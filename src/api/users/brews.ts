@@ -1,5 +1,5 @@
 import { Hono, Context } from 'hono'
-import { Env } from '../index'
+import { Env } from '../../index'
 import { z } from 'zod'
 
 const app = new Hono<{ Bindings: Env }>();

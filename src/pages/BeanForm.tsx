@@ -44,7 +44,7 @@ const BeanForm: React.FC = () => {
 
   const handlePost = async (newBean: Bean) => {
     try {
-      const response = await fetch('/api/beans', {
+      const response = await fetch('/api/users/beans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newBean),

@@ -1,6 +1,6 @@
 
 import { Hono, Context } from 'hono'
-import { Env } from '../index'
+import { Env } from '../../index'
 
 const app = new Hono<{ Bindings: Env }>();
 

@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT UNIQUE NOT NULL,                   -- メールアドレス
     name TEXT,                                    -- 表示名
     photo_url TEXT,                               -- プロフィール画像URL
-    terms_agreed_at DATETIME,                     -- 利用規約同意日時
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP -- ユーザー作成日時
 );
 

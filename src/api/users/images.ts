@@ -1,5 +1,5 @@
 import { Hono, Context } from 'hono'
-import { Env } from './index'
+import { Env } from '../../index'
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -18,7 +18,7 @@ app.get('/:id', async (c: Context<{ Bindings: Env }>) => {
     }
 
     // KVストアのKeyを生成
-    const photoKey = `/api/images/coffee-labels/${id}`;
+    const photoKey = `/api/users/images/coffee-labels/${id}`;
 
     // KVストアから画像データとメタデータを取得
     const { value: imageData, metadata } = await c.env.MAME_LOG_IMAGES.getWithMetadata(photoKey, { type: 'arrayBuffer' });
@@ -27,7 +27,7 @@ app.get('/:id', async (c: Context<{ Bindings: Env }>) => {
     }
 
     // メタデータからuser_idを取得
-    const metadataUserId = (metadata as { user_id?: number })?.user_id;
+    const metadataUserId = (metadata as { user_id?: string })?.user_id;
     if (!metadataUserId || metadataUserId !== user.id) {
       return c.json({ error: "Unauthorized access to this image" }, 403);
     }

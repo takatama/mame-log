@@ -70,7 +70,7 @@ const BeanCapture: React.FC = () => {
 
     try {
       const imageData = canvas.toDataURL('image/png'); // 画像データを取得
-      const response = await fetch('/api/analyze', {
+      const response = await fetch('/api/users/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: imageData }),

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Bean } from '../types/Bean';
 import { Brew } from '../types/Brew';
-import { useAuth } from './AuthContext'; // 認証状態を確認する
+import { useSession } from '@hono/auth-js/react';
 
 interface BrewContextProps {
   beans: Bean[];
@@ -17,7 +17,7 @@ const BrewContext = createContext<BrewContextProps | undefined>(undefined);
 export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [beans, setBeansState] = useState<Bean[]>([]);
   const [brews, setBrewsState] = useState<Brew[]>([]);
-  const { isSignedIn, isRegistered } = useAuth(); // 認証状態を確認
+  const { status } = useSession();
   const [isInitialized, setIsInitialized] = useState(false); // 初期化済みフラグ
 
   // beans または brews の再計算ロジック
@@ -39,19 +39,19 @@ export const BrewProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     async function fetchBeansAndBrews() {
-      const beansResponse = await fetch('/api/beans');
+      const beansResponse = await fetch('/api/users/beans');
       const fetchedBeans: Bean[] = await beansResponse.json();
       setBeansState(fetchedBeans);
 
-      const brewsResponse = await fetch('/api/brews');
+      const brewsResponse = await fetch('/api/users/brews');
       const fetchedBrews: Brew[] = await brewsResponse.json();
       setBrewsState(updateBrewsWithBeans(fetchedBeans, fetchedBrews));
     }
 
-    if (isSignedIn && isRegistered && !isInitialized) {
+    if (status === 'authenticated' && !isInitialized) {
       fetchBeansAndBrews().then(() => setIsInitialized(true));
     }
-  }, [isSignedIn, isRegistered, isInitialized]);
+  }, [status, isInitialized]);
   
   const updateBean = (bean: Bean) => {
     const updatedBeans = beans.map((b) => (b.id === bean.id ? bean : b));

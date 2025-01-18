@@ -1,11 +1,11 @@
 import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useSession } from '@hono/auth-js/react';
 
 const PublicRoutes: React.FC = () => {
-  const { isRegistered } = useAuth();
+  const { status } = useSession();
 
-  if (isRegistered) {
+  if (status === 'authenticated') {
     return <Navigate to="/dashboard" />;
   }
 
