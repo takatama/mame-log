@@ -1,19 +1,30 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Brew } from '../types/Brew';
 import { formatLocalDateTime } from '../utils/date';
+import TagList from '../components/TagList';
 
 interface BrewListItemProps {
   brew: Brew;
 }
 
 export const BrewListItem: React.FC<BrewListItemProps> = ({ brew }) => {
+  const navigate = useNavigate();
+
+  const handleTagClick = (tag: string) => {
+    navigate(`/brews?tag=${encodeURIComponent(tag)}`); // タグでフィルタした豆一覧を表示
+  };
+
   return (
     <li key={brew.id} className="p-4 border rounded-md">
       <Link to={`/brews/${brew.id}`} className="text-blue-500 hover:underline">
         <h2 className="font-bold">{formatLocalDateTime(brew.created_at)}</h2>
         <p>豆: {brew.bean?.name}</p>
+        
+        <div className="my-2">
+          <TagList tags={brew.tags || []} onTagClick={handleTagClick} />
+        </div>
         {(brew.overall_score != null && brew.overall_score > 0) && (<p>評価: {'★'.repeat(brew.overall_score ?? 0)}</p>)}
       </Link>
     </li>

@@ -1,16 +1,23 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
+import TagList from '../components/TagList';
 
 interface BeanListItemProps {
   bean: Bean;
 }
 
 const BeanListItem: React.FC<BeanListItemProps> = ({ bean }) => {
+  const navigate = useNavigate();
+
+  const handleTagClick = (tag: string) => {
+    navigate(`/beans?tag=${encodeURIComponent(tag)}`);
+  };
+
   return (
     <li key={bean.id} className="p-4 border rounded-md flex items-center">
-      {(bean.photo_data_url || bean.photo_url) && (
+        {(bean.photo_data_url || bean.photo_url) && (
         <img
           src={bean.photo_data_url || bean.photo_url}
           alt={bean.name}
@@ -21,6 +28,9 @@ const BeanListItem: React.FC<BeanListItemProps> = ({ bean }) => {
         <Link to={`/beans/${bean.id}`} className="text-blue-500 hover:underline">
           <h2 className="font-bold">{bean.name}</h2>
         </Link>
+        <div className="my-2">
+          <TagList tags={bean.tags || []} onTagClick={handleTagClick} />
+        </div>
         {bean.country && (<p>
           {bean.country} ({bean.area})
         </p>)}
