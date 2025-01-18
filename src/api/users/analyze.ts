@@ -19,7 +19,6 @@ async function handleGemini(base64Data: string, env: Env): Promise<Response> {
 - メモ (notes)
 
 出力形式はJSONでお願いします。含まれていない項目はNULLではなく""にしてください。
-purchase_dateとroast_dateは日付形式でお願いします。例: "2022-01-01"
 `;
 
   const generationConfig = {

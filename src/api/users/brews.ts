@@ -22,7 +22,8 @@ const brewSchema = z.object({
     id: z.number().optional(),
     name: z.string(),
     user_id: z.number().optional(),
-  })).optional()
+  })).optional(),
+  created_at: z.string().optional(),
 });
 
 app.post('/', async (c) => {
@@ -30,6 +31,8 @@ app.post('/', async (c) => {
   try {
     const brew = await c.req.json();
     const parsedBrew = brewSchema.parse(brew);
+    const now = new Date();
+    const currentUtcDatetime = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')} ${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}:${String(now.getUTCSeconds()).padStart(2, '0')}`;
 
     const {
       bean_id,
@@ -46,11 +49,12 @@ app.post('/', async (c) => {
       sweetness = 0,
       notes = '',
       tags = [],
+      created_at = currentUtcDatetime,
     } = parsedBrew;
 
     const insertResult = await c.env.DB.prepare(
-      `INSERT INTO brews (bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, user_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO brews (bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, user_id, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         bean_id,
@@ -66,7 +70,8 @@ app.post('/', async (c) => {
         acidity,
         sweetness,
         notes,
-        user.id
+        user.id,
+        created_at
       )
       .run();
 
@@ -75,7 +80,7 @@ app.post('/', async (c) => {
     }
 
     const brewId = insertResult.meta.last_row_id;
-    const insertedBrew = { id: brewId, ...parsedBrew };
+    const insertedBrew = { id: brewId, created_at, ...parsedBrew };
 
     // タグを関連付け
     if (tags && tags.length > 0) {

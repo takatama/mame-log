@@ -22,9 +22,9 @@ export const fromUtcToLocalDate = (utcDateString: string | undefined): string =>
   return localDate.toISOString().slice(0, 10);
 };
 
-export const formatLocalDate = (isoDate: string | undefined) => {
-  if (!isoDate) return '';
-  const date = new Date(isoDate);
+export const formatLocalDate = (utcDatetime: string | undefined) => {
+  if (!utcDatetime) return '';
+  const date = new Date(utcDatetime + 'Z');
   return date.toLocaleDateString(undefined, {
     year: 'numeric',
     month: '2-digit',
@@ -32,9 +32,9 @@ export const formatLocalDate = (isoDate: string | undefined) => {
   });
 };
 
-export const formatLocalDateTime = (isoDate: string | undefined) => {
-  if (!isoDate) return '';
-  const date = new Date(isoDate);
+export const formatLocalDateTime = (utcDatetime: string | undefined) => {
+  if (!utcDatetime) return '';
+  const date = new Date(utcDatetime + 'Z');
   return date.toLocaleDateString(undefined, {
     year: 'numeric',
     month: '2-digit',
