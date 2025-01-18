@@ -144,12 +144,6 @@ const BeanForm: React.FC = () => {
           AIでラベルを解析
       </button>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <TagManager
-          tags={bean.tags || []}
-          onAdd={handleAddTag}
-          onRemove={handleRemoveTag}
-          tagSuggestions={['お気に入り']}
-        />
         <div>
           <label className="block text-sm font-medium">豆の名前</label>
           <input
@@ -213,6 +207,12 @@ const BeanForm: React.FC = () => {
             className="mt-1 block w-full border rounded-md p-2"
           />
         </div>
+        <TagManager
+          tags={bean.tags || []}
+          onAdd={handleAddTag}
+          onRemove={handleRemoveTag}
+          tagSuggestions={['お気に入り']}
+        />
         <button className="bg-blue-500 text-white p-2 rounded-md">保存する</button>
       </form>
     </div>
