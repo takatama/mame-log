@@ -21,12 +21,11 @@ export const BrewListItem: React.FC<BrewListItemProps> = ({ brew }) => {
       <Link to={`/brews/${brew.id}`} className="text-blue-500 hover:underline">
         <h2 className="font-bold">{formatLocalDateTime(brew.created_at)}</h2>
         <p>豆: {brew.bean?.name}</p>
-        
-        <div className="my-2">
-          <TagList tags={brew.tags || []} onTagClick={handleTagClick} />
-        </div>
         {(brew.overall_score != null && brew.overall_score > 0) && (<p>評価: {'★'.repeat(brew.overall_score ?? 0)}</p>)}
       </Link>
+      <div className="my-2">
+        <TagList tags={brew.tags || []} onTagClick={handleTagClick} />
+      </div>
     </li>
   );
 }
