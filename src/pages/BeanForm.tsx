@@ -58,7 +58,7 @@ const BeanForm: React.FC = () => {
   
       const createdBean: Bean = await response.json();
       // KVに保存した画像が取得できるようになるまで時間がかかるため、ローカルの写真があれば表示する。
-      createdBean.photo_data_url = newBean.photo_data_url;
+      createdBean.photo_data_url = newBean.photo_data_url || '';
       // 作成されたIDで更新
       setBeans([...beans, createdBean]);
       navigate(`/beans/${createdBean.id}`);
