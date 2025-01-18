@@ -71,7 +71,7 @@ const BeanForm: React.FC = () => {
     try {
       updateBean(updatedBean); // 状態を一時的に更新
       navigate(`/beans/${beanId}`);
-      const response = await fetch(`/api/beans/${beanId}`, {
+      const response = await fetch(`/api/users/beans/${beanId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedBean),

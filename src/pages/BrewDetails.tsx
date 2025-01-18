@@ -24,7 +24,7 @@ const BrewDetails: React.FC = () => {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/brews/${brewId}`, {
+      const response = await fetch(`/api/users/brews/${brewId}`, {
         method: 'DELETE',
       });
 

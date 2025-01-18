@@ -2,9 +2,12 @@ import React, { useEffect } from 'react';
 import { useBrewContext } from '../context/BrewContext';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
+import { Brew } from '../types/Brew';
+import { BrewListItem } from './BrewList';
 
 const BeanDetail: React.FC = () => {
-  const { beans, setBeans } = useBrewContext()
+  const { beans, setBeans, brews } = useBrewContext();
+  const [ relatedBrews, setRelatedBrews ] = React.useState<Brew[]>([]);
   const { beanId } = useParams<{ beanId?: string }>()
   const [ bean, setBean ] = React.useState<Bean | undefined>(undefined)
   const navigate = useNavigate();
@@ -13,6 +16,7 @@ const BeanDetail: React.FC = () => {
     if (!beanId) return;
     const bean = beans.find((bean) => bean.id === Number(beanId));
     setBean(bean);
+    setRelatedBrews(brews.filter(brew => brew.bean_id?.toString() === beanId))
   }, [beanId, beans]);
 
   const handleDelete = async () => {
@@ -22,7 +26,7 @@ const BeanDetail: React.FC = () => {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`/api/beans/${beanId}`, {
+      const response = await fetch(`/api/users/beans/${beanId}`, {
         method: 'DELETE',
       });
 
@@ -71,6 +75,12 @@ const BeanDetail: React.FC = () => {
       {bean.notes && (<p>
         <strong>メモ:</strong> {bean.notes}
       </p>)}
+      <h3 className="text-xl font-bold mt-4 mb-2">抽出ログ</h3>
+      <ul className="space-y-4 mt-4">
+        {relatedBrews.length > 0 ? (relatedBrews.map((brew) => (
+          <BrewListItem key={brew.id} brew={brew} />
+        ))): <div>なし</div>}
+      </ul>
       <div className="mt-4 py-2">
         <Link
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
