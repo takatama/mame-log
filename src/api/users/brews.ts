@@ -122,7 +122,7 @@ app.get('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');
   try {
     const { results } = await c.env.DB.prepare(
-      'SELECT * FROM brews WHERE user_id = ?'
+      `SELECT * FROM brews WHERE user_id = ? ORDER BY brew_date DESC`
     ).bind(user.id).all();
     const parsedResults = results.map((brew: any) => ({
       ...brew,
