@@ -26,13 +26,13 @@ CREATE TABLE IF NOT EXISTS beans (
     photo_url TEXT,
     notes TEXT,
     user_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 -- 抽出記録テーブル
 CREATE TABLE IF NOT EXISTS brews (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    brew_date DATETIME NOT NULL,
     bean_id INTEGER NOT NULL,
     bean_amount INTEGER,
     cups INTEGER,
@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS brews (
     sweetness INTEGER,
     notes TEXT,
     user_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (bean_id) REFERENCES beans (id),
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
@@ -56,6 +57,7 @@ CREATE TABLE IF NOT EXISTS settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     settings JSON NOT NULL,
     user_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
@@ -69,9 +71,9 @@ VALUES
 (1, 'メキシコ オアハカ ハニー', 'メキシコ', 'オアハカ', 'ペタテドライ', 'ハニー', '中煎り', '', '', 1),
 (2, 'オリエンテナチュラル', 'グアテマラ', 'オリエンテ', 'ナチュラル', 'ナチュラル', '浅煎り', '', '', 1);
 
-INSERT INTO brews (id, brew_date, bean_id, bean_amount, grind_size, cups, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, user_id)
+INSERT INTO brews (id, bean_id, bean_amount, grind_size, cups, water_temp, bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, user_id)
 VALUES
-(1, '2024-12-29T23:00:00.000Z', 1, 20, '中細', 2, 85, 55, 45, '[140, 220, 300]', 4, 3, 2, 4, 'フルーティーでおいしい', 1);
+(1, 1, 20, '中細', 2, 85, 55, 45, '[140, 220, 300]', 4, 3, 2, 4, 'フルーティーでおいしい', 1);
 
 INSERT INTO settings (id, settings, user_id)
 VALUES

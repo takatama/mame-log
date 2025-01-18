@@ -12,7 +12,7 @@ export const BrewListItem: React.FC<BrewListItemProps> = ({ brew }) => {
   return (
     <li key={brew.id} className="p-4 border rounded-md">
       <Link to={`/brews/${brew.id}`} className="text-blue-500 hover:underline">
-        <h2 className="font-bold">{formatLocalDateTime(brew.brew_date)}</h2>
+        <h2 className="font-bold">{formatLocalDateTime(brew.created_at)}</h2>
         <p>豆: {brew.bean?.name}</p>
         {(brew.overall_score != null && brew.overall_score > 0) && (<p>評価: {'★'.repeat(brew.overall_score ?? 0)}</p>)}
       </Link>
