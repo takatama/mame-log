@@ -3,6 +3,7 @@ import { useSettingsContext } from '../context/SettingsContext';
 import { isFixedOption, isDynamicOption } from '../types/Settings';
 import FixedOptionEditor from '../components/settings/FixedOptionEditor';
 import DynamicOptionEditor from '../components/settings/DynamicOptionEditor';
+import { signOut } from '@hono/auth-js/react';
 
 const Settings: React.FC = () => {
   const { settings, updateSettings, saveSettings, loadSettings } = useSettingsContext();
@@ -29,7 +30,13 @@ const Settings: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">設定を変更</h1>
+      <button
+        onClick={() => signOut()}
+        className="px-4 py-2 border flex gap-2 border-slate-300 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 hover:border-slate-400 dark:hover:border-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:shadow transition duration-150"
+      >
+        サインアウト
+      </button>
+      <h1 className="text-2xl font-bold mt-4 mb-4">設定を変更</h1>
       <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
         {Object.entries(settings).map(([key, setting]) => (
           <div key={key} className="mb-6 border p-4 rounded-md">
