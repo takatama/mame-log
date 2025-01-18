@@ -78,10 +78,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       loadSettings().then(() => setIsInitialized(true));
     }
   }, [isSignedIn, isRegistered, isInitialized]);
-
+  
   return (
     <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, loadSettings }}>
-      {isInitialized ? children : null} {/* 初期化済みなら子要素を表示 */}
+      {children}
     </SettingsContext.Provider>
   );
 };
