@@ -15,7 +15,7 @@ export interface Env {
   MAME_LOG_IMAGES: KVNamespace;
   HOST_NAME: string;
   AUTH_SECRET: string;
-  JWT_SECRET: string;
+  AUTH_GOOGLE_ID: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();

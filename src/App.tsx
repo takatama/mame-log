@@ -11,9 +11,7 @@ import BeanForm from './pages/BeanForm';
 import BeanList from './pages/BeanList';
 import BeanDetails from './pages/BeanDetails';
 import BeanCapture from './pages/BeanCapture';
-import TermsAgreement from './pages/TermsAgreement';
 import PublicRoutes from './routes/PublicRoutes';
-import AuthRoutes from './routes/AuthRoutes';
 import UserRoutes from './routes/UserRoutes';
 import { AuthProvider } from './context/AuthContext';
 import { BrewProvider } from './context/BrewContext';
@@ -33,13 +31,6 @@ const App: React.FC = () => {
                 {/* 公開ルート */}
                 <Route element={<PublicRoutes />}>
                   <Route path="/" element={<Home />} />
-                </Route>
-
-                {/* Googleログインが必要なルート */}
-                <Route element={
-                  <AuthRoutes />
-                }>
-                  <Route path="/signup" element={<TermsAgreement />} />
                 </Route>
 
                 {/* 利用登録が必要なルート */}
