@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
+import TagManager from '../components/TagManager';
 
 const BeanForm: React.FC = () => {
   const { beans, updateBean, setBeans } = useBrewContext();
@@ -15,6 +16,7 @@ const BeanForm: React.FC = () => {
     roast_level: '',
     photo_url: '',
     notes: '',
+    tags: [],
   });
   const navigate = useNavigate();
   const location = useLocation();
@@ -108,6 +110,14 @@ const BeanForm: React.FC = () => {
     navigate(`/beans/${beanId || 'new'}/capture`);
   };
 
+  const handleAddTag = (tag: string) => {
+    setBean((prev) => ({ ...prev, tags: [...(prev.tags || []), tag] }));
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setBean((prev) => ({ ...prev, tags: prev.tags?.filter((t) => t !== tag) }));
+  };
+
   if (!bean) {
     return <div>読み込み中...</div>
   }
@@ -134,6 +144,12 @@ const BeanForm: React.FC = () => {
           AIでラベルを解析
       </button>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <TagManager
+          tags={bean.tags || []}
+          onAdd={handleAddTag}
+          onRemove={handleRemoveTag}
+          tagSuggestions={['お気に入り']}
+        />
         <div>
           <label className="block text-sm font-medium">豆の名前</label>
           <input

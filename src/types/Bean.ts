@@ -9,4 +9,5 @@ export interface Bean {
   photo_url?: string;
   photo_data_url?:string;
   notes?: string;
+  tags: string[];
 }
