@@ -8,7 +8,7 @@ interface BrewListItemProps {
   brew: Brew;
 }
 
-const BrewListItem: React.FC<BrewListItemProps> = ({ brew }) => {
+export const BrewListItem: React.FC<BrewListItemProps> = ({ brew }) => {
   return (
     <li key={brew.id} className="p-4 border rounded-md">
       <Link to={`/brews/${brew.id}`} className="text-blue-500 hover:underline">

@@ -79,7 +79,7 @@ const BrewForm: React.FC = () => {
       // 楽観的に状態を更新
       updateBrew(updatedBrew);
       navigate(`/brews/${brewId}`);
-      const response = await fetch(`/api/brews/${brewId}`, {
+      const response = await fetch(`/api/users/brews/${brewId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedBrew),
