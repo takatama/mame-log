@@ -267,24 +267,35 @@ app.get('/', async (c: Context<{ Bindings: Env }>) => {
 app.delete('/:id', async (c) => {
   const user = c.get('user');
   try {
-    const id = c.req.param('id');
+    const brewId = c.req.param('id');
 
-    if (!id) {
+    if (!brewId) {
       return c.json({ error: 'Brew ID is required' }, 400);
+    }
+
+    // `brew_tags` テーブルのデータを削除
+    const deleteTagsResult = await c.env.DB.prepare(
+      `DELETE FROM brew_tags WHERE brew_id = ? AND user_id = ?`
+    )
+      .bind(brewId, user.id)
+      .run();
+
+    if (!deleteTagsResult.success) {
+      throw new Error(`Failed to delete tags for brew with ID ${brewId}`);
     }
 
     // `brews` テーブルのデータを削除
     const deleteBrewResult = await c.env.DB.prepare(
       `DELETE FROM brews WHERE id = ? AND user_id = ?`
     )
-      .bind(id, user.id)
+      .bind(brewId, user.id)
       .run();
 
     if (!deleteBrewResult.success) {
-      throw new Error(`Failed to delete brew with ID ${id}`);
+      throw new Error(`Failed to delete brew with ID ${brewId}`);
     }
 
-    return c.json({ message: `Brew with ID ${id} is deleted successfully` }, 200);
+    return c.json({ message: `Brew with ID ${brewId} is deleted successfully` }, 200);
   } catch (error) {
     console.error(error);
     return c.json(

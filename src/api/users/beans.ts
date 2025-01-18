@@ -261,9 +261,9 @@ app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
 app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');
   try {
-    const id = c.req.param('id');
+    const beanId = c.req.param('id');
 
-    if (!id) {
+    if (!beanId) {
       return c.json({ error: 'Bean ID is required' }, 400);
     }
     
@@ -271,19 +271,30 @@ app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
     const deleteBrewsResult = await c.env.DB.prepare(
       `DELETE FROM brews WHERE bean_id = ? AND user_id = ?`
     )
-      .bind(id, user.id)
+      .bind(beanId, user.id)
       .run();
 
     if (!deleteBrewsResult.success) {
-      throw new Error(`Failed to delete brews for bean ID ${id}`);
+      throw new Error(`Failed to delete brews for bean ID ${beanId}`);
+    }
+
+    // `bean_tags` を削除
+    const deleteTagsResult = await c.env.DB.prepare(
+      `DELETE FROM bean_tags WHERE bean_id = ? AND user_id = ?`
+    )
+      .bind(beanId, user.id)
+      .run();
+
+    if (!deleteTagsResult.success) {
+      throw new Error(`Failed to delete tags for bean ID ${beanId}`);
     }
 
     // KVの写真を削除
     const beanData = await c.env.DB.prepare(
       'SELECT photo_url FROM beans WHERE id = ? AND user_id = ?'
-    ).bind(id, user.id).first();
+    ).bind(beanId, user.id).first();
     if (!beanData) {
-      return c.json({ error: `Bean with ID ${id} not found` }, 404);
+      return c.json({ error: `Bean with ID ${beanId} not found` }, 404);
     }
 
     const photoKey = beanData.photo_url;
@@ -295,14 +306,14 @@ app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
     const deleteBeanResult = await c.env.DB.prepare(
       `DELETE FROM beans WHERE id = ? AND user_id = ?`
     )
-      .bind(id, user.id)
+      .bind(beanId, user.id)
       .run();
 
     if (!deleteBeanResult.success) {
-      throw new Error(`Failed to delete bean with ID ${id}`);
+      throw new Error(`Failed to delete bean with ID ${beanId}`);
     }
 
-    return c.json({ message: `Bean with ID ${id} and its related brews and pours were deleted successfully` }, 200);
+    return c.json({ message: `Bean with ID ${beanId} and its related brews and pours were deleted successfully` }, 200);
   } catch (error) {
     console.error(error);
     return c.json(
