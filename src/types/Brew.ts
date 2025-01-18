@@ -16,6 +16,7 @@ export interface Brew {
   acidity?: number;
   sweetness?: number;
   notes?: string;
+  tags?: string[];
   created_at?: string;
 }
 
