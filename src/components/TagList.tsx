@@ -1,8 +1,9 @@
 import React from 'react';
+import { Tag } from '../types/Tag';
 
 type TagListProps = {
-  tags: string[];
-  onTagClick?: (tag: string) => void; // タグクリック時のコールバック（任意）
+  tags: Tag[];
+  onTagClick?: (tagName: string) => void; // タグクリック時のコールバック（任意）
 };
 
 const TagList: React.FC<TagListProps> = ({ tags, onTagClick }) => {
@@ -14,11 +15,11 @@ const TagList: React.FC<TagListProps> = ({ tags, onTagClick }) => {
     <div className="flex flex-wrap gap-2">
       {tags.map((tag) => (
         <span
-          key={tag}
+          key={tag.name}
           className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm cursor-pointer hover:bg-blue-200"
-          onClick={() => onTagClick?.(tag)}
+          onClick={() => onTagClick?.(tag.name)}
         >
-          {tag}
+          {tag.name}
         </span>
       ))}
     </div>

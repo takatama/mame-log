@@ -18,6 +18,11 @@ const brewSchema = z.object({
   acidity: z.number().nonnegative().optional(),
   sweetness: z.number().nonnegative().optional(),
   notes: z.string().optional(),
+  tags: z.array(z.object({
+    id: z.number().optional(),
+    name: z.string(),
+    user_id: z.number().optional(),
+  })).optional()
 });
 
 app.post('/', async (c) => {
@@ -40,6 +45,7 @@ app.post('/', async (c) => {
       acidity = 0,
       sweetness = 0,
       notes = '',
+      tags = [],
     } = parsedBrew;
 
     const insertResult = await c.env.DB.prepare(
@@ -68,10 +74,40 @@ app.post('/', async (c) => {
       throw new Error('Failed to insert brew log');
     }
 
-    const brew_id = insertResult.meta.last_row_id;
+    const brewId = insertResult.meta.last_row_id;
+    const insertedBrew = { id: brewId, ...parsedBrew };
 
-    const insertedBrew = { id: brew_id, ...parsedBrew };
-    return c.json(insertedBrew, 201);
+    // タグを関連付け
+    if (tags && tags.length > 0) {
+      for (const tag of tags) {
+        let tagId = tag.id;
+
+        // タグが新規作成の場合
+        if (!tagId) {
+          const tagInsertResult = await c.env.DB.prepare(
+            `INSERT INTO tags (name, user_id) VALUES (?, ?)`
+          )
+            .bind(tag.name, user.id)
+            .run();
+
+          if (!tagInsertResult.success) {
+            throw new Error(`Failed to create tag: ${tag.name}`);
+          }
+
+          tagId = tagInsertResult.meta.last_row_id;
+          tag.id = tagId;
+        }
+
+        // タグを抽出ログに関連付け
+        await c.env.DB.prepare(
+          `INSERT OR IGNORE INTO brew_tags (brew_id, tag_id, user_id) VALUES (?, ?, ?)`
+        )
+          .bind(brewId, tagId, user.id)
+          .run();
+      }
+    }
+
+    return c.json({ ...insertedBrew, tags }, 201);
   } catch (error) {
     console.error(error);
     return c.json(
@@ -89,20 +125,56 @@ app.put('/:id', async (c) => {
     const brew = await c.req.json();
     const parsedBrew = brewSchema.parse(brew);
 
-    const { bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount: bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes } = parsedBrew;
+    const { bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount: bloom_water_amount, bloom_time, pours, overall_score, bitterness, acidity, sweetness, notes, tags = [] } = parsedBrew;
 
+    const brewId = c.req.param('id');
     const updateResult = await c.env.DB.prepare(
       `UPDATE brews
        SET bean_id = ?, bean_amount = ?, cups = ?, grind_size = ?, water_temp = ?, bloom_water_amount = ?, bloom_time = ?, pours = ?, overall_score = ?, bitterness = ?, acidity = ?, sweetness = ?, notes = ?
        WHERE id = ? AND user_id = ?`
     )
-      .bind(bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, JSON.stringify(pours), overall_score, bitterness, acidity, sweetness, notes, c.req.param('id'), user.id)
+      .bind(bean_id, bean_amount, cups, grind_size, water_temp, bloom_water_amount, bloom_time, JSON.stringify(pours), overall_score, bitterness, acidity, sweetness, notes, brewId, user.id)
       .run();
 
     if (!updateResult.success) {
       throw new Error('Failed to update brew log');
     }
 
+    // 2. 既存のタグを解除
+    await c.env.DB.prepare(
+      `DELETE FROM brew_tags WHERE brew_id = ? AND user_id = ?`
+    ).bind(brewId, user.id).run();
+
+    // 3. 新しいタグを処理
+    if (tags && tags.length > 0) {
+      for (const tag of tags) {
+        let tagId = tag.id;
+
+        // タグが新規作成の場合
+        if (!tagId) {
+          const tagInsertResult = await c.env.DB.prepare(
+            `INSERT INTO tags (name, user_id) VALUES (?, ?)`
+          )
+            .bind(tag.name, user.id)
+            .run();
+
+          if (!tagInsertResult.success) {
+            throw new Error(`Failed to create tag: ${tag.name}`);
+          }
+
+          tagId = tagInsertResult.meta.last_row_id;
+          tag.id = tagId;
+        }
+
+        // タグを抽出ログに関連付け
+        await c.env.DB.prepare(
+          `INSERT OR IGNORE INTO brew_tags (brew_id, tag_id, user_id) VALUES (?, ?, ?)`
+        )
+          .bind(brewId, tagId, user.id)
+          .run();
+      }
+    }
+    
     return c.json({ message: 'Brew log and pours updated successfully' });
   } catch (error) {
     console.error(error);
@@ -118,14 +190,70 @@ app.put('/:id', async (c) => {
 app.get('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');
   try {
+    // 抽出ログとタグを結合して取得
     const { results } = await c.env.DB.prepare(
-      `SELECT * FROM brews WHERE user_id = ? ORDER BY created_at DESC`
+      `SELECT 
+        brews.id AS brew_id,
+        brews.bean_id,
+        brews.bean_amount,
+        brews.cups,
+        brews.grind_size,
+        brews.water_temp,
+        brews.bloom_water_amount,
+        brews.bloom_time,
+        brews.pours,
+        brews.overall_score,
+        brews.bitterness,
+        brews.acidity,
+        brews.sweetness,
+        brews.notes,
+        brews.created_at,
+        tags.id AS tag_id,
+        tags.name AS tag_name
+       FROM brews
+       LEFT JOIN brew_tags ON brews.id = brew_tags.brew_id
+       LEFT JOIN tags ON brew_tags.tag_id = tags.id
+       WHERE brews.user_id = ?
+       ORDER BY brews.created_at DESC`
     ).bind(user.id).all();
-    const parsedResults = results.map((brew: any) => ({
-      ...brew,
-      pours: JSON.parse(brew.pours)
-    }));
-    return c.json(parsedResults);
+
+    // データを整形: 抽出ログごとにタグをまとめる
+    const brewsWithTags = results.reduce((acc: any, row: any) => {
+      const existingBrew = acc.find((b: any) => b.id === row.brew_id);
+
+      const tag = row.tag_id
+        ? { id: row.tag_id, name: row.tag_name }
+        : null; // タグがない場合は null
+
+      if (existingBrew) {
+        // 既存の抽出ログにタグを追加
+        if (tag) existingBrew.tags.push(tag);
+      } else {
+        // 新しい抽出ログを作成
+        acc.push({
+          id: row.brew_id,
+          bean_id: row.bean_id,
+          bean_amount: row.bean_amount,
+          cups: row.cups,
+          grind_size: row.grind_size,
+          water_temp: row.water_temp,
+          bloom_water_amount: row.bloom_water_amount,
+          bloom_time: row.bloom_time,
+          pours: JSON.parse(row.pours),
+          overall_score: row.overall_score,
+          bitterness: row.bitterness,
+          acidity: row.acidity,
+          sweetness: row.sweetness,
+          notes: row.notes,
+          created_at: row.created_at,
+          tags: tag ? [tag] : [], // タグがない場合は空配列
+        });
+      }
+
+      return acc;
+    }, []);
+
+    return c.json(brewsWithTags);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {

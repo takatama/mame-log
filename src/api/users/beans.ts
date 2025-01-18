@@ -14,6 +14,11 @@ const beanSchema = z.object({
   photo_url: z.string().optional(),
   photo_data_url: z.string().optional(),
   notes: z.string().optional(),
+  tags: z.array(z.object({
+    id: z.number().optional(),
+    name: z.string(),
+    user_id: z.number().optional(),
+  })).optional()
 });
 
 const getPhotoKey = (photo_url: string | undefined): string => photo_url || `/api/users/images/coffee-labels/${crypto.randomUUID()}.png`;
@@ -33,9 +38,7 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user')
   try {
     const bean = await c.req.json();
-    bean.is_active = bean.is_active ? 1 : 0;
     const parsedBean = beanSchema.parse(bean);
-
     const {
       name = '',
       country = '',
@@ -46,6 +49,7 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
       photo_url = '',
       photo_data_url = '',
       notes = '',
+      tags = []
     } = parsedBean;
 
     const photoKey = getPhotoKey(photo_url);
@@ -59,11 +63,43 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
       .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes, user.id)
       .run();
 
+    const beanId = result.meta.last_row_id;
     const insertedBean = {
-      id: result.meta.last_row_id,
+      id: beanId,
       name, country, area, drying_method, processing_method, roast_level, photo_url: photoKey, notes
     }
-    return c.json(insertedBean, 201);
+
+    // タグを関連付け
+    if (tags && tags.length > 0) {
+      for (const tag of tags) {
+        let tagId = tag.id;
+
+        // タグが新規作成の場合
+        if (!tagId) {
+          const tagInsertResult = await c.env.DB.prepare(
+            `INSERT INTO tags (name, user_id) VALUES (?, ?)`
+          )
+            .bind(tag.name, user.id)
+            .run();
+
+          if (!tagInsertResult.success) {
+            throw new Error(`Failed to create tag: ${tag.name}`);
+          }
+
+          tagId = tagInsertResult.meta.last_row_id;
+          tag.id = tagId;
+        }
+
+        // タグを豆に関連付け
+        await c.env.DB.prepare(
+          `INSERT OR IGNORE INTO bean_tags (bean_id, tag_id, user_id) VALUES (?, ?, ?)`
+        )
+          .bind(beanId, tagId, user.id)
+          .run();
+      }
+    }
+
+    return c.json({ ...insertedBean, tags }, 201);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -78,9 +114,59 @@ app.get('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');
   try {
     const { results } = await c.env.DB.prepare(
-      'SELECT * FROM beans WHERE user_id = ?'
-    ).bind(user.id).all();
-    return c.json(results);
+      `SELECT 
+        beans.id AS bean_id,
+        beans.name,
+        beans.country,
+        beans.area,
+        beans.drying_method,
+        beans.processing_method,
+        beans.roast_level,
+        beans.photo_url,
+        beans.notes,
+        beans.created_at,
+        tags.id AS tag_id,
+        tags.name AS tag_name
+       FROM beans
+       LEFT JOIN bean_tags ON beans.id = bean_tags.bean_id
+       LEFT JOIN tags ON bean_tags.tag_id = tags.id
+       WHERE beans.user_id = ?`
+    )
+      .bind(user.id)
+      .all();
+
+    // データを整形: 各豆に対応するタグを配列としてまとめる
+    const beansWithTags = results.reduce((acc: any, row: any) => {
+      const existingBean = acc.find((b: any) => b.id === row.bean_id);
+
+      const tag = row.tag_id
+        ? { id: row.tag_id, name: row.tag_name, user_id: user.id }
+        : null; // タグがない場合は null
+
+      if (existingBean) {
+        // 既存の豆にタグを追加
+        if (tag) existingBean.tags.push(tag);
+      } else {
+        // 新しい豆を作成
+        acc.push({
+          id: row.bean_id,
+          name: row.name,
+          country: row.country,
+          area: row.area,
+          drying_method: row.drying_method,
+          processing_method: row.processing_method,
+          roast_level: row.roast_level,
+          photo_url: row.photo_url,
+          notes: row.notes,
+          created_at: row.created_at,
+          tags: tag ? [tag] : [], // タグがない場合は空配列
+        });
+      }
+
+      return acc;
+    }, []);
+
+    return c.json(beansWithTags);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -94,10 +180,21 @@ app.get('/', async (c: Context<{ Bindings: Env }>) => {
 app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');
   try {
+    const beanId = c.req.param('id');
     const bean = await c.req.json();
-    bean.is_active = bean.is_active ? 1 : 0;
     const parsedBean = beanSchema.parse(bean);
-    const { name, country, area, drying_method, processing_method, roast_level, photo_url, photo_data_url, notes } = parsedBean;
+    const {
+      name = '',
+      country = '',
+      area = '',
+      drying_method = '',
+      processing_method = '',
+      roast_level = '',
+      photo_url = '',
+      photo_data_url = '',
+      notes = '',
+      tags = []
+    } = parsedBean;
 
     const photoKey = getPhotoKey(photo_url);
 
@@ -108,13 +205,48 @@ app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
        SET name = ?, country = ?, area = ?, drying_method = ?, processing_method = ?, roast_level = ?, photo_url = ?, notes = ?
        WHERE id = ? AND user_id = ?`
     )
-      .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes, c.req.param('id'), user.id)
+      .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes, beanId, user.id)
       .run();
 
     if (!updateResult.success) {
       throw new Error('Failed to update bean');
     }
 
+    // 2. 既存のタグを解除
+    await c.env.DB.prepare(
+      `DELETE FROM bean_tags WHERE bean_id = ? AND user_id = ?`
+    ).bind(beanId, user.id).run();
+
+    // 3. 新しいタグを処理
+    if (tags && tags.length > 0) {
+      for (const tag of tags) {
+        let tagId = tag.id;
+
+        // タグが新規作成の場合
+        if (!tagId) {
+          const tagInsertResult = await c.env.DB.prepare(
+            `INSERT INTO tags (name, user_id) VALUES (?, ?)`
+          )
+            .bind(tag.name, user.id)
+            .run();
+
+          if (!tagInsertResult.success) {
+            throw new Error(`Failed to create tag: ${tag.name}`);
+          }
+
+          tagId = tagInsertResult.meta.last_row_id;
+          tag.id = tagId;
+        }
+
+        // タグを豆に関連付け
+        await c.env.DB.prepare(
+          `INSERT OR IGNORE INTO bean_tags (bean_id, tag_id, user_id) VALUES (?, ?, ?)`
+        )
+          .bind(beanId, tagId, user.id)
+          .run();
+      }
+    }
+    
     return c.json({ message: 'Bean updated successfully' });
   } catch (error) {
     console.error(error);

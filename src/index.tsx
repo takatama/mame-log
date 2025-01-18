@@ -8,6 +8,7 @@ import brews from './api/users/brews'
 import analyze from './api/users/analyze'
 import settings from './api/users/settings'
 import images from './api/users/images'
+import tags from './api/users/tags'
 
 export interface Env {
   DB: D1Database;
@@ -36,6 +37,7 @@ app.route('/api/users/brews', brews)
 app.route('/api/users/analyze', analyze)
 app.route('/api/users/settings', settings)
 app.route('/api/users/images/*', images)
+app.route('/api/users/tags', tags)
 
 app.get('*', (c) => {
   return c.html(

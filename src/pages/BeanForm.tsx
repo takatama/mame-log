@@ -110,12 +110,12 @@ const BeanForm: React.FC = () => {
     navigate(`/beans/${beanId || 'new'}/capture`);
   };
 
-  const handleAddTag = (tag: string) => {
-    setBean((prev) => ({ ...prev, tags: [...(prev.tags || []), tag] }));
+  const handleAddTag = (tagName: string) => {
+    setBean((prev) => ({ ...prev, tags: [...(prev.tags || []), { name: tagName }] }));
   };
 
-  const handleRemoveTag = (tag: string) => {
-    setBean((prev) => ({ ...prev, tags: prev.tags?.filter((t) => t !== tag) }));
+  const handleRemoveTag = (tagName: string) => {
+    setBean((prev) => ({ ...prev, tags: prev.tags?.filter((t) => t.name !== tagName) }));
   };
 
   if (!bean) {

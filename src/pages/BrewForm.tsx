@@ -145,12 +145,12 @@ const BrewForm: React.FC = () => {
     });
   };
 
-  const handleAddTag = (tag: string) => {
-    setBrew((prev) => ({ ...prev, tags: [...(prev.tags || []), tag] }));
+  const handleAddTag = (tagName: string) => {
+    setBrew((prev) => ({ ...prev, tags: [...(prev.tags || []), { name: tagName }] }));
   };
 
-  const handleRemoveTag = (tag: string) => {
-    setBrew((prev) => ({ ...prev, tags: prev.tags?.filter((t) => t !== tag) }));
+  const handleRemoveTag = (tagName: string) => {
+    setBrew((prev) => ({ ...prev, tags: prev.tags?.filter((t) => t.name !== tagName) }));
   };
 
   if (!brew) return <div>読み込み中...</div>;

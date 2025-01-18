@@ -1,4 +1,7 @@
 -- FOREIGN KEY制約が影響を受けない順番で削除する
+DROP TABLE IF EXISTS brew_tags;
+DROP TABLE IF EXISTS bean_tags;
+DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS settings;
 DROP TABLE IF EXISTS brews;
 DROP TABLE IF EXISTS beans;
@@ -60,6 +63,39 @@ CREATE TABLE IF NOT EXISTS settings (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
+
+CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,                           -- タグ名
+    user_id INTEGER NOT NULL,                     -- タグを作成したユーザーID
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,-- タグ作成日時
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE IF NOT EXISTS bean_tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bean_id INTEGER NOT NULL,                     -- 豆ID
+    tag_id INTEGER NOT NULL,                      -- タグID
+    user_id INTEGER NOT NULL,                     -- 関連付けたユーザーID
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,-- 関連付け日時
+    FOREIGN KEY (bean_id) REFERENCES beans (id),
+    FOREIGN KEY (tag_id) REFERENCES tags (id),
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    UNIQUE (bean_id, tag_id, user_id)             -- 同じ豆とタグの重複を防ぐ
+);
+
+CREATE TABLE IF NOT EXISTS brew_tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    brew_id INTEGER NOT NULL,                     -- 抽出ログID
+    tag_id INTEGER NOT NULL,                      -- タグID
+    user_id INTEGER NOT NULL,                     -- 関連付けたユーザーID
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,-- 関連付け日時
+    FOREIGN KEY (brew_id) REFERENCES brews (id),
+    FOREIGN KEY (tag_id) REFERENCES tags (id),
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    UNIQUE (brew_id, tag_id, user_id)             -- 同じ抽出ログとタグの重複を防ぐ
+);
+
 
 -- サンプルデータ挿入
 INSERT INTO users (id, provider_account_id, email, name)

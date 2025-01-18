@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { Tag } from '../types/Tag';
 
 type TagManagerProps = {
-  tags: string[]; // 現在のタグリスト
+  tags: Tag[]; // 現在のタグリスト
   onAdd: (tag: string) => void; // タグ追加時の処理
   onRemove: (tag: string) => void; // タグ削除時の処理
   tagSuggestions?: string[]; // タグ候補（オプション）
@@ -12,7 +13,7 @@ const TagManager: React.FC<TagManagerProps> = ({ tags, onAdd, onRemove, tagSugge
 
   const handleAdd = () => {
     const newTag = inputValue.trim();
-    if (newTag && !tags.includes(newTag)) {
+    if (newTag && !tags.find((tag) => tag.name === newTag)) {
       onAdd(newTag);
       setInputValue('');
     }
@@ -24,11 +25,11 @@ const TagManager: React.FC<TagManagerProps> = ({ tags, onAdd, onRemove, tagSugge
       <div className="flex flex-wrap gap-2 mb-2">
         {tags.map((tag) => (
           <span
-            key={tag}
-            className="bg-gray-300 px-2 py-1 rounded-full text-sm cursor-pointer"
-            onClick={() => onRemove(tag)}
+            key={tag.name}
+            className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm cursor-pointer"
+            onClick={() => onRemove(tag.name)}
           >
-            {tag} ×
+            {tag.name} ×
           </span>
         ))}
       </div>
@@ -56,9 +57,8 @@ const TagManager: React.FC<TagManagerProps> = ({ tags, onAdd, onRemove, tagSugge
               <span
                 key={suggestion}
                 className="bg-gray-200 px-2 py-1 rounded-full text-sm cursor-pointer"
-                // bg-gray-200 px-2 py-1 rounded-full text-sm cursor-pointer
                 onClick={() => {
-                  if (!tags.includes(suggestion)) onAdd(suggestion);
+                  if (!tags.find(tag => tag.name === suggestion)) onAdd(suggestion);
                 }}
               >
                 {suggestion}
