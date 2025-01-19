@@ -23,12 +23,14 @@ const beanSchema = z.object({
 });
 
 const getPhotoKey = (photo_data_url: string, photo_url: string): string => {
-  if (!photo_data_url.trim() || !photo_url.trim()) {
-    return '';
+  if (photo_url.trim()) {
+    return photo_url;
   }
-  return `/api/users/images/coffee-labels/${crypto.randomUUID()}.png`;
+  if (photo_data_url.trim()) {
+    return `/api/users/images/coffee-labels/${crypto.randomUUID()}.png`;
+  }
+  return '';
 };
-
 
 const updatePhoto = async (c: Context, user_id: string, photoKey: string, photo_data_url: string | undefined) => {
   if (!photo_data_url) return;
@@ -60,7 +62,6 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
     } = parsedBean;
 
     const photoKey = getPhotoKey(photo_data_url, photo_url);
-    console.log(photo_data_url, photo_url, photoKey)
     updatePhoto(c, user.id, photoKey, photo_data_url);
 
     const result = await c.env.DB.prepare(
