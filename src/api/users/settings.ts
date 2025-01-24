@@ -21,15 +21,14 @@ settings.get('/', async (c) => {
 });
 
 settings.post('/', async (c) => {
-  const user = c.get('user'); // ユーザー情報を取得
+  const user = c.get('user');
   try {
     const newSettings = await c.req.json();
-    // ユーザーごとの設定を保存
     await c.env.DB.prepare(
-      'INSERT OR REPLACE INTO settings (user_id, settings) VALUES (?, ?)'
-    )
-      .bind(user.id, JSON.stringify(newSettings)) // user.id を利用
-      .run();
+      `INSERT INTO settings (user_id, settings)
+       VALUES (?, ?)
+       ON CONFLICT(user_id) DO UPDATE SET settings = excluded.settings`
+    ).bind(user.id, JSON.stringify(newSettings)).run();
     return c.json({ message: 'Settings saved successfully' });
   } catch (error) {
     console.error(error);

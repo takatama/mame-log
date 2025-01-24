@@ -35,7 +35,6 @@ export const authConfig = (c: Context<{ Bindings: Env }>) =>
 
         if (result?.id) {
           token.user_id = result.id;
-          console.log("token", token)
         } else {
           console.error('Failed to upsert user information');
         }
