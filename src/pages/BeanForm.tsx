@@ -10,7 +10,7 @@ const BeanForm: React.FC = () => {
   const location = useLocation();
   const { beans, updateBean, setBeans } = useBrewContext();
   const { beanId } = useParams();
-  const { tags } = useSettingsContext();
+  const { tags, setTags } = useSettingsContext();
   const [bean, setBean] = useState<Bean>({
     name: '',
     country: '',
@@ -69,6 +69,7 @@ const BeanForm: React.FC = () => {
       // 作成されたIDで更新
       setBeans([...beans, createdBean]);
       navigate(`/beans/${createdBean.id}`);
+      return createdBean;
     } catch (error) {
       console.error(error);
       alert('An error occurred while creating the bean. Please try again.');
@@ -106,12 +107,21 @@ const BeanForm: React.FC = () => {
       id: beanId ? Number(beanId) : tempId,
     };
   
-    if (beanId) {
-      await handlePut(Number(beanId), newBean);
-    } else {
-      await handlePost(newBean);
+    try {
+      const response = beanId ? await handlePut(Number(beanId), newBean) : await handlePost(newBean) as Bean;
+      if (response?.tags) {
+        // 新しいタグ情報を設定
+        setTags((prevTags) => {
+          const existingTagNames = prevTags.map((tag) => tag.name);
+          const newTags = response.tags.filter((tag) => !existingTagNames.includes(tag.name));
+          return [...prevTags, ...newTags]; // 既存のタグに新しいタグを追加
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      alert('保存中にエラーが発生しました。再試行してください。');
     }
-  };
+  };  
 
   const handleNavigateToCapture = () => {
     navigate(`/beans/${beanId || 'new'}/capture`);
