@@ -43,6 +43,60 @@ const updatePhoto = async (c: Context, user_id: string, photoKey: string, photo_
   });
 }
 
+// TODO 同じ名前のタグは新しく作らない
+// TODO 設定でタグを削除したら、フロントエンドでも豆や抽出ログのタグとの関連を外す
+async function processTags(c: Context<{ Bindings: Env }>, userId: string, beanId: number, tags: any[]) {
+  const existingTagsQuery = await c.env.DB.prepare(
+    `SELECT tag_id FROM bean_tags WHERE bean_id = ? AND user_id = ?`
+  ).bind(beanId, userId).all();
+
+  const existingTagIds: number[] = (existingTagsQuery.results || []).map((row) => row.tag_id as number);
+
+  const newTagIds: number[] = [];
+
+  for (const tag of tags) {
+    let tagId = tag.id;
+
+    // タグが新規の場合
+    if (!tagId) {
+      const tagInsertResult = await c.env.DB.prepare(
+        `INSERT INTO tags (name, user_id) VALUES (?, ?)`
+      ).bind(tag.name, userId).run();
+
+      if (!tagInsertResult.success) {
+        throw new Error(`Failed to create tag: ${tag.name}`);
+      }
+
+      tagId = tagInsertResult.meta.last_row_id;
+    }
+
+    newTagIds.push(tagId);
+
+    // タグを豆に関連付け
+    await c.env.DB.prepare(
+      `INSERT OR IGNORE INTO bean_tags (bean_id, tag_id, user_id) VALUES (?, ?, ?)`
+    ).bind(beanId, tagId, userId).run();
+  }
+
+  // 削除対象のタグを計算して削除
+  const tagsToDelete = existingTagIds.filter((id) => !newTagIds.includes(id));
+  if (tagsToDelete.length > 0) {
+    await c.env.DB.prepare(
+      `DELETE FROM bean_tags WHERE bean_id = ? AND tag_id IN (${tagsToDelete.join(',')}) AND user_id = ?`
+    ).bind(beanId, userId).run();
+  }
+
+  // 更新後のすべてのタグを取得して返却
+  const updatedTagsQuery = await c.env.DB.prepare(
+    `SELECT tags.id, tags.name
+     FROM tags
+     JOIN bean_tags ON tags.id = bean_tags.tag_id
+     WHERE bean_tags.bean_id = ? AND bean_tags.user_id = ?`
+  ).bind(beanId, userId).all();
+
+  return updatedTagsQuery.results || [];
+}
+
 app.post('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');
   try {
@@ -58,7 +112,7 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
       photo_url = '',
       photo_data_url = '',
       notes = '',
-      tags = [],
+      tags = []
     } = parsedBean;
 
     const photoKey = getPhotoKey(photo_data_url, photo_url);
@@ -68,73 +122,13 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
       `INSERT INTO beans (name, country, area, drying_method, processing_method, roast_level, photo_url, notes, user_id)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-      .bind(
-        name,
-        country,
-        area,
-        drying_method,
-        processing_method,
-        roast_level,
-        photoKey,
-        notes,
-        user.id
-      )
+      .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes, user.id)
       .run();
 
     const beanId = result.meta.last_row_id;
 
-    // 現在のタグの関連付けを取得
-    const { results } = await c.env.DB.prepare(
-      `SELECT tag_id FROM bean_tags WHERE bean_id = ? AND user_id = ?`
-    )
-      .bind(beanId, user.id)
-      .all();
-
-    const currentTags = results as { tag_id: number }[];
-    const currentTagIds = currentTags.map((row: { tag_id: number }) => row.tag_id);
-
-    // 新しいタグを追加、または既存のタグを関連付け
-    const newTagIds: number[] = [];
-    for (const tag of tags) {
-      let tagId = tag.id;
-
-      // タグが新規作成の場合
-      if (!tagId) {
-        const tagInsertResult = await c.env.DB.prepare(
-          `INSERT INTO tags (name, user_id) VALUES (?, ?)`
-        )
-          .bind(tag.name, user.id)
-          .run();
-
-        if (!tagInsertResult.success) {
-          throw new Error(`Failed to create tag: ${tag.name}`);
-        }
-
-        tagId = tagInsertResult.meta.last_row_id;
-        tag.id = tagId;
-      }
-
-      // タグを豆に関連付け
-      await c.env.DB.prepare(
-        `INSERT OR IGNORE INTO bean_tags (bean_id, tag_id, user_id) VALUES (?, ?, ?)`
-      )
-        .bind(beanId, tagId, user.id)
-        .run();
-
-      newTagIds.push(tagId);
-    }
-
-    // 削除対象のタグを計算
-    const tagsToDelete = currentTagIds.filter((id) => !newTagIds.includes(id));
-
-    // 削除対象のタグを削除
-    for (const tagId of tagsToDelete) {
-      await c.env.DB.prepare(
-        `DELETE FROM bean_tags WHERE bean_id = ? AND tag_id = ? AND user_id = ?`
-      )
-        .bind(beanId, tagId, user.id)
-        .run();
-    }
+    // タグ処理（すべてのタグを返却）
+    const updatedTags = await processTags(c, user.id, beanId, tags);
 
     const insertedBean = {
       id: beanId,
@@ -148,17 +142,12 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
       notes,
     };
 
-    return c.json({ ...insertedBean, tags }, 201);
+    return c.json({ ...insertedBean, tags: updatedTags }, 201);
   } catch (error) {
     console.error(error);
-    if (error instanceof Error) {
-      return c.json({ error: error.message }, 400);
-    } else {
-      return c.json({ error: 'An unexpected error occurred' }, 400);
-    }
+    return c.json({ error: error instanceof Error ? error.message : 'An unexpected error occurred' }, 400);
   }
 });
-
 
 app.get('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');
@@ -262,49 +251,13 @@ app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
       throw new Error('Failed to update bean');
     }
 
-    // 2. 既存のタグを解除
-    await c.env.DB.prepare(
-      `DELETE FROM bean_tags WHERE bean_id = ? AND user_id = ?`
-    ).bind(beanId, user.id).run();
+    // タグ処理（すべてのタグを返却）
+    const updatedTags = await processTags(c, user.id, Number(beanId), tags);
 
-    // 3. 新しいタグを処理
-    if (tags && tags.length > 0) {
-      for (const tag of tags) {
-        let tagId = tag.id;
-
-        // タグが新規作成の場合
-        if (!tagId) {
-          const tagInsertResult = await c.env.DB.prepare(
-            `INSERT INTO tags (name, user_id) VALUES (?, ?)`
-          )
-            .bind(tag.name, user.id)
-            .run();
-
-          if (!tagInsertResult.success) {
-            throw new Error(`Failed to create tag: ${tag.name}`);
-          }
-
-          tagId = tagInsertResult.meta.last_row_id;
-          tag.id = tagId;
-        }
-
-        // タグを豆に関連付け
-        await c.env.DB.prepare(
-          `INSERT OR IGNORE INTO bean_tags (bean_id, tag_id, user_id) VALUES (?, ?, ?)`
-        )
-          .bind(beanId, tagId, user.id)
-          .run();
-      }
-    }
-    
-    return c.json({ message: 'Bean updated successfully' });
+    return c.json({ message: 'Bean updated successfully', tags: updatedTags });
   } catch (error) {
     console.error(error);
-    if (error instanceof Error) {
-      return c.json({ error: error.message }, 400);
-    } else {
-      return c.json({ error: 'An unexpected error occurred' }, 400);
-    }
+    return c.json({ error: error instanceof Error ? error.message : 'An unexpected error occurred' }, 400);
   }
 });
 
