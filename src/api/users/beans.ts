@@ -44,7 +44,7 @@ const updatePhoto = async (c: Context, user_id: string, photoKey: string, photo_
 }
 
 app.post('/', async (c: Context<{ Bindings: Env }>) => {
-  const user = c.get('user')
+  const user = c.get('user');
   try {
     const bean = await c.req.json();
     const parsedBean = beanSchema.parse(bean);
@@ -58,7 +58,7 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
       photo_url = '',
       photo_data_url = '',
       notes = '',
-      tags = []
+      tags = [],
     } = parsedBean;
 
     const photoKey = getPhotoKey(photo_data_url, photo_url);
@@ -68,44 +68,85 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
       `INSERT INTO beans (name, country, area, drying_method, processing_method, roast_level, photo_url, notes, user_id)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-      .bind(name, country, area, drying_method, processing_method, roast_level, photoKey, notes, user.id)
+      .bind(
+        name,
+        country,
+        area,
+        drying_method,
+        processing_method,
+        roast_level,
+        photoKey,
+        notes,
+        user.id
+      )
       .run();
 
     const beanId = result.meta.last_row_id;
-    const insertedBean = {
-      id: beanId,
-      name, country, area, drying_method, processing_method, roast_level, photo_url: photoKey, notes
-    }
 
-    // タグを関連付け
-    if (tags && tags.length > 0) {
-      for (const tag of tags) {
-        let tagId = tag.id;
+    // 現在のタグの関連付けを取得
+    const { results } = await c.env.DB.prepare(
+      `SELECT tag_id FROM bean_tags WHERE bean_id = ? AND user_id = ?`
+    )
+      .bind(beanId, user.id)
+      .all();
 
-        // タグが新規作成の場合
-        if (!tagId) {
-          const tagInsertResult = await c.env.DB.prepare(
-            `INSERT INTO tags (name, user_id) VALUES (?, ?)`
-          )
-            .bind(tag.name, user.id)
-            .run();
+    const currentTags = results as { tag_id: number }[];
+    const currentTagIds = currentTags.map((row: { tag_id: number }) => row.tag_id);
 
-          if (!tagInsertResult.success) {
-            throw new Error(`Failed to create tag: ${tag.name}`);
-          }
+    // 新しいタグを追加、または既存のタグを関連付け
+    const newTagIds: number[] = [];
+    for (const tag of tags) {
+      let tagId = tag.id;
 
-          tagId = tagInsertResult.meta.last_row_id;
-          tag.id = tagId;
+      // タグが新規作成の場合
+      if (!tagId) {
+        const tagInsertResult = await c.env.DB.prepare(
+          `INSERT INTO tags (name, user_id) VALUES (?, ?)`
+        )
+          .bind(tag.name, user.id)
+          .run();
+
+        if (!tagInsertResult.success) {
+          throw new Error(`Failed to create tag: ${tag.name}`);
         }
 
-        // タグを豆に関連付け
-        await c.env.DB.prepare(
-          `INSERT OR IGNORE INTO bean_tags (bean_id, tag_id, user_id) VALUES (?, ?, ?)`
-        )
-          .bind(beanId, tagId, user.id)
-          .run();
+        tagId = tagInsertResult.meta.last_row_id;
+        tag.id = tagId;
       }
+
+      // タグを豆に関連付け
+      await c.env.DB.prepare(
+        `INSERT OR IGNORE INTO bean_tags (bean_id, tag_id, user_id) VALUES (?, ?, ?)`
+      )
+        .bind(beanId, tagId, user.id)
+        .run();
+
+      newTagIds.push(tagId);
     }
+
+    // 削除対象のタグを計算
+    const tagsToDelete = currentTagIds.filter((id) => !newTagIds.includes(id));
+
+    // 削除対象のタグを削除
+    for (const tagId of tagsToDelete) {
+      await c.env.DB.prepare(
+        `DELETE FROM bean_tags WHERE bean_id = ? AND tag_id = ? AND user_id = ?`
+      )
+        .bind(beanId, tagId, user.id)
+        .run();
+    }
+
+    const insertedBean = {
+      id: beanId,
+      name,
+      country,
+      area,
+      drying_method,
+      processing_method,
+      roast_level,
+      photo_url: photoKey,
+      notes,
+    };
 
     return c.json({ ...insertedBean, tags }, 201);
   } catch (error) {
@@ -117,6 +158,7 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
     }
   }
 });
+
 
 app.get('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');

@@ -14,8 +14,9 @@ const BrewForm: React.FC = () => {
   const [bean, setBean] = useState<Bean | undefined>(undefined);
   const [brew, setBrew] = useState<Brew>({});
   const [baseBrew, setBaseBrew] = useState<Brew>();
-  const { settings } = useSettingsContext();
-  
+  const { settings, tags } = useSettingsContext();
+  const [tagNames, setTagNames] = useState<string[]>([]);
+
   useEffect(() => {
     if (brewId) {
       const selectedBrew = brews.find((b: Brew) => b.id === Number(brewId));
@@ -34,6 +35,10 @@ const BrewForm: React.FC = () => {
       setBrew({ ...baseBrew, id: undefined, created_at: undefined });
     }
   }, [brewId, beanId, baseBrewId, beans, brews]);
+
+  useEffect(() => {
+    setTagNames([...tags.map(tag => tag.name)]);
+  }, [tags]);
 
   const handleAddPour = () => {
     setBrew({ ...brew, pours: [...(brew?.pours || []), 0] })
@@ -259,7 +264,7 @@ const BrewForm: React.FC = () => {
           tags={brew.tags || []}
           onAdd={handleAddTag}
           onRemove={handleRemoveTag}
-          tagSuggestions={['お気に入り']}
+          tagSuggestions={tagNames}
         />
         <button type="submit" className="bg-blue-500 text-white p-2 rounded-md">
           保存する

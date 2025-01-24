@@ -1,14 +1,50 @@
 import React, { useState } from 'react';
 import { useSettingsContext } from '../context/SettingsContext';
 import { isFixedOption, isDynamicOption } from '../types/Settings';
-import FixedOptionEditor from '../components/settings/FixedOptionEditor';
-import DynamicOptionEditor from '../components/settings/DynamicOptionEditor';
+import FixedOptionEditor from '../components/FixedOptionEditor';
+import DynamicOptionEditor from '../components/DynamicOptionEditor';
 import { signOut } from '@hono/auth-js/react';
+import TagEditor from '../components/TagEditor';
+import { Tag } from '../types/Tag';
+
+interface BulkResponse {
+  tags: { id: number; name: string }[];
+}
 
 const Settings: React.FC = () => {
-  const { settings, updateSettings, saveSettings, loadSettings } = useSettingsContext();
+  const { settings, updateSettings, saveSettings, loadSettings, tags, setTags } = useSettingsContext();
   const [previewCups, setPreviewCups] = useState<number>(1);
+  const [initialTags, setInitialTags] = useState<Tag[]>(tags);
+  const [currentTags, setCurrentTags] = useState<Tag[]>(initialTags);
 
+  const sanitizeTags = (currentTags: Tag[], initialTags: Tag[]): Tag[] => {
+    const initialTagMap = new Map(
+      initialTags.map((tag) => [tag.name.trim(), tag.id])
+    );
+    const seenNames = new Set<string>();
+    const sanitized: Tag[] = [];
+  
+    for (const tag of currentTags) {
+      const trimmedName = tag.name.trim();
+  
+      if (!trimmedName) {
+        // 空の名前のタグはスキップ
+        continue;
+      }
+  
+      if (!seenNames.has(trimmedName)) {
+        seenNames.add(trimmedName); // 名前を追跡
+        sanitized.push({
+          ...tag,
+          name: trimmedName,
+          id: tag.id ?? initialTagMap.get(trimmedName) ?? undefined, // ID を再利用または設定
+        });
+      }
+    }
+  
+    return [...sanitized];
+  };
+  
   const handleSave = async () => {
     const sanitizedSettings = Object.entries(settings).reduce((acc, [key, setting]) => {
       acc[key] = {
@@ -26,6 +62,55 @@ const Settings: React.FC = () => {
     }, {} as typeof settings);
 
     await saveSettings(sanitizedSettings);
+
+    const sanitizedTags = sanitizeTags(currentTags, initialTags);
+
+    const addedTags = sanitizedTags.filter(
+      (tag) => !tag.id && !initialTags.some((prev) => prev.name === tag.name)
+    );    
+
+    const updatedTags = sanitizedTags.filter(
+      (tag) =>
+        tag.id &&
+        initialTags.some((prev) => prev.id === tag.id && prev.name !== tag.name)
+    );
+
+    const removedTags = initialTags.filter(
+      (prev) => !sanitizedTags.some((tag) => tag.id === prev.id)
+    );
+
+    console.log('sanitizedTags', sanitizedTags);
+    console.log('Added Tags:', addedTags);
+    console.log('Updated Tags:', updatedTags);
+    console.log('Removed Tags:', removedTags);
+
+    const tags = {
+      addedTags, updatedTags, removedTagIds: removedTags.map(tag => tag.id)
+    };
+
+    try {
+      const response = await fetch('/api/users/tags/bulk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tags),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to save tags: ${response.statusText}`);
+      }
+
+      const { tags: updatedTags } = (await response.json()) as BulkResponse;
+    
+      // 状態を更新
+      setTags(updatedTags)
+      setInitialTags(updatedTags);
+      setCurrentTags(updatedTags);
+
+    } catch(error) {
+      console.error(error);
+      alert('タグの保存中にエラーが発生しました。再試行してください。');
+    }
   };
 
   return (
@@ -36,8 +121,15 @@ const Settings: React.FC = () => {
       >
         サインアウト
       </button>
-      <h1 className="text-2xl font-bold mt-4 mb-4">設定を変更</h1>
       <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+        <h1 className="text-2xl font-bold mt-4 mb-4">設定を変更</h1>
+        <div key="tag" className="mb-6 border p-4 rounded-md">
+          <h2 className="text-xl font-semibold mb-2">タグ</h2>
+          <TagEditor
+            tags={currentTags}
+            onTagsChange={setCurrentTags}
+          />
+        </div>
         {Object.entries(settings).map(([key, setting]) => (
           <div key={key} className="mb-6 border p-4 rounded-md">
             <h2 className="text-xl font-semibold mb-2">{setting.displayName} {setting.unitLabel ? `[${setting.unitLabel}]` : ""}</h2>

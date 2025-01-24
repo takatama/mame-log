@@ -39,12 +39,12 @@ const TagManager: React.FC<TagManagerProps> = ({ tags, onAdd, onRemove, tagSugge
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="タグを追加"
-          className="block w-4/5 border rounded-md p-2"
+          className="block w-3/4 border rounded-md p-2"
         />
         <button
           type="button"
           onClick={handleAdd}
-          className="w-1/5 bg-blue-500 text-white py-2 px-4 rounded-md"
+          className="w-1/4 bg-blue-500 text-white py-2 px-4 rounded-md"
         >
           追加
         </button>

@@ -1,4 +1,4 @@
-import { BrewSettings, DynamicBrewSettingOption, FixedBrewSettingOption } from "../types/Brew";
+import { BrewSettings, DynamicBrewSettingOption, FixedBrewSettingOption } from "../types/Settings";
 
 const cups: FixedBrewSettingOption<number> = {
   type: "fixed",

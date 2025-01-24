@@ -2,12 +2,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { BrewSettings } from '../types/Settings';
 import { DefaultBrewSettings as initialSettings } from '../settings/DefaultBrewSettings';
 import { useSession } from '@hono/auth-js/react';
+import { Tag } from '../types/Tag';
 
 interface SettingsContextProps {
   settings: BrewSettings;
   updateSettings: (key: string, newSetting: BrewSettings[keyof BrewSettings]) => void;
   saveSettings: (newSettings: BrewSettings) => Promise<void>;
   loadSettings: () => Promise<void>;
+  tags: Tag[];
+  setTags: (newTags: Tag[]) => void;
 }
 
 const SettingsContext = createContext<SettingsContextProps>({
@@ -15,12 +18,15 @@ const SettingsContext = createContext<SettingsContextProps>({
   updateSettings: () => {},
   saveSettings: async () => {},
   loadSettings: async () => {},
+  tags: [],
+  setTags: () => {},
 });
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { status } = useSession();
   const [settings, setSettings] = useState<BrewSettings>(initialSettings);
   const [isInitialized, setIsInitialized] = useState(false); // 初期化済みフラグ
+  const [tags, setTags] = useState<Tag[]>([]);
 
   const updateSettings = (key: string, newSetting: BrewSettings[keyof BrewSettings]) => {
     setSettings((prevSettings) => ({
@@ -73,14 +79,23 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const loadTags = async () => {
+    const response = await fetch('/api/users/tags');
+    if (!response.ok) {
+      throw new Error(`Failed to load tags: ${response.statusText}`);
+    }
+    const currentTags = await response.json() as Tag[];
+    setTags(currentTags);
+  }
+
   useEffect(() => {
     if (status === 'authenticated' && !isInitialized) {
-      loadSettings().then(() => setIsInitialized(true));
+      loadSettings().then(() => loadTags()).then(() => setIsInitialized(true));
     }
   }, [status, isInitialized]);
   
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, loadSettings }}>
+    <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, loadSettings, tags, setTags }}>
       {children}
     </SettingsContext.Provider>
   );

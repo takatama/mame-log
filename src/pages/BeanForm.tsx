@@ -3,10 +3,14 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
 import TagManager from '../components/TagManager';
+import { useSettingsContext } from '../context/SettingsContext';
 
 const BeanForm: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { beans, updateBean, setBeans } = useBrewContext();
   const { beanId } = useParams();
+  const { tags } = useSettingsContext();
   const [bean, setBean] = useState<Bean>({
     name: '',
     country: '',
@@ -18,8 +22,7 @@ const BeanForm: React.FC = () => {
     notes: '',
     tags: [],
   });
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [tagNames, setTagNames] = useState<string[]>([]);
 
   const getBeanById = (beanId: number) => {
     return beans.find(bean => bean.id === beanId);
@@ -43,6 +46,10 @@ const BeanForm: React.FC = () => {
       }
     }
   }, [beanId, location.state]);
+
+  useEffect(() => {
+    setTagNames([...tags.map(tag => tag.name)]);
+  }, [tags]);
 
   const handlePost = async (newBean: Bean) => {
     try {
@@ -211,7 +218,7 @@ const BeanForm: React.FC = () => {
           tags={bean.tags || []}
           onAdd={handleAddTag}
           onRemove={handleRemoveTag}
-          tagSuggestions={['お気に入り']}
+          tagSuggestions={tagNames}
         />
         <button className="bg-blue-500 text-white p-2 rounded-md">保存する</button>
       </form>
