@@ -43,9 +43,7 @@ const updatePhoto = async (c: Context, user_id: string, photoKey: string, photo_
   });
 }
 
-// TODO 同じ名前のタグは新しく作らない
-// TODO 設定でタグを削除したら、フロントエンドでも豆や抽出ログのタグとの関連を外す
-async function processTags(c: Context<{ Bindings: Env }>, userId: string, beanId: number, tags: any[]) {
+async function processBeanTags(c: Context<{ Bindings: Env }>, userId: string, beanId: number, tags: any[]) {
   const existingTagsQuery = await c.env.DB.prepare(
     `SELECT tag_id FROM bean_tags WHERE bean_id = ? AND user_id = ?`
   ).bind(beanId, userId).all();
@@ -128,7 +126,7 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
     const beanId = result.meta.last_row_id;
 
     // タグ処理（すべてのタグを返却）
-    const updatedTags = await processTags(c, user.id, beanId, tags);
+    const updatedTags = await processBeanTags(c, user.id, beanId, tags);
 
     const insertedBean = {
       id: beanId,
@@ -252,7 +250,7 @@ app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
     }
 
     // タグ処理（すべてのタグを返却）
-    const updatedTags = await processTags(c, user.id, Number(beanId), tags);
+    const updatedTags = await processBeanTags(c, user.id, Number(beanId), tags);
 
     return c.json({ message: 'Bean updated successfully', tags: updatedTags });
   } catch (error) {

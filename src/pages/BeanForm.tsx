@@ -4,6 +4,7 @@ import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
 import TagManager from '../components/TagManager';
 import { useSettingsContext } from '../context/SettingsContext';
+import { preview } from 'vite';
 
 const BeanForm: React.FC = () => {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const BeanForm: React.FC = () => {
     }
   }, [beanId, location.state]);
 
+  // TODO 設定でタグを削除したら、フロントエンドでも豆や抽出ログのタグとの関連を外す
   useEffect(() => {
     setTagNames([...tags.map(tag => tag.name)]);
   }, [tags]);
@@ -128,7 +130,8 @@ const BeanForm: React.FC = () => {
   };
 
   const handleAddTag = (tagName: string) => {
-    setBean((prev) => ({ ...prev, tags: [...(prev.tags || []), { name: tagName }] }));
+    const addedTag = tags.find(tag => tag.name === tagName) || { name: tagName };
+    setBean((prev) => ({ ...prev, tags: [...(prev.tags || []), addedTag] }));
   };
 
   const handleRemoveTag = (tagName: string) => {
