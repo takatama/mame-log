@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { Hono, Context } from 'hono';
 import { Env } from '../../index';
 import { z } from 'zod';
 
@@ -9,6 +9,38 @@ const tagSchema = z.object({
   id: z.number().positive().optional(),
   name: z.string().min(1, 'Tag name cannot be empty'),
 });
+
+export async function processTags(c: Context<{ Bindings: Env }>, userId: string, resourceId: number, tagIds: number[], resourceName: string) {
+  const tableName = `${resourceName}_tags`;
+  const resourceIdColumn = `${resourceName}_id`;
+
+  // 既存の関連付けを取得
+  const existingTagsQuery = await c.env.DB.prepare(
+    `SELECT tag_id FROM ${tableName} WHERE ${resourceIdColumn} = ? AND user_id = ?`
+  ).bind(resourceId, userId).all();
+
+  const existingTagIds: number[] = (existingTagsQuery.results || []).map((row) => row.tag_id as number);
+
+  // 新規タグを計算
+  const tagsToAdd = tagIds.filter((id) => !existingTagIds.includes(id));
+  const tagsToRemove = existingTagIds.filter((id) => !tagIds.includes(id));
+
+  // タグを追加
+  if (tagsToAdd.length > 0) {
+    for (const tagId of tagsToAdd) {
+      await c.env.DB.prepare(
+        `INSERT OR IGNORE INTO ${tableName} (${resourceIdColumn}, tag_id, user_id) VALUES (?, ?, ?)`
+      ).bind(resourceId, tagId, userId).run();
+    }
+  }
+
+  // タグを削除
+  if (tagsToRemove.length > 0) {
+    await c.env.DB.prepare(
+      `DELETE FROM ${tableName} WHERE resource_id = ? AND tag_id IN (${tagsToRemove.join(',')}) AND user_id = ?`
+    ).bind(resourceId, userId).run();
+  }
+}
 
 // タグの作成
 app.post('/', async (c) => {
