@@ -12,4 +12,5 @@ export interface Bean {
   photo_data_url?:string;
   notes?: string;
   tags: Tag[];
+  tagIds: number[];
 }
