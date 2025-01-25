@@ -18,7 +18,7 @@ const beanSchema = z.object({
   tags: z.array(z.object({
     id: z.number().optional(),
     name: z.string(),
-    user_id: z.number().optional(),
+    user_id: z.string().optional(),
   })).optional()
 });
 

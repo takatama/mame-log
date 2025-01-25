@@ -4,7 +4,6 @@ import { useBrewContext } from '../context/BrewContext';
 import { Bean } from '../types/Bean';
 import TagManager from '../components/TagManager';
 import { useSettingsContext } from '../context/SettingsContext';
-import { preview } from 'vite';
 
 const BeanForm: React.FC = () => {
   const navigate = useNavigate();
@@ -78,21 +77,24 @@ const BeanForm: React.FC = () => {
     }
   };
   
-  const handlePut = async (beanId: number, updatedBean: Bean) => {
+  const handlePut = async (beanId: number, bean: Bean) => {
     const previousBean = getBeanById(beanId); // 現在の状態を取得
     try {
-      updateBean(updatedBean); // 状態を一時的に更新
+      updateBean(bean); // 状態を一時的に更新
       navigate(`/beans/${beanId}`);
       const response = await fetch(`/api/users/beans/${beanId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedBean),
+        body: JSON.stringify(bean),
       });
   
       if (!response.ok) {
         if (previousBean) updateBean(previousBean); // エラー時に元の状態を復元
         throw new Error(`Failed to update bean: ${response.statusText}`);
       }
+      // TODO 楽観的UIにするため、待たずに返却する
+      const updatedBean: Bean = await response.json();
+      return updatedBean;
     } catch (error) {
       console.error(error);
       if (previousBean) updateBean(previousBean); // エラー時に元の状態を復元
@@ -110,14 +112,16 @@ const BeanForm: React.FC = () => {
     };
   
     try {
-      const response = beanId ? await handlePut(Number(beanId), newBean) : await handlePost(newBean) as Bean;
-      if (response?.tags) {
-        // 新しいタグ情報を設定
+      const updatedBean = beanId ? await handlePut(Number(beanId), newBean) : await handlePost(newBean) as Bean;
+      console.log(updatedBean, updatedBean?.tags, tags);
+      if (updatedBean?.tags) {
+        // 追加したタグを反映
         setTags((prevTags) => {
-          const existingTagNames = prevTags.map((tag) => tag.name);
-          const newTags = response.tags.filter((tag) => !existingTagNames.includes(tag.name));
+          const existingTagIds = prevTags.map((tag) => tag.id);
+          const newTags = updatedBean?.tags.filter((tag) => !existingTagIds.includes(tag.id));
           return [...prevTags, ...newTags]; // 既存のタグに新しいタグを追加
         });
+        console.log(updatedBean, updatedBean.tags, tags);
       }
     } catch (error) {
       console.error(error);
