@@ -10,7 +10,7 @@ interface SettingsContextProps {
   saveSettings: (newSettings: BrewSettings) => Promise<void>;
   loadSettings: () => Promise<void>;
   tags: Tag[];
-  setTags: (newTags: Tag[]) => void;
+  setTags: React.Dispatch<React.SetStateAction<Tag[]>>;
 }
 
 const SettingsContext = createContext<SettingsContextProps>({
