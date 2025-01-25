@@ -203,6 +203,54 @@ app.put('/:id', async (c) => {
   }
 });
 
+export async function deleteBrew(c: Context<{ Bindings: Env }>, brewId: number, userId: string) {
+  // `brew_tags` を削除
+  const deleteTagsResult = await c.env.DB.prepare(
+    `DELETE FROM brew_tags WHERE brew_id = ? AND user_id = ?`
+  )
+    .bind(brewId, userId)
+    .run();
+
+  if (!deleteTagsResult.success) {
+    throw new Error(`Failed to delete tags for brew ID ${brewId}`);
+  }
+
+  // `brews` を削除
+  const deleteBrewResult = await c.env.DB.prepare(
+    `DELETE FROM brews WHERE id = ? AND user_id = ?`
+  )
+    .bind(brewId, userId)
+    .run();
+
+  if (!deleteBrewResult.success) {
+    throw new Error(`Failed to delete brew with ID ${brewId}`);
+  }
+}
+
+app.delete('/:id', async (c) => {
+  const user = c.get('user');
+  try {
+    const id = parseInt(c.req.param('id'), 10);
+
+    if (!id) {
+      return c.json({ error: 'Brew ID is required' }, 400);
+    }
+
+    // 共通関数を利用して削除
+    await deleteBrew(c, id, user.id);
+
+    return c.json({ message: `Brew with ID ${id} and its related tags are deleted successfully` }, 200);
+  } catch (error) {
+    console.error(error);
+    return c.json(
+      {
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      },
+      400
+    );
+  }
+});
+
 app.get('/', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');
   try {
@@ -277,54 +325,6 @@ app.get('/', async (c: Context<{ Bindings: Env }>) => {
     } else {
       return c.json({ error: 'An unexpected error occurred' }, 500);
     }
-  }
-});
-
-export async function deleteBrew(c: Context<{ Bindings: Env }>, brewId: number, userId: string) {
-  // `brew_tags` を削除
-  const deleteTagsResult = await c.env.DB.prepare(
-    `DELETE FROM brew_tags WHERE brew_id = ? AND user_id = ?`
-  )
-    .bind(brewId, userId)
-    .run();
-
-  if (!deleteTagsResult.success) {
-    throw new Error(`Failed to delete tags for brew ID ${brewId}`);
-  }
-
-  // `brews` を削除
-  const deleteBrewResult = await c.env.DB.prepare(
-    `DELETE FROM brews WHERE id = ? AND user_id = ?`
-  )
-    .bind(brewId, userId)
-    .run();
-
-  if (!deleteBrewResult.success) {
-    throw new Error(`Failed to delete brew with ID ${brewId}`);
-  }
-}
-
-app.delete('/:id', async (c) => {
-  const user = c.get('user');
-  try {
-    const id = parseInt(c.req.param('id'), 10);
-
-    if (!id) {
-      return c.json({ error: 'Brew ID is required' }, 400);
-    }
-
-    // 共通関数を利用して削除
-    await deleteBrew(c, id, user.id);
-
-    return c.json({ message: `Brew with ID ${id} and its related tags are deleted successfully` }, 200);
-  } catch (error) {
-    console.error(error);
-    return c.json(
-      {
-        error: error instanceof Error ? error.message : 'An unexpected error occurred',
-      },
-      400
-    );
   }
 });
 

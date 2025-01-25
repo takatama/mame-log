@@ -147,73 +147,6 @@ app.post('/', async (c: Context<{ Bindings: Env }>) => {
   }
 });
 
-app.get('/', async (c: Context<{ Bindings: Env }>) => {
-  const user = c.get('user');
-  try {
-    const { results } = await c.env.DB.prepare(
-      `SELECT 
-        beans.id AS bean_id,
-        beans.name,
-        beans.country,
-        beans.area,
-        beans.drying_method,
-        beans.processing_method,
-        beans.roast_level,
-        beans.photo_url,
-        beans.notes,
-        beans.created_at,
-        tags.id AS tag_id,
-        tags.name AS tag_name
-       FROM beans
-       LEFT JOIN bean_tags ON beans.id = bean_tags.bean_id
-       LEFT JOIN tags ON bean_tags.tag_id = tags.id
-       WHERE beans.user_id = ?`
-    )
-      .bind(user.id)
-      .all();
-
-    // データを整形: 各豆に対応するタグを配列としてまとめる
-    const beansWithTags = results.reduce((acc: any, row: any) => {
-      const existingBean = acc.find((b: any) => b.id === row.bean_id);
-
-      const tag = row.tag_id
-        ? { id: row.tag_id, name: row.tag_name, user_id: user.id }
-        : null; // タグがない場合は null
-
-      if (existingBean) {
-        // 既存の豆にタグを追加
-        if (tag) existingBean.tags.push(tag);
-      } else {
-        // 新しい豆を作成
-        acc.push({
-          id: row.bean_id,
-          name: row.name,
-          country: row.country,
-          area: row.area,
-          drying_method: row.drying_method,
-          processing_method: row.processing_method,
-          roast_level: row.roast_level,
-          photo_url: row.photo_url,
-          notes: row.notes,
-          created_at: row.created_at,
-          tags: tag ? [tag] : [], // タグがない場合は空配列
-        });
-      }
-
-      return acc;
-    }, []);
-
-    return c.json(beansWithTags);
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      return c.json({ error: error.message }, 500);
-    } else {
-      return c.json({ error: 'An unexpected error occurred' }, 500);
-    }
-  }
-});
-
 app.put('/:id', async (c: Context<{ Bindings: Env }>) => {
   const user = c.get('user');
   try {
@@ -326,6 +259,73 @@ app.delete('/:id', async (c: Context<{ Bindings: Env }>) => {
       },
       400
     );
+  }
+});
+
+app.get('/', async (c: Context<{ Bindings: Env }>) => {
+  const user = c.get('user');
+  try {
+    const { results } = await c.env.DB.prepare(
+      `SELECT 
+        beans.id AS bean_id,
+        beans.name,
+        beans.country,
+        beans.area,
+        beans.drying_method,
+        beans.processing_method,
+        beans.roast_level,
+        beans.photo_url,
+        beans.notes,
+        beans.created_at,
+        tags.id AS tag_id,
+        tags.name AS tag_name
+       FROM beans
+       LEFT JOIN bean_tags ON beans.id = bean_tags.bean_id
+       LEFT JOIN tags ON bean_tags.tag_id = tags.id
+       WHERE beans.user_id = ?`
+    )
+      .bind(user.id)
+      .all();
+
+    // データを整形: 各豆に対応するタグを配列としてまとめる
+    const beansWithTags = results.reduce((acc: any, row: any) => {
+      const existingBean = acc.find((b: any) => b.id === row.bean_id);
+
+      const tag = row.tag_id
+        ? { id: row.tag_id, name: row.tag_name, user_id: user.id }
+        : null; // タグがない場合は null
+
+      if (existingBean) {
+        // 既存の豆にタグを追加
+        if (tag) existingBean.tags.push(tag);
+      } else {
+        // 新しい豆を作成
+        acc.push({
+          id: row.bean_id,
+          name: row.name,
+          country: row.country,
+          area: row.area,
+          drying_method: row.drying_method,
+          processing_method: row.processing_method,
+          roast_level: row.roast_level,
+          photo_url: row.photo_url,
+          notes: row.notes,
+          created_at: row.created_at,
+          tags: tag ? [tag] : [], // タグがない場合は空配列
+        });
+      }
+
+      return acc;
+    }, []);
+
+    return c.json(beansWithTags);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      return c.json({ error: error.message }, 500);
+    } else {
+      return c.json({ error: 'An unexpected error occurred' }, 500);
+    }
   }
 });
 

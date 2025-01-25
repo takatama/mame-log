@@ -121,7 +121,6 @@ const BeanForm: React.FC = () => {
           const newTags = updatedBean?.tags.filter((tag) => !existingTagIds.includes(tag.id));
           return [...prevTags, ...newTags]; // 既存のタグに新しいタグを追加
         });
-        console.log(updatedBean, updatedBean.tags, tags);
       }
     } catch (error) {
       console.error(error);
