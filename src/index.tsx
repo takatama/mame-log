@@ -2,7 +2,6 @@ import { Hono } from 'hono'
 import { renderToString } from 'react-dom/server'
 import { authHandler, verifyAuth } from '@hono/auth-js'
 import { authConfig, userMiddleware } from './middlewares/auth'
-import users from './api/users'
 import beans from './api/users/beans'
 import brews from './api/users/brews'
 import analyze from './api/users/analyze'
@@ -29,8 +28,6 @@ app.use('*', async (c, next) => {
 app.use('/api/auth/*', authHandler());
 
 app.use('/api/*', verifyAuth())
-app.route('/api/users', users)
-
 app.use('/api/users/*', userMiddleware);
 app.route('/api/users/beans', beans)
 app.route('/api/users/brews', brews)
