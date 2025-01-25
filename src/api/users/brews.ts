@@ -26,6 +26,73 @@ const brewSchema = z.object({
   created_at: z.string().optional(),
 });
 
+async function processBrewTags(
+  c: Context<{ Bindings: Env }>,
+  userId: string,
+  brewId: number,
+  tags: { id?: number; name: string }[]
+) {
+  // 既存のタグを取得
+  const existingTagsQuery = await c.env.DB.prepare(
+    `SELECT tag_id FROM brew_tags WHERE brew_id = ? AND user_id = ?`
+  )
+    .bind(brewId, userId)
+    .all();
+
+  const existingTagIds = (existingTagsQuery.results || []).map(row => row.tag_id);
+
+  const newTagIds: number[] = [];
+  for (const tag of tags) {
+    let tagId = tag.id;
+
+    // タグが新規の場合
+    if (!tagId) {
+      const tagInsertResult = await c.env.DB.prepare(
+        `INSERT INTO tags (name, user_id) VALUES (?, ?)`
+      )
+        .bind(tag.name, userId)
+        .run();
+
+      if (!tagInsertResult.success) {
+        throw new Error(`Failed to create tag: ${tag.name}`);
+      }
+
+      tagId = tagInsertResult.meta.last_row_id;
+    }
+
+    newTagIds.push(tagId);
+
+    // タグを抽出ログに関連付け
+    await c.env.DB.prepare(
+      `INSERT OR IGNORE INTO brew_tags (brew_id, tag_id, user_id) VALUES (?, ?, ?)`
+    )
+      .bind(brewId, tagId, userId)
+      .run();
+  }
+
+  // 不要なタグの削除
+  const tagsToDelete = existingTagIds.filter((id) => !newTagIds.includes(id as number));
+  if (tagsToDelete.length > 0) {
+    await c.env.DB.prepare(
+      `DELETE FROM brew_tags WHERE brew_id = ? AND tag_id IN (${tagsToDelete.join(',')}) AND user_id = ?`
+    )
+      .bind(brewId, userId)
+      .run();
+  }
+
+  // 更新後のすべてのタグを取得
+  const updatedTagsQuery = await c.env.DB.prepare(
+    `SELECT tags.id, tags.name
+     FROM tags
+     JOIN brew_tags ON tags.id = brew_tags.tag_id
+     WHERE brew_tags.brew_id = ? AND brew_tags.user_id = ?`
+  )
+    .bind(brewId, userId)
+    .all();
+
+  return updatedTagsQuery.results || [];
+}
+
 app.post('/', async (c) => {
   const user = c.get('user');
   try {
@@ -80,47 +147,14 @@ app.post('/', async (c) => {
     }
 
     const brewId = insertResult.meta.last_row_id;
-    const insertedBrew = { id: brewId, created_at, ...parsedBrew };
 
-    // タグを関連付け
-    if (tags && tags.length > 0) {
-      for (const tag of tags) {
-        let tagId = tag.id;
+    // タグ処理
+    const updatedTags = await processBrewTags(c, user.id, brewId, tags);
 
-        // タグが新規作成の場合
-        if (!tagId) {
-          const tagInsertResult = await c.env.DB.prepare(
-            `INSERT INTO tags (name, user_id) VALUES (?, ?)`
-          )
-            .bind(tag.name, user.id)
-            .run();
-
-          if (!tagInsertResult.success) {
-            throw new Error(`Failed to create tag: ${tag.name}`);
-          }
-
-          tagId = tagInsertResult.meta.last_row_id;
-          tag.id = tagId;
-        }
-
-        // タグを抽出ログに関連付け
-        await c.env.DB.prepare(
-          `INSERT OR IGNORE INTO brew_tags (brew_id, tag_id, user_id) VALUES (?, ?, ?)`
-        )
-          .bind(brewId, tagId, user.id)
-          .run();
-      }
-    }
-
-    return c.json({ ...insertedBrew, tags }, 201);
+    return c.json({ id: brewId, created_at, tags: updatedTags, ...parsedBrew }, 201);
   } catch (error) {
     console.error(error);
-    return c.json(
-      {
-        error: error instanceof Error ? error.message : 'An unexpected error occurred',
-      },
-      400
-    );
+    return c.json({ error: error instanceof Error ? error.message : 'An unexpected error occurred' }, 400);
   }
 });
 
@@ -131,7 +165,7 @@ app.put('/:id', async (c) => {
     const brew = await c.req.json();
     const parsedBrew = brewSchema.parse(brew);
     const {
-      bean_id = '',
+      bean_id,
       bean_amount = '',
       cups = '',
       grind_size = '',
@@ -159,50 +193,13 @@ app.put('/:id', async (c) => {
       throw new Error('Failed to update brew log');
     }
 
-    // 2. 既存のタグを解除
-    await c.env.DB.prepare(
-      `DELETE FROM brew_tags WHERE brew_id = ? AND user_id = ?`
-    ).bind(brewId, user.id).run();
+    // タグ処理
+    const updatedTags = await processBrewTags(c, user.id, Number(brewId), tags);
 
-    // 3. 新しいタグを処理
-    if (tags && tags.length > 0) {
-      for (const tag of tags) {
-        let tagId = tag.id;
-
-        // タグが新規作成の場合
-        if (!tagId) {
-          const tagInsertResult = await c.env.DB.prepare(
-            `INSERT INTO tags (name, user_id) VALUES (?, ?)`
-          )
-            .bind(tag.name, user.id)
-            .run();
-
-          if (!tagInsertResult.success) {
-            throw new Error(`Failed to create tag: ${tag.name}`);
-          }
-
-          tagId = tagInsertResult.meta.last_row_id;
-          tag.id = tagId;
-        }
-
-        // タグを抽出ログに関連付け
-        await c.env.DB.prepare(
-          `INSERT OR IGNORE INTO brew_tags (brew_id, tag_id, user_id) VALUES (?, ?, ?)`
-        )
-          .bind(brewId, tagId, user.id)
-          .run();
-      }
-    }
-    
-    return c.json({ message: 'Brew log and pours updated successfully' });
+    return c.json({ message: 'Brew log updated successfully', tags: updatedTags });
   } catch (error) {
     console.error(error);
-    return c.json(
-      {
-        error: error instanceof Error ? error.message : 'An unexpected error occurred',
-      },
-      400
-    );
+    return c.json({ error: error instanceof Error ? error.message : 'An unexpected error occurred' }, 400);
   }
 });
 
