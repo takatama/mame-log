@@ -7,6 +7,7 @@ import { useBrewContext } from '../context/BrewContext';
 import StarRating from '../components/StarRating';
 import { useSettingsContext } from '../context/SettingsContext';
 import TagManager from '../components/TagManager';
+import { Tag } from '../types/Tag';
 
 const BrewForm: React.FC = () => {
   const { beans, brews, updateBrew, setBrews } = useBrewContext();
@@ -14,7 +15,7 @@ const BrewForm: React.FC = () => {
   const [bean, setBean] = useState<Bean | undefined>(undefined);
   const [brew, setBrew] = useState<Brew>({});
   const [baseBrew, setBaseBrew] = useState<Brew>();
-  const { settings, tags } = useSettingsContext();
+  const { settings, tags, setTags } = useSettingsContext();
   const [tagNames, setTagNames] = useState<string[]>([]);
 
   useEffect(() => {
@@ -72,6 +73,7 @@ const BrewForm: React.FC = () => {
       const createdBrew: any = await response.json();
       setBrews([...brews, createdBrew]);
       navigate(`/brews/${createdBrew.id}`);
+      return createdBrew;
     } catch (error) {
       console.error(error);
       alert('An error occurred while creating the brew. Please try again.');
@@ -95,6 +97,9 @@ const BrewForm: React.FC = () => {
         if (previousBrew) updateBrew(previousBrew); // エラー時に元の状態を復元
         throw new Error(`Failed to update brew: ${response.statusText}`);
       }
+  
+      const createdBrew: Brew = await response.json();
+      return createdBrew;
     } catch (error) {
       console.error(error);
       if (previousBrew) updateBrew(previousBrew); // エラー時に元の状態を復元
@@ -110,11 +115,15 @@ const BrewForm: React.FC = () => {
       bean_id: bean?.id,
       ...brew,
     };
-    
-    if (brewId) {
-      await handlePut(Number(brewId), newBrew);
-    } else {
-      await handlePost(newBrew);
+
+    const response = brewId ? await handlePut(Number(brewId), newBrew) : await handlePost(newBrew);
+    if (response?.tags) {
+      // 新しいタグ情報を設定
+      setTags((prevTags) => {
+        const existingTagNames = prevTags.map((tag) => tag.name);
+        const newTags = response.tags.filter((tag: Tag) => !existingTagNames.includes(tag.name));
+        return [...prevTags, ...newTags]; // 既存のタグに新しいタグを追加
+      });
     }
   };
   
@@ -151,7 +160,8 @@ const BrewForm: React.FC = () => {
   };
 
   const handleAddTag = (tagName: string) => {
-    setBrew((prev) => ({ ...prev, tags: [...(prev.tags || []), { name: tagName }] }));
+    const addedTag = tags.find(tag => tag.name === tagName) || { name: tagName };
+    setBrew((prev) => ({ ...prev, tags: [...(prev.tags || []), addedTag] }));
   };
 
   const handleRemoveTag = (tagName: string) => {
