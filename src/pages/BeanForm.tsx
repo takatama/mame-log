@@ -21,36 +21,52 @@ const BeanForm: React.FC = () => {
     photo_url: '',
     notes: '',
     tags: [],
+    tagIds: [],
   });
-  const [tagNames, setTagNames] = useState<string[]>([]);
 
-  const getBeanById = (beanId: number) => {
-    return beans.find(bean => bean.id === beanId);
-  }
+  const getBeanById = (beanId: number) => beans.find((bean) => bean.id === beanId);
 
   useEffect(() => {
-    // `location.state`からデータを取得して反映
-    if (location.state && typeof location.state?.bean === 'object') {
-      setBean((prevBean) => ({
-        ...prevBean,
-        ...(location.state.bean as Bean),
-      }));
-      return;
-    }
-
-    // `beanId`がある場合、既存のデータを取得
-    if (beanId) {
+    if (location.state?.bean) {
+      setBean(location.state.bean as Bean);
+    } else if (beanId) {
       const existingBean = getBeanById(Number(beanId));
-      if (existingBean) {
-        setBean(existingBean);
-      }
+      if (existingBean) setBean(existingBean);
     }
   }, [beanId, location.state]);
 
-  // TODO 設定でタグを削除したら、フロントエンドでも豆や抽出ログのタグとの関連を外す
-  useEffect(() => {
-    setTagNames([...tags.map(tag => tag.name)]);
-  }, [tags]);
+  const tagSuggestions = tags.map((tag) => tag.name);
+
+  // 新しいタグをIDで追加
+  const handleAddTag = (tagName: string) => {
+    const existingTag = tags.find((tag) => tag.name === tagName);
+    if (existingTag) {
+      // 既存のタグを追加
+      setBean((prev) => ({
+        ...prev,
+        tagIds: [...new Set([...(prev.tagIds || []), existingTag.id!])],
+      }));
+    } else {
+      // 新しいタグを作成
+      const newTag = { id: undefined, name: tagName };
+      setTags((prevTags) => [...prevTags, newTag]);
+      setBean((prev) => ({
+        ...prev,
+        tagIds: [...new Set([...(prev.tagIds || []), undefined])],
+      }));
+    }
+  };
+
+  // タグIDを削除
+  const handleRemoveTag = (tagName: string) => {
+    const tagToRemove = tags.find((tag) => tag.name === tagName);
+    if (tagToRemove) {
+      setBean((prev) => ({
+        ...prev,
+        tagIds: prev.tagIds?.filter((id) => id !== tagToRemove.id),
+      }));
+    }
+  };
 
   const handlePost = async (newBean: Bean) => {
     try {
@@ -112,14 +128,17 @@ const BeanForm: React.FC = () => {
     };
   
     try {
-      const updatedBean = beanId ? await handlePut(Number(beanId), newBean) : await handlePost(newBean) as Bean;
-      console.log(updatedBean, updatedBean?.tags, tags);
+      const updatedBean = beanId
+        ? await handlePut(Number(beanId), newBean)
+        : await handlePost(newBean) as Bean;
+      
       if (updatedBean?.tags) {
         // 追加したタグを反映
         setTags((prevTags) => {
-          const existingTagIds = prevTags.map((tag) => tag.id);
-          const newTags = updatedBean?.tags.filter((tag) => !existingTagIds.includes(tag.id));
-          return [...prevTags, ...newTags]; // 既存のタグに新しいタグを追加
+          const newTags = updatedBean.tagIds
+            .filter((id) => !prevTags.some((tag) => tag.id === id))
+            .map((id) => ({ id, name: `Tag ${id}` })); // タグ名はバックエンドで返却されると仮定
+          return [...prevTags, ...newTags];
         });
       }
     } catch (error) {
@@ -132,24 +151,13 @@ const BeanForm: React.FC = () => {
     navigate(`/beans/${beanId || 'new'}/capture`);
   };
 
-  const handleAddTag = (tagName: string) => {
-    const addedTag = tags.find(tag => tag.name === tagName) || { name: tagName };
-    setBean((prev) => ({ ...prev, tags: [...(prev.tags || []), addedTag] }));
-  };
-
-  const handleRemoveTag = (tagName: string) => {
-    setBean((prev) => ({ ...prev, tags: prev.tags?.filter((t) => t.name !== tagName) }));
-  };
-
   if (!bean) {
     return <div>読み込み中...</div>
   }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">
-        {beanId ? '豆を編集' : '豆を追加'}
-      </h1>
+      <h1 className="text-2xl font-bold mb-4">{beanId ? '豆を編集' : '豆を追加'}</h1>
       {(bean.photo_data_url || bean.photo_url) && (
         <div className="mb-4">
           <img
@@ -234,7 +242,7 @@ const BeanForm: React.FC = () => {
           tags={bean.tags || []}
           onAdd={handleAddTag}
           onRemove={handleRemoveTag}
-          tagSuggestions={tagNames}
+          tagSuggestions={tagSuggestions}
         />
         <button className="bg-blue-500 text-white p-2 rounded-md">保存する</button>
       </form>
