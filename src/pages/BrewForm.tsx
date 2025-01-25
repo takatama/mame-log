@@ -80,26 +80,26 @@ const BrewForm: React.FC = () => {
     }
   };
   
-  const handlePut = async (brewId: number, updatedBrew: Brew) => {
+  const handlePut = async (brewId: number, brew: Brew) => {
     const previousBrew = getBrewById(brewId); // 現在の状態を取得
 
     try {
       // 楽観的に状態を更新
-      updateBrew(updatedBrew);
+      updateBrew(brew);
       navigate(`/brews/${brewId}`);
       const response = await fetch(`/api/users/brews/${brewId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedBrew),
+        body: JSON.stringify(brew),
       });
   
       if (!response.ok) {
         if (previousBrew) updateBrew(previousBrew); // エラー時に元の状態を復元
         throw new Error(`Failed to update brew: ${response.statusText}`);
       }
-  
-      const createdBrew: Brew = await response.json();
-      return createdBrew;
+      // TODO 楽観的UIにするため、非同期でリターンする
+      const updatedBrew: Brew = await response.json();
+      return updatedBrew;
     } catch (error) {
       console.error(error);
       if (previousBrew) updateBrew(previousBrew); // エラー時に元の状態を復元
@@ -116,14 +116,9 @@ const BrewForm: React.FC = () => {
       ...brew,
     };
 
-    const response = brewId ? await handlePut(Number(brewId), newBrew) : await handlePost(newBrew);
-    if (response?.tags) {
-      // 新しいタグ情報を設定
-      setTags((prevTags) => {
-        const existingTagNames = prevTags.map((tag) => tag.name);
-        const newTags = response.tags.filter((tag: Tag) => !existingTagNames.includes(tag.name));
-        return [...prevTags, ...newTags]; // 既存のタグに新しいタグを追加
-      });
+    const updatedBrew = brewId ? await handlePut(Number(brewId), newBrew) : await handlePost(newBrew);
+    if (updatedBrew?.tags) {
+      setTags(updatedBrew.tags);
     }
   };
   
