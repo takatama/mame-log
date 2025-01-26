@@ -1,4 +1,4 @@
-import React, { createContext, useState, ReactNode, useEffect, useContext, use } from 'react';
+import React, { createContext, useState, ReactNode, useEffect, useContext } from 'react';
 import { Bean } from '../types/Bean';
 import { Brew } from '../types/Brew';
 import { Tag } from '../types/Tag';
@@ -52,10 +52,6 @@ export const CoffeeProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setLocalBrews((currentBrews) =>
       updateBrewsWithBeansAndTags(updatedBeans, currentBrews, tags)
     );
-  };
-
-  const setBrews = (newBrews: Brew[]) => {
-    setLocalBrews(updateBrewsWithBeansAndTags(beans, newBrews, tags));
   };
 
   const setTags = (newTags: Tag[]) => {
@@ -128,7 +124,7 @@ export const CoffeeProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   return (
     <CoffeeContext.Provider
-      value={{ beans, updateBean, createBean, deleteBean, brews, createBrew, updateBrew, deleteBrew, tags, setTags }}
+      value={{ createBean, beans, updateBean, deleteBean, createBrew, brews, updateBrew, deleteBrew, tags, setTags }}
     >
       {children}
     </CoffeeContext.Provider>

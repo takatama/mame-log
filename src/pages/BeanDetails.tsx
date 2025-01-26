@@ -14,7 +14,6 @@ const BeanDetail: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-  console.log('BeanDetails', beanId, beans)
     if (!beanId) return;
     const bean = beans.find((bean) => bean.id === Number(beanId));
     setBean(bean);
