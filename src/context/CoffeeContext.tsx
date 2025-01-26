@@ -37,13 +37,13 @@ export const CoffeeProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   };
 
   const updateBrewsWithBeansAndTags = (beans: Bean[], brews: Brew[], tags: Tag[]) => {
-    return brews.map((brew) => ({
+    return brews.map(brew => ({
       ...brew,
-      bean: beans.find((bean) => bean.id === brew.bean_id),
+      bean: beans.find(bean => bean.id === brew.bean_id),
       tags: brew.tags
-        ?.map((tag) => tags.find((t) => t.id === tag.id))
-        .filter((t) => t !== undefined) as Tag[], // 有効なタグのみを保持
-    }));
+        ?.map(tag => tags.find((t) => t.id === tag.id))
+        .filter(t => t !== undefined) as Tag[], // 有効なタグのみを保持
+    })).filter(brew => brew.bean); // 豆がなくなったら抽出ログを削除
   };
 
   const setBeans = (newBeans: Bean[]) => {

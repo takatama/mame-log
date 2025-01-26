@@ -69,7 +69,8 @@ const BrewForm: React.FC = () => {
         throw new Error(`Failed to create brew: ${response.statusText}`);
       }
   
-      const createdBrew: any = await response.json();
+      const createdBrew: Brew = await response.json();
+      createdBrew.bean = bean;
       createBrew(createdBrew);
       navigate(`/brews/${createdBrew.id}`);
       return createdBrew;
