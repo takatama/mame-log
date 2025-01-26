@@ -3,19 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
 import { Brew, totalWaterAmount } from '../types/Brew';
 import { generateOptions } from '../types/Settings';
-import { useBrewContext } from '../context/BrewContext';
+import { useCoffeeContext } from '../context/CoffeeContext';
 import StarRating from '../components/StarRating';
 import { useSettingsContext } from '../context/SettingsContext';
 import TagManager from '../components/TagManager';
-import { Tag } from '../types/Tag';
 
 const BrewForm: React.FC = () => {
-  const { beans, brews, updateBrew, setBrews } = useBrewContext();
+  const { beans, brews, updateBrew, setBrews, tags } = useCoffeeContext();
   const { brewId, beanId, baseBrewId } = useParams<{ brewId?: string; beanId?: string; baseBrewId?: string }>();
   const [bean, setBean] = useState<Bean | undefined>(undefined);
   const [brew, setBrew] = useState<Brew>({});
   const [baseBrew, setBaseBrew] = useState<Brew>();
-  const { settings, tags, setTags } = useSettingsContext();
+  const { settings } = useSettingsContext();
   const [tagNames, setTagNames] = useState<string[]>([]);
 
   useEffect(() => {
@@ -116,9 +115,10 @@ const BrewForm: React.FC = () => {
       ...brew,
     };
 
-    const updatedBrew = brewId ? await handlePut(Number(brewId), newBrew) : await handlePost(newBrew);
-    if (updatedBrew?.tags) {
-      setTags(updatedBrew.tags);
+    if (brewId) {
+      await handlePut(Number(brewId), newBrew);
+    } else {
+      await handlePost(newBrew);
     }
   };
   

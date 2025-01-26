@@ -13,7 +13,7 @@ import BeanDetails from './pages/BeanDetails';
 import BeanCapture from './pages/BeanCapture';
 import PublicRoutes from './routes/PublicRoutes';
 import UserRoutes from './routes/UserRoutes';
-import { BrewProvider } from './context/BrewContext';
+import { CoffeeProvider } from './context/CoffeeContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { SessionProvider } from '@hono/auth-js/react';
 
@@ -32,11 +32,11 @@ const App: React.FC = () => {
 
               {/* 利用登録が必要なルート */}
               <Route element={
-                <BrewProvider>
+                <CoffeeProvider>
                   <SettingsProvider>
                     <UserRoutes />
                   </SettingsProvider>
-                </BrewProvider>
+                </CoffeeProvider>
               }>
                 <Route path="/dashboard" element={<BeanList />} />
                 <Route path="/beans" element={<BeanList />} />

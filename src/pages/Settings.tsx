@@ -6,13 +6,15 @@ import DynamicOptionEditor from '../components/DynamicOptionEditor';
 import { signOut } from '@hono/auth-js/react';
 import TagEditor from '../components/TagEditor';
 import { Tag } from '../types/Tag';
+import { useCoffeeContext } from '../context/CoffeeContext';
 
 interface BulkResponse {
   tags: { id: number; name: string }[];
 }
 
 const Settings: React.FC = () => {
-  const { settings, updateSettings, saveSettings, loadSettings, tags, setTags } = useSettingsContext();
+  const { settings, updateSettings, saveSettings, loadSettings } = useSettingsContext();
+  const { tags, setTags } = useCoffeeContext();
   const [previewCups, setPreviewCups] = useState<number>(1);
   const [initialTags, setInitialTags] = useState<Tag[]>(tags);
   const [currentTags, setCurrentTags] = useState<Tag[]>(initialTags);

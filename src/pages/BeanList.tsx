@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useBrewContext } from '../context/BrewContext';
+import { useCoffeeContext } from '../context/CoffeeContext';
 import { Bean } from '../types/Bean';
 import TagList from '../components/TagList';
 
@@ -41,7 +41,7 @@ const BeanListItem: React.FC<BeanListItemProps> = ({ bean }) => {
 }
 
 const BeanList: React.FC = () => {
-  const { beans } = useBrewContext();
+  const { beans } = useCoffeeContext();
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">コーヒー豆一覧</h1>

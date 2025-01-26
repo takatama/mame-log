@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useBrewContext } from '../context/BrewContext';
+import { useCoffeeContext } from '../context/CoffeeContext';
 import { Bean } from '../types/Bean';
 import TagManager from '../components/TagManager';
-import { useSettingsContext } from '../context/SettingsContext';
 
 const BeanForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { beans, updateBean, setBeans } = useBrewContext();
+  const { beans, createBean, updateBean, tags } = useCoffeeContext();
   const { beanId } = useParams();
-  const { tags, setTags } = useSettingsContext();
   const [bean, setBean] = useState<Bean>({
     name: '',
     country: '',
@@ -68,7 +66,7 @@ const BeanForm: React.FC = () => {
       // KVに保存した画像が取得できるようになるまで時間がかかるため、ローカルの写真があれば表示する。
       createdBean.photo_data_url = newBean.photo_data_url || '';
       // 作成されたIDで更新
-      setBeans([...beans, createdBean]);
+      createBean(createdBean);
       navigate(`/beans/${createdBean.id}`);
       return createdBean;
     } catch (error) {
@@ -110,18 +108,12 @@ const BeanForm: React.FC = () => {
       ...bean,
       id: beanId ? Number(beanId) : tempId,
     };
-  
+
     try {
-      const updatedBean = beanId ? await handlePut(Number(beanId), newBean) : await handlePost(newBean) as Bean;
-      console.log(updatedBean, updatedBean?.tags, tags);
-      if (updatedBean?.tags) {
-        // 追加したタグを反映
-        setTags((prevTags) => {
-          const existingTagIds = prevTags.map((tag) => tag.id);
-          const newTags = updatedBean?.tags.filter((tag) => !existingTagIds.includes(tag.id));
-          return [...prevTags, ...newTags]; // 既存のタグに新しいタグを追加
-        });
-        console.log(updatedBean, updatedBean.tags, tags);
+      if (beanId) {
+        await handlePut(Number(beanId), newBean);
+      } else {
+        await handlePost(newBean) as Bean;
       }
     } catch (error) {
       console.error(error);

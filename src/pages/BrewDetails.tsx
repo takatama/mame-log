@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useBrewContext } from '../context/BrewContext';
+import { useCoffeeContext } from '../context/CoffeeContext';
 import StarRating from '../components/StarRating';
 import { Brew, totalWaterAmount } from '../types/Brew';
 import { formatLocalDateTime } from '../utils/date';
@@ -9,7 +9,7 @@ import TagList from '../components/TagList';
 const BrewDetails: React.FC = () => {
   const { brewId } = useParams<{ brewId?: string }>()
   const navigate = useNavigate();
-  const { brews, setBrews } = useBrewContext()
+  const { brews, setBrews } = useCoffeeContext()
   const [brew, setBrew] = React.useState<Brew | undefined>(undefined)
 
   useEffect(() => {
