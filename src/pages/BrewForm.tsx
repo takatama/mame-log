@@ -9,10 +9,10 @@ import { useSettingsContext } from '../context/SettingsContext';
 import TagManager from '../components/TagManager';
 
 const BrewForm: React.FC = () => {
-  const { beans, brews, updateBrew, setBrews, tags } = useCoffeeContext();
+  const { beans, brews, updateBrew, createBrew, tags } = useCoffeeContext();
   const { brewId, beanId, baseBrewId } = useParams<{ brewId?: string; beanId?: string; baseBrewId?: string }>();
   const [bean, setBean] = useState<Bean | undefined>(undefined);
-  const [brew, setBrew] = useState<Brew>({});
+  const [brew, setBrew] = useState<Brew>({ tags: [] });
   const [baseBrew, setBaseBrew] = useState<Brew>();
   const { settings } = useSettingsContext();
   const [tagNames, setTagNames] = useState<string[]>([]);
@@ -70,7 +70,7 @@ const BrewForm: React.FC = () => {
       }
   
       const createdBrew: any = await response.json();
-      setBrews([...brews, createdBrew]);
+      createBrew(createdBrew);
       navigate(`/brews/${createdBrew.id}`);
       return createdBrew;
     } catch (error) {

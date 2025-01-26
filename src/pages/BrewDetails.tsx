@@ -9,7 +9,7 @@ import TagList from '../components/TagList';
 const BrewDetails: React.FC = () => {
   const { brewId } = useParams<{ brewId?: string }>()
   const navigate = useNavigate();
-  const { brews, setBrews } = useCoffeeContext()
+  const { brews, deleteBrew } = useCoffeeContext()
   const [brew, setBrew] = React.useState<Brew | undefined>(undefined)
 
   useEffect(() => {
@@ -34,7 +34,7 @@ const BrewDetails: React.FC = () => {
       }
 
       // 成功時に状態を更新し、リストページにリダイレクト
-      setBrews(brews.filter((brew) => brew.id !== Number(brewId)));
+      deleteBrew(Number(brewId));
       navigate('/brews');
     } catch (error) {
       console.error(error);

@@ -10,8 +10,9 @@ interface CoffeeContextProps {
   updateBean: (bean: Bean) => void;
   deleteBean: (beanId: number) => void;
   brews: Brew[];
+  createBrew: (brew: Brew) => void;
   updateBrew: (brew: Brew) => void;
-  setBrews: (brews: Brew[]) => void;
+  deleteBrew: (brewId: number) => void;
   tags: Tag[];
   // setTags: React.Dispatch<React.SetStateAction<Tag[]>>;
   setTags: (tags: Tag[]) => void;
@@ -108,14 +109,26 @@ export const CoffeeProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setBeans(beans.filter((bean) => bean.id !== beanId));
   }
 
+  const createBrew = (brew: Brew) => {
+    // タグが新規作成されている場合がある
+    addNewTags(brew.tags);
+    setLocalBrews([...brews, brew]);
+  }
+
   const updateBrew = (brew: Brew) => {
+    // タグが新規作成されている場合がある
+    addNewTags(brew.tags);
     const updatedBrews = brews.map((b) => (b.id === brew.id ? brew : b));
-    setBrews(updatedBrews);
+    setLocalBrews(updatedBrews);
   };
+
+  const deleteBrew = (brewId: number) => {
+    setLocalBrews(brews.filter((brew) => brew.id !== brewId));
+  }
 
   return (
     <CoffeeContext.Provider
-      value={{ beans, brews, tags, updateBean, createBean, deleteBean, updateBrew, setBrews, setTags }}
+      value={{ beans, updateBean, createBean, deleteBean, brews, createBrew, updateBrew, deleteBrew, tags, setTags }}
     >
       {children}
     </CoffeeContext.Provider>
