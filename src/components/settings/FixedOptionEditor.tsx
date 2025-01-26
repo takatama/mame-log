@@ -1,5 +1,5 @@
 import React from 'react';
-import { FixedBrewSettingOption } from '../../types/Brew';
+import { FixedBrewSettingOption } from '../../types/Settings';
 
 interface FixedOptionEditorProps {
   setting: FixedBrewSettingOption<number | string>;

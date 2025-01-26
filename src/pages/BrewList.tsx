@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useBrewContext } from '../context/BrewContext';
+import { useCoffeeContext } from '../context/CoffeeContext';
 import { Brew } from '../types/Brew';
 import { formatLocalDateTime } from '../utils/date';
 import TagList from '../components/TagList';
@@ -31,7 +31,7 @@ export const BrewListItem: React.FC<BrewListItemProps> = ({ brew }) => {
 }
 
 const BrewList: React.FC = () => {
-  const { brews } = useBrewContext()
+  const { brews } = useCoffeeContext()
 
   return (
     <div className="container mx-auto p-4">

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useBrewContext } from '../context/BrewContext';
+import { useCoffeeContext } from '../context/CoffeeContext';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Bean } from '../types/Bean';
 import { Brew } from '../types/Brew';
@@ -7,13 +7,14 @@ import { BrewListItem } from './BrewList';
 import TagList from '../components/TagList';
 
 const BeanDetail: React.FC = () => {
-  const { beans, setBeans, brews } = useBrewContext();
+  const { beans, deleteBean, brews } = useCoffeeContext();
   const [ relatedBrews, setRelatedBrews ] = React.useState<Brew[]>([]);
   const { beanId } = useParams<{ beanId?: string }>()
   const [ bean, setBean ] = React.useState<Bean | undefined>(undefined)
   const navigate = useNavigate();
 
   useEffect(() => {
+  console.log('BeanDetails', beanId, beans)
     if (!beanId) return;
     const bean = beans.find((bean) => bean.id === Number(beanId));
     setBean(bean);
@@ -36,7 +37,7 @@ const BeanDetail: React.FC = () => {
       }
 
       // 成功時に状態を更新し、リストページにリダイレクト
-      setBeans(beans.filter((bean) => bean.id !== Number(beanId)));
+      deleteBean(Number(beanId));
       navigate('/beans');
     } catch (error) {
       console.error(error);
