@@ -167,7 +167,8 @@ app.get('/', async (c: Context<{ Bindings: Env }>) => {
        FROM beans
        LEFT JOIN bean_tags ON beans.id = bean_tags.bean_id
        LEFT JOIN tags ON bean_tags.tag_id = tags.id
-       WHERE beans.user_id = ?`
+       WHERE beans.user_id = ?
+       ORDER BY beans.created_at DESC`
     )
       .bind(user.id)
       .all();
