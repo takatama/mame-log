@@ -91,7 +91,7 @@ export const CoffeeProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const createBean = (bean: Bean) => {
     // タグが新規作成されている場合がある
     addNewTags(bean.tags);
-    setLocalBeans([...beans, bean]);
+    setLocalBeans([bean, ...beans]);
   }
 
   const updateBean = (bean: Bean) => {
@@ -108,7 +108,7 @@ export const CoffeeProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const createBrew = (brew: Brew) => {
     // タグが新規作成されている場合がある
     addNewTags(brew.tags);
-    setLocalBrews([...brews, brew]);
+    setLocalBrews([brew, ...brews]);
   }
 
   const updateBrew = (brew: Brew) => {
