@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useCoffeeContext } from '../context/CoffeeContext';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Bean } from '../types/Bean';
+import { useCoffeeContext } from '../context/CoffeeContext';
 import TagList from '../components/TagList';
 
 interface BeanListItemProps {
@@ -17,7 +17,7 @@ const BeanListItem: React.FC<BeanListItemProps> = ({ bean }) => {
 
   return (
     <li key={bean.id} className="p-4 border rounded-md flex items-center">
-        {(bean.photo_data_url || bean.photo_url) && (
+      {(bean.photo_data_url || bean.photo_url) && (
         <img
           src={bean.photo_data_url || bean.photo_url}
           alt={bean.name}
@@ -31,22 +31,35 @@ const BeanListItem: React.FC<BeanListItemProps> = ({ bean }) => {
         <div className="my-2">
           <TagList tags={bean.tags || []} onTagClick={handleTagClick} />
         </div>
-        {bean.country && (<p>
-          {bean.country} ({bean.area})
-        </p>)}
-        {bean.roast_level && (<p>{bean.roast_level}</p>)}
+        {bean.country && (
+          <p>
+            {bean.country} ({bean.area})
+          </p>
+        )}
+        {bean.roast_level && <p>{bean.roast_level}</p>}
       </div>
     </li>
   );
-}
+};
 
 const BeanList: React.FC = () => {
   const { beans } = useCoffeeContext();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const tagFilter = searchParams.get('tag'); // クエリパラメータ 'tag' を取得
+
+  // フィルタリング
+  const filteredBeans = tagFilter
+    ? beans.filter((bean) => bean.tags.some((tag) => tag.name === tagFilter))
+    : beans;
+
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">コーヒー豆一覧</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        {tagFilter ? `タグ: ${tagFilter} の豆` : 'コーヒー豆一覧'}
+      </h1>
       <ul className="space-y-4">
-        {beans.map((bean) => (
+        {filteredBeans.map((bean) => (
           <BeanListItem key={bean.id} bean={bean} />
         ))}
       </ul>
